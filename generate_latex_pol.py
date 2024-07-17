@@ -10,8 +10,6 @@ refinement_indices = [0, 1, 2]
 ### Plot settings ###
 width = 0.4 # width of each subplot, in terms of textwidth
 height = 0.5 # height of each subplot, in terms of textwidth
-ymin = 0.5
-ymax = 2.75
 color = "blue"
 style = "solid"
 
@@ -29,7 +27,7 @@ def generate_preamble():
     return latex_code
 
 # Generate the LaTeX code 
-def generate_latex(data_file="", titles=[], xlabel="", rows=1, columns=3, include_preamble=True):
+def generate_latex(data_file="", titles=[], xlabel="", rows=1, columns=3, ymin=0, ymax=1, include_preamble=True):
     if data_file == "" or len(titles) == 0 or xlabel == "":
         raise ValueError("Data file and titles must be provided.")
 
@@ -48,8 +46,10 @@ def generate_latex(data_file="", titles=[], xlabel="", rows=1, columns=3, includ
         y_tick_label_style = (r"y tick label style={/pgf/number format/fixed,"
                               r"/pgf/number format/precision=2},") if idx == 0 else "yticklabels={},"
         ylabel = "" if idx > 0 else styles.getHeadLabel(3)
+        # latex_code.append(rf"\nextgroupplot[title={{{title}}}, ylabel={{{ylabel}}}, xlabel={{{styles.getArcLengthLabel()}}},"
+        #                   rf"ymin={ymin}, ymax={ymax}, ytick={{0.5,0.75,...,2.75}}, grid=major,{y_tick_label_style}]")
         latex_code.append(rf"\nextgroupplot[title={{{title}}}, ylabel={{{ylabel}}}, xlabel={{{styles.getArcLengthLabel()}}},"
-                          rf"ymin={ymin}, ymax={ymax}, ytick={{0.5,0.75,...,2.75}}, grid=major,{y_tick_label_style}]")
+                          rf"ymin={ymin}, ymax={ymax}, grid=major,{y_tick_label_style}]")
         
         data_file_ref = data_file.replace('X', str(ref))
         latex_code.append(r"\addplot[")
@@ -74,18 +74,20 @@ for case in os.listdir(directory):
         if case != "small_features":
             data_file = os.path.join('results', case, "dol_cond1_X.csv")
             titles = ['$\\sim 500$ cells', '$\\sim 4k$ cells', '$\\sim 32k$ cells']
-
-            latex_code = generate_latex(data_file=data_file, titles=titles, xlabel=styles.getArcLengthLabel(), rows=1, columns=3)
+            ymin = 0.5
+            ymax = 2.75
+            latex_code = generate_latex(data_file=data_file, titles=titles, xlabel=styles.getArcLengthLabel(), rows=1, columns=3, ymin=ymin, ymax=ymax)
             with open(f"{case}.tex", "w") as f:
                 f.write(latex_code)
                 print(f"Created {case}.tex")
         else:
             titles = ["$\\sim 30k$ cells", "$\\sim 150k$ cells"]
             line_indices = [1, 2]
-
+            ymin = 0
+            ymax = 0.1
             for line_index in line_indices:
                 data_file = os.path.join('results', case, f"dol_line{line_index}_refinementX.csv")
-                latex_code = generate_latex(data_file=data_file, titles=titles, xlabel=styles.getArcLengthLabel(), rows=1, columns=2)
+                latex_code = generate_latex(data_file=data_file, titles=titles, xlabel=styles.getArcLengthLabel(), rows=1, columns=3, ymin=ymin, ymax=ymax)
                 with open(f"{case}_{line_index}.tex", "w") as f:
                     f.write(latex_code)
                     print(f"Created {case}_{line_index}.tex")
