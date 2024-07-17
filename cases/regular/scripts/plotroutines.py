@@ -23,7 +23,7 @@ plt.rc('font', size=15)
 linestyle = styles.linestyle
 color = styles.color
 
-def plot_over_line(file_name, ID, simulation_id, title, cond, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_over_line(file_name, simulation_id, title, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
@@ -34,7 +34,7 @@ def plot_over_line(file_name, ID, simulation_id, title, cond, ax, lineStyle='-',
     if simulation_id > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, 1], label=ID, linestyle=lineStyle, color=clr)
+    ax.plot(data[:, 0], data[:, 1], linestyle=lineStyle, color=clr)
     ax.set_xlabel( styles.getArcLengthLabel() )
     ax.grid(True)
     ax.set_ylabel( styles.getHeadLabel(3) )
@@ -75,7 +75,7 @@ def crop_pdf(filename):
         os.system("pdfcrop " + filename + " " + filename)
 
 
-def plot_over_time(file_name, legend, title, cond,  region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_over_time(file_name, title, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 22
@@ -87,7 +87,7 @@ def plot_over_time(file_name, legend, title, cond,  region, region_pos, num_regi
     if region_pos > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, region+1], label=legend, linestyle=lineStyle, color=clr)
+    ax.plot(data[:, 0], data[:, region_pos+1], linestyle=lineStyle, color=clr)
 
     ax.set_xlabel( styles.getTimeLabel() )
     ax.set_ylabel(styles.getConcentrationLabel(3))
