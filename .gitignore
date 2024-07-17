@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 cases/field/results/.DS_Store
 .DS_Store
+*.tex
+*.pgf
