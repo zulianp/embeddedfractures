@@ -75,10 +75,10 @@ def crop_pdf(filename):
         os.system("pdfcrop " + filename + " " + filename)
 
 
-def plot_over_time(file_name, title, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_over_time(file_name, title, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 22
+    N = num_regions
     data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)), skip_header=1)
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
