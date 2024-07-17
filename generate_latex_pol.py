@@ -67,9 +67,15 @@ def generate_latex(data_file="", titles=[], xlabel="", rows=1, columns=3, ymin=0
 
 # Generate the LaTeX code for each case
 directory = "cases"
+latex_directory = "latex_files"
 for case in os.listdir(directory):
     # Check if case is a directory
     if os.path.isdir(os.path.join(directory, case)):
+        # Check whether latex directory exists. If not, create it.
+        if not os.path.exists(latex_directory):
+            os.makedirs(latex_directory)
+            print(f"Created directory: {latex_directory}")
+
         print(f"Creating LaTeX document for case: {case}")
         if case != "small_features":
             data_file = os.path.join('results', case, "dol_cond1_X.csv")
@@ -77,9 +83,9 @@ for case in os.listdir(directory):
             ymin = 0.5
             ymax = 2.75
             latex_code = generate_latex(data_file=data_file, titles=titles, xlabel=styles.getArcLengthLabel(), rows=1, columns=3, ymin=ymin, ymax=ymax)
-            with open(f"{case}.tex", "w") as f:
+            with open(f"{os.path.join(latex_directory, case)}.tex", "w") as f:
                 f.write(latex_code)
-                print(f"Created {case}.tex")
+                print(f"Created {os.path.join(latex_directory, case)}.tex")
         else:
             titles = ["$\\sim 30k$ cells", "$\\sim 150k$ cells"]
             line_indices = [1, 2]
@@ -88,8 +94,8 @@ for case in os.listdir(directory):
             for line_index in line_indices:
                 data_file = os.path.join('results', case, f"dol_line{line_index}_refinementX.csv")
                 latex_code = generate_latex(data_file=data_file, titles=titles, xlabel=styles.getArcLengthLabel(), rows=1, columns=3, ymin=ymin, ymax=ymax)
-                with open(f"{case}_{line_index}.tex", "w") as f:
+                with open(f"{os.path.join(latex_directory, case)}_{line_index}.tex", "w") as f:
                     f.write(latex_code)
-                    print(f"Created {case}_{line_index}.tex")
+                    print(f"Created {os.path.join(latex_directory, case)}_{line_index}.tex")
 
 print("All LaTeX documents created successfully.")
