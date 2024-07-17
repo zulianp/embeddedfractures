@@ -16,7 +16,7 @@ if len(argv) < 4:
 
 path_matrix=argv[1]
 path_csv=argv[2]
-block_input=argv[3] 
+block_input=argv[3] #/IOSS/element_blocks/block_1
 block_number = ('/IOSS/element_blocks/%s' %(block_input))
 print(block_number)
 matrix_transporte = IOSSReader(registrationName='matrix_transport.e', FileName=[path_matrix])

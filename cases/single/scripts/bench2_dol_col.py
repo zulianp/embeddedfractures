@@ -3,15 +3,20 @@ import sys
 
 argv=sys.argv
 
-if len(argv) < 3:
-	print(f'usage: {argv[0]} <input_csv> <output_csv> ')
+if len(argv) < 6:
+	print(f'usage: {argv[0]} <input_csv1> <input_csv2> <input_csv3> <output_csv> <index> <refinment>')
 	exit()
 
-path_matrix=argv[1]
-path_csv=argv[2]
+input_csv1=argv[1]
+input_csv2=argv[2]
+input_csv3=argv[3]
+
+path_csv=argv[4]
+refinment=argv[5]
+print(refinment)
 
 #create DataFrame
-df = pd.read_csv(path_matrix)
+df = pd.read_csv(input_csv1)
 
 #view DataFrame
 #define function to swap columns
@@ -24,6 +29,18 @@ def swap_columns(df, col1, col2):
 
 #swap points and rebounds columns
 df = swap_columns(df, 'pressure', 'arc_length')
+
+df3 = pd.read_csv(input_csv3)
+df2 = pd.read_csv(input_csv2)
+
+
+
+# Add the new column using loc
+df.loc[:, "c3"] = df2
+df.loc[:, "c2"] = df3
+
+
 df.to_csv(path_csv, index=False)
 #view updated DataFrame
 print(df)
+

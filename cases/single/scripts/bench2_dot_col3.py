@@ -10,46 +10,24 @@ paraview.simple._DisableFirstRenderCameraReset()
 
 argv=sys.argv
 
-if len(argv) < 4:
-	print(f'usage: {argv[0]}  <input_mesh> <output_csv> <block_number>')
+if len(argv) < 3:
+	print(f'usage: {argv[0]}  <input_mesh> <output_csv1>')
 	exit()
 
 path_matrix=argv[1]
-path_csv=argv[2]
-block_input=argv[3] 
-block_number = ('/IOSS/element_blocks/%s' %(block_input))
-print(block_number)
+path_csv1=argv[2]
+
+# create a new 'IOSS Reader'
 matrix_transporte = IOSSReader(registrationName='matrix_transport.e', FileName=[path_matrix])
 
-# get animation scene
-animationScene1 = GetAnimationScene()
-
-# update animation scene based on data timesteps
-animationScene1.UpdateAnimationUsingDataTimeSteps()
-
 # get active view
-renderView1 = GetActiveViewOrCreate('RenderView')
+renderView2 = GetActiveViewOrCreate('RenderView')
 
-# show data in view
-matrix_transporteDisplay = Show(matrix_transporte, renderView1, 'UnstructuredGridRepresentation')
-
-# trace defaults for the display properties.
-matrix_transporteDisplay.Representation = 'Surface'
-
-# reset view to fit data
-renderView1.ResetCamera(False, 0.9)
+# get display properties
+matrix_transporteDisplay = GetDisplayProperties(matrix_transporte, view=renderView2)
 
 # get the material library
 materialLibrary1 = GetMaterialLibrary()
-
-# update the view to ensure updated data information
-renderView1.Update()
-
-# set scalar coloring
-ColorBy(matrix_transporteDisplay, ('FIELD', 'vtkBlockColors'))
-
-# show color bar/color legend
-matrix_transporteDisplay.SetScalarBarVisibility(renderView1, True)
 
 # get color transfer function/color map for 'vtkBlockColors'
 vtkBlockColorsLUT = GetColorTransferFunction('vtkBlockColors')
@@ -60,28 +38,80 @@ vtkBlockColorsPWF = GetOpacityTransferFunction('vtkBlockColors')
 # get 2D transfer function for 'vtkBlockColors'
 vtkBlockColorsTF2D = GetTransferFunction2D('vtkBlockColors')
 
-# create a new 'Extract Block'
-extractBlock1 = ExtractBlock(registrationName='ExtractBlock1', Input=matrix_transporte)
+# get animation scene
+animationScene1 = GetAnimationScene()
 
-# Properties modified on extractBlock1
-extractBlock1.Selectors = [block_number]
+# update animation scene based on data timesteps
+animationScene1.UpdateAnimationUsingDataTimeSteps()
 
-# show data in view
-extractBlock1Display = Show(extractBlock1, renderView1, 'UnstructuredGridRepresentation')
-
-# trace defaults for the display properties.
-extractBlock1Display.Representation = 'Surface'
-
-# hide data in view
-Hide(matrix_transporte, renderView1)
+# Properties modified on matrix_transporte
+matrix_transporte.ElementBlocks = ['block_2']
 
 # update the view to ensure updated data information
-renderView1.Update()
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.ElementBlocks = ['block_1', 'block_2']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.SideSets = ['surface_1']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.SideSets = ['surface_1', 'surface_2']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.ElementBlocks = ['block_2']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.ElementBlocks = ['block_1', 'block_2']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.ElementBlocks = ['block_2']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.SideSets = ['surface_2']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.SideSets = ['surface_1', 'surface_2']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.SideSets = ['surface_1']
+
+# update the view to ensure updated data information
+renderView2.Update()
+
+# Properties modified on matrix_transporte
+matrix_transporte.ElementBlocks = []
+
+# update the view to ensure updated data information
+renderView2.Update()
 
 # create a new 'Integrate Variables'
-integrateVariables1 = IntegrateVariables(registrationName='IntegrateVariables1', Input=extractBlock1)
-
-animationScene1.Play()
+integrateVariables1 = IntegrateVariables(registrationName='IntegrateVariables1', Input=matrix_transporte)
 
 # Create a new 'SpreadSheet View'
 spreadSheetView1 = CreateView('SpreadSheetView')
@@ -91,11 +121,13 @@ spreadSheetView1.BlockSize = 1024
 # show data in view
 integrateVariables1Display = Show(integrateVariables1, spreadSheetView1, 'SpreadSheetRepresentation')
 
-# get layout
-layout1 = GetLayoutByName("Layout #1")
-
 # add view to a layout so it's visible in UI
-AssignViewToLayout(view=spreadSheetView1, layout=layout1, hint=0)
+
+# find view
+spreadSheetView2 = FindViewOrCreate('SpreadSheetView2', viewtype='SpreadSheetView')
+
+# update the view to ensure updated data information
+spreadSheetView2.Update()
 
 # update the view to ensure updated data information
 spreadSheetView1.Update()
@@ -110,7 +142,6 @@ quartileChartView1 = CreateView('QuartileChartView')
 plotDataOverTime1Display = Show(plotDataOverTime1, quartileChartView1, 'QuartileChartRepresentation')
 
 # add view to a layout so it's visible in UI
-AssignViewToLayout(view=quartileChartView1, layout=layout1, hint=2)
 
 # Properties modified on plotDataOverTime1Display
 plotDataOverTime1Display.SeriesOpacity = ['concentration (stats)', '1', 'X (stats)', '1', 'Y (stats)', '1', 'Z (stats)', '1', 'N (stats)', '1', 'Time (stats)', '1', 'vtkValidPointMask (stats)', '1']
@@ -121,16 +152,38 @@ plotDataOverTime1Display.SeriesMarkerStyle = ['N (stats)', '0', 'Time (stats)', 
 plotDataOverTime1Display.SeriesMarkerSize = ['N (stats)', '4', 'Time (stats)', '4', 'X (stats)', '4', 'Y (stats)', '4', 'Z (stats)', '4', 'concentration (stats)', '4', 'vtkValidPointMask (stats)', '4']
 
 # update the view to ensure updated data information
-quartileChartView1.Update()
+spreadSheetView2.Update()
 
-# get active source.
-plotSelectionOverTime1 = GetActiveSource()
+# set active view
+SetActiveView(spreadSheetView2)
+
+# destroy spreadSheetView2
+Delete(spreadSheetView2)
+del spreadSheetView2
+
+# close an empty frame
+
+# find view
+renderView1 = FindViewOrCreate('RenderView1', viewtype='RenderView')
+
+# set active view
+SetActiveView(renderView1)
+
+# destroy renderView1
+Delete(renderView1)
+del renderView1
+
+# close an empty frame
 
 # save data
-SaveData(path_csv, proxy=plotDataOverTime1, ChooseArraysToWrite=1,
+SaveData(path_csv1, proxy=plotDataOverTime1, WriteTimeSteps=1,
+    ChooseArraysToWrite=1,
     RowDataArrays=['Time', 'avg(concentration)'],
     FieldAssociation='Row Data',
     AddMetaData=0)
+
+# set active view
+SetActiveView(renderView2)
 
 #================================================================
 # addendum: following script captures some of the application
@@ -141,15 +194,15 @@ SaveData(path_csv, proxy=plotDataOverTime1, ChooseArraysToWrite=1,
 # saving layout sizes for layouts
 
 # layout/tab size in pixels
-layout1.SetSize(1701, 1244)
 
 #-----------------------------------
 # saving camera placements for views
 
-# current camera placement for renderView1
-renderView1.CameraPosition = [0.5, 0.5, 3.9879387989061272]
-renderView1.CameraFocalPoint = [0.5, 0.5, 0.5]
-renderView1.CameraParallelScale = 0.905324035552808
+# current camera placement for renderView2
+renderView2.CameraPosition = [321.34265927538445, 193.1296082906069, 183.59865536376844]
+renderView2.CameraFocalPoint = [50.0, 50.0, 50.0]
+renderView2.CameraViewUp = [-0.32550076596440325, 0.8967971070373966, -0.29967348926113485]
+renderView2.CameraParallelScale = 86.60254037844386
 
 
 ##--------------------------------------------

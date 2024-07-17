@@ -29,7 +29,6 @@ for d in ${dirs[@]}
 do
 	echo "DIR: $d"
 	python3 results_pro.py $d/mesh_fracture.e $d/matrix_transport.e results/temp/results_cond1_ref$r.csv
-    
     r=$(($r + 1))
 
 done
@@ -37,6 +36,7 @@ done
 
 
 tot_ref=${#dirs[@]}
+echo "tot_ref: $tot_ref"
 python3 results_merge_rows.py results/results_cond1.csv  $tot_ref 'results/temp'
 
 rm -r results/temp

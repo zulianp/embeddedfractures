@@ -3,12 +3,14 @@ import sys
 
 argv=sys.argv
 
-if len(argv) < 3:
-	print(f'usage: {argv[0]} <input_csv> <output_csv> ')
+if len(argv) < 4:
+	print(f'usage: {argv[0]} <input_csv> <output_csv> <index> <refinment>')
 	exit()
 
 path_matrix=argv[1]
 path_csv=argv[2]
+refinment=argv[3]
+print(refinment)
 
 #create DataFrame
 df = pd.read_csv(path_matrix)
