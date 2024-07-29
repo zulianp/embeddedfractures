@@ -6,26 +6,40 @@ mkdir -p results
 cd results
 mkdir -p temp
 
+
 cd ..
 
 dirs=(small medium large) 
-
 r=0
-block_start=1
-block_end=52
 
 
 for d in ${dirs[@]}
 do
 	echo "DIR: $d"
- 
-	for b in $(seq "$block_start" "$block_end"); 
-	do
-		pvpython bench2_dot_block.py $d/matrix_transport.e results/temp/dot_cond1_block$b.csv block_10
-		b=$(($b + 1))
-	done
 
-	python3 bench2_dot_pandas.py results/temp/dot_cond1_block1.csv results/temp/dot_cond1_block2.csv results/dot_cond1_$r.csv
+	for b in {1..52}
+	do 
+		echo "$b"
+		pvpython bench2_dot_block.py $d/fracture_transport.e results/temp/dot_cond1_block$b.csv $b
+
+		if [ "$b" = 1 ]; 
+		 then
+		 	echo "primo giro"
+
+		elif [ "$b" -gt 1 -a "$b" -le 51 ]
+		 then
+
+		 	let "bb = $b - 1"
+			echo "$bb"
+		    python3 bench2_dot_pandas.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/temp/dot_cond1_block$b.csv $b
+		
+		else 
+			let "bb = $b - 1"
+		    python3 bench2_dot_pandas.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/dot_cond1_$r.csv $b
+
+		fi
+    done 
+
     r=$(($r + 1))
 
 done
