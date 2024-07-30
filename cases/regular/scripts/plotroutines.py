@@ -11,7 +11,8 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-sys.path.insert(0, '../../../utils')
+# Print current path
+sys.path.insert(0, './utils')
 import styles
 
 #------------------------------------------------------------------------------#

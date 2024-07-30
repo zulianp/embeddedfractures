@@ -46,8 +46,6 @@ def generate_latex(data_file="", titles=[], xlabel="", rows=1, columns=3, ymin=0
         y_tick_label_style = (r"y tick label style={/pgf/number format/fixed,"
                               r"/pgf/number format/precision=2},") if idx == 0 else "yticklabels={},"
         ylabel = "" if idx > 0 else styles.getHeadLabel(3)
-        # latex_code.append(rf"\nextgroupplot[title={{{title}}}, ylabel={{{ylabel}}}, xlabel={{{styles.getArcLengthLabel()}}},"
-        #                   rf"ymin={ymin}, ymax={ymax}, ytick={{0.5,0.75,...,2.75}}, grid=major,{y_tick_label_style}]")
         latex_code.append(rf"\nextgroupplot[title={{{title}}}, ylabel={{{ylabel}}}, xlabel={{{styles.getArcLengthLabel()}}},"
                           rf"ymin={ymin}, ymax={ymax}, grid=major,{y_tick_label_style}]")
         
