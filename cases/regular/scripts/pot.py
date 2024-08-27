@@ -29,4 +29,4 @@ for refinement in refinements:
             plot.plot_over_time(file_name=data, title=title, region_pos=region_pos, num_regions=num_regions, ax=ax, clr="blue", has_legend=False, fmt="%1.2f")
 
         # save figures
-        plot.save(1, f"case2_cot_cond{cond}_{refinement}")
+        plot.save(1, f"case_regular_cot_cond{cond}_{refinement}")

@@ -9,7 +9,6 @@ titles = ['$\\sim 500$ cells', '$\\sim 4k$ cells', '$\\sim 32k$ cells']
 refinement_index = [0, 1, 2]
 cond = 1
 
-
 fig = plot.plt.figure(cond+11, figsize=(16, 6))
 fig.subplots_adjust(hspace=0, wspace=0)
 if cond == 0:
@@ -31,6 +30,8 @@ for title, ref in zip(titles, refinement_index):
         print(f"Error: Data file '{data}' not found.")
         exit(0)
     else:
+        print("Plotting data from file: ", data)
         plot.plot_over_line(file_name=data, simulation_id=ref, title=title, ax=ax, has_legend=False, fmt=fmt)
+
 # save figures
-plot.save(cond, "case2_pol_cond"+str(cond))
+plot.save(cond, "case_regular_pol_cond"+str(cond))
