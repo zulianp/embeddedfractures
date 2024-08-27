@@ -1,8 +1,7 @@
+from __future__ import print_function
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-import matplotlib.image as mpimg
-import matplotlib.offsetbox as ob
 
 from scipy import interpolate
 from scipy.integrate import simps
@@ -11,7 +10,6 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-# Print current path
 sys.path.insert(0, './utils')
 import styles
 
@@ -21,33 +19,50 @@ plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 plt.rc('font', size=15)
 
+# ids of the different plots
+id_p_matrix = 0   # pressure along (0, 100, 100)-(100, 0, 0)
+id_p_matrix_legend = 10   # pressure along (0, 100, 100)-(100, 0, 0)
+id_c_matrix = 1   # c along (0, 100, 100)-(100, 0, 0)
+id_c_matrix_legend = 11   # c along (0, 100, 100)-(100, 0, 0)
+id_c_fracture = 2 # c along (0, 100, 80)-(100, 0, 20)
+id_c_fracture_legend = 12 # c along (0, 100, 80)-(100, 0, 20)
+
 linestyle = styles.linestyle
 color = styles.color
 
-def plot_over_line(file_name, simulation_id, title, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 2
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)), skip_header=1)
+    N = 5
 
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+    # print(f"Filename: {file_name}")
+    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    data = np.genfromtxt(file_name, delimiter=",")
 
-    if simulation_id > 0:
+    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+
+    if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, 1], linestyle=lineStyle, color=clr)
+    print(f"ID: {ID}")
+    ax.plot(data[:, ID], data[:, ID+1], label=legend, linestyle=lineStyle, color=clr)
     ax.set_xlabel( styles.getArcLengthLabel() )
     ax.grid(True)
-    ax.set_ylabel( styles.getHeadLabel(3) )
     if kwargs.get("has_title", True):
         ax.set_title(title)
     if kwargs.get("has_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
-    if kwargs.get("xlim", None):
-        plt.xlim(kwargs.get("xlim"))
-    if kwargs.get("ylim", None):
-        plt.ylim(kwargs.get("ylim"))
 
+    # choose y-label depending on plot id
+    if ID == id_p_matrix:
+        ax.set_ylabel( styles.getHeadLabel(3) )
+    elif ID == id_c_matrix:
+        ax.set_ylabel( styles.getConcentrationLabel(3) )
+    elif ID == id_c_fracture:
+        ax.set_ylabel( styles.getConcentrationLabel(2) )
+    else:
+        print("Error. Invalid plot id provided.")
+        sys.exit(1)
 
 def save(simulation_id, filename, extension=".pgf", **kwargs):
     folder = "./plots/"
@@ -55,6 +70,7 @@ def save(simulation_id, filename, extension=".pgf", **kwargs):
     if not os.path.exists(folder):
         os.makedirs(folder)
 
+    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     fig = plt.figure(simulation_id+11)
 
     for idx, ax in enumerate(fig.get_axes()):
@@ -63,35 +79,40 @@ def save(simulation_id, filename, extension=".pgf", **kwargs):
             index = 97 + idx + kwargs.get("starting_from", 0)
             text = "\\textbf{subfig. " + chr(index) + "}"
             ax.text(0.5, -0.2, text, horizontalalignment='center',
-                    verticalalignment='top', transform=ax.transAxes)
+                    verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder + filename + extension, **kwargs)
+    plt.savefig(folder+filename+extension, bbox_inches='tight')
     plt.gcf().clear()
 
 def crop_pdf(filename):
     folder = "./plots/"
     filename = folder + filename + ".pdf"
     if os.path.isfile(filename):
-        os.system("pdfcrop --margins '0 -400 0 0' " + filename + " " + filename)
+        os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
         os.system("pdfcrop " + filename + " " + filename)
 
+# ids of the different plots
+id_intc_matrix = 0   # integral of c*porosity in the lower matrix sub-domain
+id_intc_matrix_legend = 10   # integral of c*porosity in the lower matrix sub-domain
+id_intc_fracture = 1 # indegral of c*porosity in the fracture
+id_intc_fracture_legend = 11 # indegral of c*porosity in the fracture
+id_outflux = 2       # integrated outflux across the outflow boundary
+id_outflux_legend = 12       # integrated outflux across the outflow boundary
 
-def plot_over_time(file_name, title, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = num_regions
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)), skip_header=1)
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+    N = 4
+    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    data = np.genfromtxt(file_name, delimiter=",")
 
-    plt.rcParams.update({'figure.max_open_warning': 0})
+    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
-    if region_pos > 0:
+    if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, region_pos+1], linestyle=lineStyle, color=clr)
-
-    ax.set_xlabel( styles.getTimeLabel() )
-    ax.set_ylabel(styles.getConcentrationLabel(3))
+    ax.plot(data[:, 0]/(365*24*3600), data[:, ID+1], label=legend, linestyle=lineStyle, color=clr)
+    ax.set_xlabel( styles.getTimeLabel('y') )
     ax.grid(True)
     if kwargs.get("has_title", True):
         ax.set_title(title)
@@ -101,6 +122,17 @@ def plot_over_time(file_name, title, region_pos, num_regions, ax, lineStyle='-',
         plt.xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
         plt.ylim(kwargs.get("ylim"))
+
+    # choose y-label depending on plot id
+    if ID == id_intc_matrix:
+        ax.set_ylabel("$\int_{\Omega_3} \phi_3 \, c_3$")
+    elif ID == id_intc_fracture:
+        ax.set_ylabel("$\int_{\Omega_2} \phi_2 \, c_2$")
+    elif ID == id_outflux:
+        ax.set_ylabel("outflux")
+    else:
+        print("Error. Invalid plot id provided.")
+        sys.exit(1)
 
 def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
@@ -114,8 +146,6 @@ class MathTextSciFormatter(mticker.Formatter):
         self.fmt = fmt
     def __call__(self, x, pos=None):
         s = self.fmt % x
-        if "f" in self.fmt:
-            return "${}$".format(s)
         decimal_point = '.'
         positive_sign = '+'
         tup = s.split('e')
@@ -131,23 +161,31 @@ class MathTextSciFormatter(mticker.Formatter):
         return "${}$".format(s)
 
 
-def plot_percentiles(ref, cond, places_and_methods, ax, **kwargs):
+def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 2
+    N = 6
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+
+    if int(ref) > 0:
+        ax.yaxis.set_tick_params(length=0)
 
     f = []
     minX = -np.inf
     maxX = np.inf
 
     for place in places_and_methods:
+
+        if place == "DTU" and ID != id_p_matrix:
+            continue
+
         for method in places_and_methods[place]:
             folder = "../results/" + place + "/" + method + "/"
-            datafile = folder.replace("\\", "") + "dol_cond_" + cond + "_refinement_" + ref + ".csv"
+            datafile = folder.replace("\\", "") + "dol_refinement_" + ref + ".csv"
             data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-            data = data[:, 0:2];
+            # only take the interesting columns and eleminate nan rows
+            data = data[:, 2*ID:2*ID+2];
             data = data[~np.isnan(data).any(axis=1)]
 
             f.append(interpolate.interp1d(data[:, 0], data[:, 1]))
@@ -171,7 +209,16 @@ def plot_percentiles(ref, cond, places_and_methods, ax, **kwargs):
     if kwargs.get("ylim", None):
         plt.ylim(kwargs.get("ylim"))
 
-    ax.set_ylabel( styles.getHeadLabel(3) )
+    # choose y-label depending on plot id
+    if ID == id_p_matrix:
+        ax.set_ylabel( styles.getHeadLabel(3) )
+    elif ID == id_c_matrix:
+        ax.set_ylabel( styles.getConcentrationLabel(3) )
+    elif ID == id_c_fracture:
+        ax.set_ylabel( styles.getConcentrationLabel(2) )
+    else:
+        print("Error. Invalid plot id provided.")
+        sys.exit(1)
 
     return (ls, lowerpercentile, upperpercentile)
 

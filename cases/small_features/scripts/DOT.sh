@@ -15,11 +15,30 @@ r=0
 for d in ${dirs[@]}
 do
 	echo "DIR: $d"
-	
-	pvpython bench2_dot_block.py $d/matrix_transport.e results/temp/dot_cond1_block1.csv block_1
-	pvpython bench2_dot_block.py $d/matrix_transport.e results/temp/dot_cond1_block2.csv block_2
 
-	python3 bench2_dot_pandas.py results/temp/dot_cond1_block1.csv results/temp/dot_cond1_block2.csv results/dot_cond1_$r.csv
+	for b in 1 2 3 4 5 6 7 8
+	do 
+		echo "$b"
+		pvpython bench2_dot_block.py $d/fracture_transport.e results/temp/dot_cond1_block$b.csv block_$b
+
+		if [ "$b" = 1 ]; 
+		 then
+		 	echo "primo giro"
+
+		elif [ "$b" -gt 1 -a "$b" -le 7 ]
+		 then
+
+		 	let "bb = $b - 1"
+			echo "$bb"
+		    python3 bench2_dot_pandas.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/temp/dot_cond1_block$b.csv $b
+		
+		else 
+			let "bb = $b - 1"
+		    python3 bench2_dot_pandas.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/dot_cond1_$r.csv $b
+
+		fi
+    done 
+
     r=$(($r + 1))
 
 done
