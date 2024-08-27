@@ -94,8 +94,15 @@ def crop_pdf(filename):
 def plot_over_time(file_name, legend, title, ID, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 53
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    # N = 53
+    # Read the first line of the file to determine the number of columns
+    with open(file_name, 'r') as f:
+        first_line = f.readline()
+        N = len(first_line.split(','))  # Assuming the delimiter is a comma
+
+    print(f"Number of columns: {N}, region: {region}, region_pos: {region_pos}, num_regions: {num_regions}")
+    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    data = np.genfromtxt(file_name, delimiter=",")
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
     plt.rcParams.update({'figure.max_open_warning': 0})
 
@@ -119,7 +126,8 @@ def plot_over_time(file_name, legend, title, ID, region, region_pos, num_regions
     ax.set_xticks([0, 500, 1000, 1500])
 
 
-def save_over_time(filename, extension=".pdf"):
+
+def save_over_time(filename, extension=".pgf"):
     folder = "./plots/"
 
     if not os.path.exists(folder):

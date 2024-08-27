@@ -1,6 +1,6 @@
 import os
-import numpy as np
 import plotroutines as plot
+import numpy as np
 
 #------------------------------------------------------------------------------#
 # add data to plots
@@ -16,38 +16,44 @@ import plotroutines as plot
 
 # TODO: add reference solution to plots as soon as available
 
-title = ""
+titles = ['$\\sim 30k$ cells', '$\\sim 150k$ cells']
+refinement_index = ['0', '1', '2']
+cond = 1
+
+label = "USI"
+place = "ETHZ\_USI"
+method = "FEM\_LM"
+ncol = 4
+
 regions = [15, 45, 48]
 
 for region_pos, region in enumerate(regions):
-
     title = "fracture " + str(region)
     fig = plot.plt.figure(plot.id_pot+11, figsize=(16, 6))
     fig.subplots_adjust(hspace=0, wspace=0)
 
     ax = fig.add_subplot(1, len(regions), region_pos + 1, ylim=(0-0.01, 1+0.01), xlim=(-100, 1800))
 
-    for place in places_and_methods:
-        for method in places_and_methods[place]:
-            folder = "./cases/field/results/"
-            data = folder.replace("\\", "") + "dot.csv"
-            label = place + "\_" + method
+    for title, refinement in zip(titles, refinement_index):
+            folder = "./cases/field/results/" 
+            data = os.path.join(folder, f"dot_cond{cond}_{refinement}.csv")
 
             plot.plot_over_time(data, label, title, plot.id_pot, region, region_pos, len(regions), ax,
                                 plot.linestyle[place][method], plot.color[place][method],
                                 has_legend=False, fmt="%1.2f")
 
+
 # save figures
-plot.save(plot.id_pot, "case4_pot")
+plot.save_over_time("case_field_pot")
 
-ncol = 4
-for place in places_and_methods:
-    for method in places_and_methods[place]:
-        label = "\\texttt{" + place + "-" + method + "}"
-        plot.plot_legend(label, plot.id_pot_legend, plot.linestyle[place][method],
-                         plot.color[place][method], ncol)
+# ncol = 4
+# for place in places_and_methods:
+#     for method in places_and_methods[place]:
+#         label = "\\texttt{" + place + "-" + method + "}"
+#         plot.plot_legend(label, plot.id_pot_legend, plot.linestyle[place][method],
+#                          plot.color[place][method], ncol)
 
-plot.save(plot.id_pot_legend, "case4_pot_legend")
-plot.crop_pdf("case4_pot_legend")
+# plot.save(plot.id_pot_legend, "case_field_pot_legend")
+# plot.crop_pdf("case_field_pot_legend")
 
 #------------------------------------------------------------------------------#
