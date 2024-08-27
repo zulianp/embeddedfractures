@@ -38,7 +38,7 @@ for title, refinement in zip(titles, refinement_index):
     axes_intc_fracture = fig_intc_fracture.add_subplot(1, 3, int(refinement) + 1, ylim=(0, 0.45))
     axes_outflux = fig_outflux.add_subplot(1, 3, int(refinement) + 1, ylim=(0-0.00000005, 0.0000014+0.00000005))
 
-    folder = "./cases/regular/results/" 
+    folder = "./cases/single/results/" 
     data = os.path.join(folder, f"dot_cond{cond}_{refinement}.csv")
 
     plot.plot_over_time(data, label, refinement, plot.id_intc_matrix, title, axes_intc_matrix,
