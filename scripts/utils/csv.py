@@ -145,7 +145,9 @@ def create_interpolated_dfs_from_csv_files(csv_files: list):
     return interpolate_and_align(df_list)
 
 def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI"):
-    max_ref_num = find_max_integer_in_filenames(os.path.join(base_dir, focus_dir))    
+    max_ref_num = find_max_integer_in_filenames(os.path.join(base_dir, focus_dir))  
+    if max_ref_num is None:
+        max_ref_num = 0
 
     for ref in range(0, max_ref_num + 1):
         filename = pattern_filename.replace('*', str(ref))

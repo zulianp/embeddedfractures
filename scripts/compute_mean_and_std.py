@@ -38,6 +38,13 @@ def main():
         # else:
         #     raise ValueError("Invalid case name")
 
+def test():
+    base_dir = project_root + "/dummy_tests"
+    subdirectories = csv_tools.find_direct_subdirectories(base_dir)
+
+    pattern_filename = f"results.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=base_dir, pattern_filename=pattern_filename)
+
 if __name__ == "__main__":
-    main()
+    test()
 
