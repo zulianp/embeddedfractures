@@ -11,13 +11,11 @@ import scripts.utils.csv as csv_tools
 ################
 
 def process_case_1(subdirectory: str):
-    # pattern_filename = f"dol_refinement_*.csv"
-    # reference_column = "arc_length"
-    # csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename, reference_column=reference_column)
+    pattern_filename = f"dol_refinement_*.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
 
     pattern_filename = f"dot_refinement_*.csv"
-    reference_column = "Time"
-    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename, reference_column=reference_column)
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
 
 def main():
     # Base directory in which to process CSV files

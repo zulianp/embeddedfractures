@@ -16,21 +16,34 @@ def get_max_num_rows(csv_files: list):
             max_num_rows = num_rows
     return max_num_rows
 
-def find_csv_filenames(base_dir:str , filename: str ='results.csv'):
+def find_csv_filenames(base_dir: str, focus_dir: str = "USI", filename: str = 'results.csv'):
     """
     Find all CSV files with a given filename in a directory and its subdirectories.
 
     Parameters:
     - base_dir (str): The base directory to start searching for CSV files.
+    - focus_dir (str): The directory whose corresponding CSV file should be listed first.
     - filename (str): The name of the CSV file to search for. Default is 'results.csv'.
 
     Returns:
-    - csv_files (list): A list of file paths to the found CSV files.
+    - csv_files (list): A list of file paths to the found CSV files, with the file from focus_dir listed first.
     """
     csv_files = []
+    focus_file = None
+    focus_dir = os.path.join(base_dir, focus_dir)
+    
     for root, dirs, files in os.walk(base_dir):
         if filename in files:
-            csv_files.append(os.path.join(root, filename))
+            file_path = os.path.join(root, filename)
+            if os.path.abspath(root) == os.path.abspath(focus_dir):
+                focus_file = file_path  # Save the focus_dir file to add it first
+            else:
+                csv_files.append(file_path)
+    
+    # Place the focus_dir file at the beginning of the list, if it was found
+    if focus_file:
+        csv_files.insert(0, focus_file)
+    
     return csv_files
 
 def find_max_integer_in_filenames(base_dir: str, pattern:str ='dol_refinement_*.csv'):
@@ -73,37 +86,13 @@ def find_direct_subdirectories(base_dir: str):
     subdirectories.sort()  # Sort the subdirectories alphabetically
     return subdirectories
 
-def create_df_from_csv(file: str):
-    def convert_to_float(s):
-        try:
-            return float(s.decode().replace('D', 'e'))
-        except ValueError:
-            return s.decode()
-
-    # Load the first row to check for a header
-    df = pd.read_csv(file, header=None, nrows=1)
-    first_row = df.iloc[0].apply(lambda x: isinstance(x, str))
-    
-    if first_row.any():
-        # If any entry in the first row is a string, it's likely a header
-        df = pd.read_csv(file, converters={i: lambda x: convert_to_float(x.encode()) for i in range(len(first_row))})
-    else:
-        # No header present, treat all data as numeric
-        df = pd.read_csv(file, header=None, converters={i: lambda x: convert_to_float(x.encode()) for i in range(len(first_row))})
-    
-    # Convert all columns to numeric, ignoring any headers
-    df = df.apply(pd.to_numeric, errors='coerce').dropna()
-    
-    return df
-
 # Function to interpolate and align the data based on the first column
 def interpolate_and_align(df_list: list):
-    # TODO: Make reference_df the USI one
     reference_df = df_list[0]
     ref_column = reference_df.iloc[:, 0].values
     
     interpolated_dfs = []
-    for df in df_list[1:]:
+    for idx, df in enumerate(df_list[1:]):
         x = df.iloc[:, 0].values
         
         # Create an interpolator for each column (except the first)
@@ -112,32 +101,59 @@ def interpolate_and_align(df_list: list):
             interpolator = interp1d(x, df.iloc[:, i].values, kind='linear', fill_value="extrapolate")
             interpolated_values.append(interpolator(ref_column))
         
-        print("Interpolated values: ", interpolated_values)
-
         # Combine the interpolated values with the reference x values
         interpolated_df = pd.DataFrame(np.column_stack([ref_column] + interpolated_values))
+        interpolated_df.columns = reference_df.columns
+
         interpolated_dfs.append(interpolated_df)
     
     return [reference_df] + interpolated_dfs
 
+def create_df_from_csv(file: str, num_cols: int = None, column_names = None):
+    def convert_to_float(s):
+        try:
+            return float(s.decode().replace('D', 'e'))
+        except ValueError:
+            return s.decode()
+
+    # Load the first row to check for a header
+    first_row_df = pd.read_csv(file, header=None, nrows=1)
+    first_row = first_row_df.iloc[0].apply(lambda x: isinstance(x, str))
+    # Number of valid columns to read
+    num_valid_columns = first_row_df.notna().sum(axis=1).iloc[0] if num_cols is None else num_cols
+
+    if first_row.any():
+        # If any entry in the first row is a string, it's likely a header
+        df = pd.read_csv(file, usecols=range(num_valid_columns), converters={i: lambda x: convert_to_float(x.encode()) for i in range(num_valid_columns)})
+    else:
+        # No header present, treat all data as numeric
+        df = pd.read_csv(file, header=None, usecols=range(num_valid_columns), converters={i: lambda x: convert_to_float(x.encode()) for i in range(num_valid_columns)})
+    
+    # Convert all columns to numeric, ignoring any headers
+    df = df.apply(pd.to_numeric, errors='coerce').dropna()
+    # Set a header if it doesn't exist and set it to the provided column names
+    if column_names is not None:
+        df.columns = column_names
+    
+    return df
+
 def create_interpolated_dfs_from_csv_files(csv_files: list):
-    df_list = [create_df_from_csv(file) for file in csv_files]
-    min_columns = min(df.shape[1] for df in df_list)
+    focus_df = create_df_from_csv(csv_files[0])
+    df_list = [create_df_from_csv(file=file, num_cols=focus_df.shape[1], column_names=focus_df.columns) for file in csv_files[1:]]
+    df_list.insert(0, focus_df)
 
-    trimmed_df_list = [df.iloc[:, :min_columns] for df in df_list]
-    interpolated_df_list = interpolate_and_align(trimmed_df_list)
+    return interpolate_and_align(df_list)
 
-    return interpolated_df_list
-
-def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, reference_column: str):
-    max_ref_num = find_max_integer_in_filenames(os.path.join(base_dir, 'USI'))    
+def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI"):
+    max_ref_num = find_max_integer_in_filenames(os.path.join(base_dir, focus_dir))    
 
     for ref in range(0, max_ref_num + 1):
         filename = pattern_filename.replace('*', str(ref))
 
         # Collect all the CSV files with the same name in base_dir, their subdirectories, their subdirectories, etc.
+        # csv_files[0] will correspond to that in the focus_dir
         csv_files = find_csv_filenames(base_dir=base_dir, filename=filename)
-
+        
         # Create Pandas DataFrames from the CSV files
         dfs = create_interpolated_dfs_from_csv_files(csv_files=csv_files)
 
@@ -145,22 +161,18 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, referenc
         combined_df = pd.concat(dfs, ignore_index=True)
 
         # Ensure the first column is numeric and the other columns are consistent
-        combined_df[0] = pd.to_numeric(combined_df[0], errors='coerce')
+        combined_df.iloc[:, 0] = pd.to_numeric(combined_df.iloc[:, 0], errors='coerce')
         for col in combined_df.columns[1:]:
             combined_df[col] = pd.to_numeric(combined_df[col], errors='coerce')
 
         # Sort by the first column to ensure proper alignment during groupby
-        combined_df = combined_df.sort_values(by=[0]).reset_index(drop=True)
+        combined_df = combined_df.sort_values(by=combined_df.columns[0]).reset_index(drop=True)
 
         # Compute the mean (assumes the first column is the reference)
-        mean_df = combined_df.groupby(0).mean().reset_index()
+        mean_df = combined_df.groupby(combined_df.columns[0]).mean().reset_index()
 
-        # Compute the standard deviation
-        std_df = combined_df.groupby(0).agg(lambda x: np.sqrt(np.mean((x - np.mean(x))**2))).reset_index()
-
-        # Rename the columns for clarity (using "reference_column" as the placeholder for the first column)
-        mean_df.columns = [f'{col}_mean' if col != 0 else reference_column for col in mean_df.columns]
-        std_df.columns = [f'{col}_std' if col != 0 else reference_column for col in std_df.columns]
+        # Compute the standard deviation using the custom formula
+        std_df = combined_df.groupby(combined_df.columns[0]).std().reset_index()
 
         # Save the mean and standard deviation DataFrames to CSV files
         mean_df.to_csv(os.path.join(base_dir, filename.replace('.csv', '') + '_mean.csv'), index=False, header=False)
@@ -168,4 +180,3 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, referenc
 
         print(f"Ref {ref} mean df: {mean_df}")
         print(f"Ref {ref} std df: {std_df}")
-
