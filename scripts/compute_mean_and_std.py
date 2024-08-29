@@ -17,6 +17,8 @@ def process_case_1(subdirectory: str):
     pattern_filename = f"dot_refinement_*.csv"
     csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
 
+    print("Processed case 1")
+
 def main():
     # Base directory in which to process CSV files
     base_dir = project_root + "/results"

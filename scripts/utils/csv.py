@@ -16,7 +16,7 @@ def get_max_num_rows(csv_files: list):
             max_num_rows = num_rows
     return max_num_rows
 
-def find_csv_filenames(base_dir: str, focus_dir: str = "USI", filename: str = 'results.csv'):
+def find_csv_filenames(base_dir: str, focus_dir: str = "USI/FEM_LM", filename: str = 'results.csv'):
     """
     Find all CSV files with a given filename in a directory and its subdirectories.
 
@@ -182,7 +182,11 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
             os.makedirs(mean_and_std_dir)
 
         # Save the mean and standard deviation DataFrames to CSV files
-        mean_df.to_csv(os.path.join(mean_and_std_dir, filename.replace('.csv', '') + '_mean.csv'), index=False, header=False)
-        std_df.to_csv(os.path.join(mean_and_std_dir, filename.replace('.csv', '') + '_std.csv'), index=False, header=False)
+        mean_csv_filename = os.path.join(mean_and_std_dir, filename.replace('.csv', '') + '_mean.csv')
+        std_csv_filename = os.path.join(mean_and_std_dir, filename.replace('.csv', '') + '_std.csv')
+        # print("Saving mean_df to ", mean_csv_filename)
+        mean_df.to_csv(mean_csv_filename, index=False, header=False)
+        # print("Saving std_df to ", std_csv_filename)
+        std_df.to_csv(mean_csv_filename, index=False, header=False)
 
         

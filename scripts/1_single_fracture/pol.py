@@ -16,16 +16,16 @@ titles = ['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells']
 refinement_index = ['0', '1', '2']
 
 places_and_methods = {
-    "UiB": ["TPFA", "MPFA", "MVEM", "RT0"],
-    "USTUTT": ["MPFA", "TPFA\_Circ"],
-    "LANL": ["MFD"],
-    "NCU\_TW": ["Hybrid\_FEM"],
-    "UNICE\_UNIGE": ["VAG\_Cont", "HFV\_Cont", "VAG\_Disc", "HFV\_Disc"],
+    # "UiB": ["TPFA", "MPFA", "MVEM", "RT0"],
+    # "USTUTT": ["MPFA", "TPFA\_Circ"],
+    # "LANL": ["MFD"],
+    # "NCU\_TW": ["Hybrid\_FEM"],
+    # "UNICE\_UNIGE": ["VAG\_Cont", "HFV\_Cont", "VAG\_Disc", "HFV\_Disc"],
     "USI": ["FEM\_LM"],
-    "UNICAMP": ["Hybrid\_Hdiv"],
-    "UNIL\_USI": ["FE\_AMR\_AFC"],
-    "INM": ["EDFM"],
-    "DTU": ["FEM\_COMSOL"],
+    # "UNICAMP": ["Hybrid\_Hdiv"],
+    # "UNIL\_USI": ["FE\_AMR\_AFC"],
+    # "INM": ["EDFM"],
+    # "DTU": ["FEM\_COMSOL"],
 };
 
 fig_p_matrix = plot.plt.figure(plot.id_p_matrix+11, figsize=(16, 6))
