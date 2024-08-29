@@ -176,9 +176,13 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
         # Compute the standard deviation using the custom formula
         std_df = combined_df.groupby(combined_df.columns[0]).std().reset_index()
 
-        # Save the mean and standard deviation DataFrames to CSV files
-        mean_df.to_csv(os.path.join(base_dir, filename.replace('.csv', '') + '_mean.csv'), index=False, header=False)
-        std_df.to_csv(os.path.join(base_dir, filename.replace('.csv', '') + '_std.csv'), index=False, header=False)
+        # Create a mean_and_std directory if it doesn't exist
+        mean_and_std_dir = os.path.join(base_dir, 'mean_and_std')
+        if not os.path.exists(mean_and_std_dir):
+            os.makedirs(mean_and_std_dir)
 
-        print(f"Ref {ref} mean df: {mean_df}")
-        print(f"Ref {ref} std df: {std_df}")
+        # Save the mean and standard deviation DataFrames to CSV files
+        mean_df.to_csv(os.path.join(mean_and_std_dir, filename.replace('.csv', '') + '_mean.csv'), index=False, header=False)
+        std_df.to_csv(os.path.join(mean_and_std_dir, filename.replace('.csv', '') + '_std.csv'), index=False, header=False)
+
+        

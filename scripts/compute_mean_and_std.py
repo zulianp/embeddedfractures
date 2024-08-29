@@ -46,5 +46,6 @@ def test():
     csv_tools.create_mean_and_std_csv_files(base_dir=base_dir, pattern_filename=pattern_filename)
 
 if __name__ == "__main__":
-    test()
+    # test()
+    main()
 
