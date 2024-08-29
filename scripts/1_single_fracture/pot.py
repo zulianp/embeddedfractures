@@ -28,6 +28,7 @@ places_and_methods = {
     # "NCU\_TW": ["Hybrid\_FEM"],
     # "UNICE\_UNIGE": ["VAG\_Cont", "HFV\_Cont", "VAG\_Disc", "HFV\_Disc"],
     "USI": ["FEM\_LM"],
+    "mean": ["key"],
     # "UNICAMP": ["Hybrid\_Hdiv"],
     # "UNIL\_USI": ["FE\_AMR\_AFC"],
     # "INM": ["EDFM"],
@@ -50,7 +51,9 @@ for title, ref in zip(titles, refinement_index):
         for method in places_and_methods[place]:
             folder = f"./results/{case}/" + place + "/" + method + "/"
             data = os.path.join(folder, f"dot_refinement_{ref}.csv").replace("\_", "_")
-            label = place + "-" + method
+
+            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+
             plot.plot_over_time(data, label, ref, plot.id_intc_matrix, title, axes_intc_matrix,
                                 plot.linestyle[place][method], plot.color[place][method],
                                 has_legend=False, ylim=(0-10, 175+10))
@@ -65,10 +68,11 @@ plot.save(plot.id_intc_matrix, f"{case}_pot_c_matrix")
 plot.save(plot.id_intc_fracture, f"{case}_pot_c_fracture")
 plot.save(plot.id_outflux, f"{case}_pot_outflux")
 
+# Plot legend
 ncol = 4
 for place in places_and_methods:
     for method in places_and_methods[place]:
-        label = "\\texttt{" + place + "-" + method + "}"
+        label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "")
         plot.plot_legend(label, plot.id_intc_matrix_legend, plot.linestyle[place][method],
                          plot.color[place][method], ncol)
         plot.plot_legend(label, plot.id_intc_fracture_legend, plot.linestyle[place][method],

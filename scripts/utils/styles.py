@@ -11,6 +11,7 @@ linestyle = {"UiB" : {"MVEM": "-", "TPFA": "-", "MPFA": "-", "RT0": ":"},
              "UNICAMP" : {"Hybrid\_Hdiv": "--", "Hybrid_Hdiv": "--"},
              "INM" : {"EDFM": "--"},
              "DTU" : {"FEM\_COMSOL": "--", "FEM_COMSOL": "--"},
+             "mean" : {"key": "-"},
             }
 
 color = {"UiB" : {"MVEM": "C0", "TPFA": "C1", "MPFA": "C2", "RT0": "C3"},
@@ -25,7 +26,8 @@ color = {"UiB" : {"MVEM": "C0", "TPFA": "C1", "MPFA": "C2", "RT0": "C3"},
          "UNIL_USI" : {"FE_AMR_AFC": "C4"},
          "UNICAMP" : {"Hybrid\_Hdiv": "C5", "Hybrid_Hdiv": "C5"},
          "INM" : {"EDFM": "C6"},
-         "DTU" : {"FEM\_COMSOL": "C7", "FEM_COMSOL": "C7"}
+         "DTU" : {"FEM\_COMSOL": "C7", "FEM_COMSOL": "C7"},
+         "mean" : {"key": "C8"},
         }
 
 # Returns the label used for time
