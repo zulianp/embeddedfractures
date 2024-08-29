@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 
@@ -10,7 +11,7 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-sys.path.insert(0, './utils')
+sys.path.insert(0, './scripts/utils')
 import styles
 
 #------------------------------------------------------------------------------#
@@ -30,22 +31,22 @@ id_c_fracture_legend = 12 # c along (0, 100, 80)-(100, 0, 20)
 linestyle = styles.linestyle
 color = styles.color
 
+curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+case = curr_dir.split(os.sep)[-1] # case we are dealing with
+
 def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 5
 
-    # print(f"Filename: {file_name}")
-    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    data = np.genfromtxt(file_name, delimiter=",")
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    print(f"ID: {ID}")
-    ax.plot(data[:, ID], data[:, ID+1], label=legend, linestyle=lineStyle, color=clr)
+    ax.plot(data[:, 2*ID], data[:, 2*ID+1], label=legend, linestyle=lineStyle, color=clr)
     ax.set_xlabel( styles.getArcLengthLabel() )
     ax.grid(True)
     if kwargs.get("has_title", True):
@@ -64,9 +65,8 @@ def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
         print("Error. Invalid plot id provided.")
         sys.exit(1)
 
-def save(simulation_id, filename, extension=".pgf", **kwargs):
-    folder = "./plots/"
-
+def save(simulation_id, filename, extension=".pdf", **kwargs):
+    folder = f"./plots/{case}/"
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -85,7 +85,7 @@ def save(simulation_id, filename, extension=".pgf", **kwargs):
     plt.gcf().clear()
 
 def crop_pdf(filename):
-    folder = "./plots/"
+    folder = f"./plots/{case}/"
     filename = folder + filename + ".pdf"
     if os.path.isfile(filename):
         os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
@@ -103,8 +103,7 @@ def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
 
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 4
-    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    data = np.genfromtxt(file_name, delimiter=",")
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
