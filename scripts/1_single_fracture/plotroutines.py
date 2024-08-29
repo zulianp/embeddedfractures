@@ -37,16 +37,24 @@ case = curr_dir.split(os.sep)[-1] # case we are dealing with
 def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 5
 
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    # Determine the number of columns from the first data row (skip the header)
+    N = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
+
+    # Read the data, skipping the header row and applying converters (skip the header)
+    data = np.genfromtxt(file_name, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 2*ID], data[:, 2*ID+1], label=legend, linestyle=lineStyle, color=clr)
+    try:
+        ax.plot(data[:, 2*ID], data[:, 2*ID+1], label=legend, linestyle=lineStyle, color=clr)
+    except Exception as e:
+        print(e)
+        print(f"Could not plot {file_name}, ID={ID}, 2*ID={2*ID}, 2*ID+1={2*ID+1}, N={N}")
+        return
     ax.set_xlabel( styles.getArcLengthLabel() )
     ax.grid(True)
     if kwargs.get("has_title", True):
@@ -102,8 +110,12 @@ id_outflux_legend = 12       # integrated outflux across the outflow boundary
 def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 4
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+
+    # Determine the number of columns from the first data row (skip the header)
+    N = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
+
+    # Read the data, skipping the header row and applying converters (skip the header)
+    data = np.genfromtxt(file_name, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 

@@ -21,11 +21,11 @@ places_and_methods = {
     "LANL": ["MFD"],
     "NCU\_TW": ["Hybrid\_FEM"],
     "UNICE\_UNIGE": ["VAG\_Cont", "HFV\_Cont", "VAG\_Disc", "HFV\_Disc"],
-    "ETHZ\_USI": ["FEM\_LM"],
+    "USI": ["FEM\_LM"],
     "UNICAMP": ["Hybrid\_Hdiv"],
     "UNIL\_USI": ["FE\_AMR\_AFC"],
     "INM": ["EDFM"],
-    "DTU": ["FEM\_COMSOL"]
+    "DTU": ["FEM\_COMSOL"],
 };
 
 fig_p_matrix = plot.plt.figure(plot.id_p_matrix+11, figsize=(16, 6))
@@ -56,9 +56,9 @@ for title, ref in zip(titles, refinement_index):
                 plot.plot_over_line(data, label, ref, plot.id_c_matrix, title, axes_c_matrix,
                                     plot.linestyle[place][method], plot.color[place][method],
                                     has_legend=False, ylim=(0-0.0005, 0.01+0.0005))
-                plot.plot_over_line(data, label, ref, plot.id_c_fracture, title, axes_c_fracture,
-                                    plot.linestyle[place][method], plot.color[place][method],
-                                    has_legend=False, ylim=(0.0075, 0.0101))
+                # plot.plot_over_line(data, label, ref, plot.id_c_fracture, title, axes_c_fracture,
+                #                     plot.linestyle[place][method], plot.color[place][method],
+                #                     has_legend=False, ylim=(0.0075, 0.0101))
 
     # add reference (5th refinement USTUTT-MPFA)
     place = "USTUTT"
@@ -72,7 +72,7 @@ for title, ref in zip(titles, refinement_index):
 # save figures
 plot.save(plot.id_p_matrix, f"{case}_pol_p_matrix")
 plot.save(plot.id_c_matrix, f"{case}_pol_c_matrix")
-plot.save(plot.id_c_fracture, f"{case}_pol_c_fracture")
+# plot.save(plot.id_c_fracture, f"{case}_pol_c_fracture")
 
 ncol = 4
 for place in places_and_methods:
@@ -85,8 +85,8 @@ for place in places_and_methods:
         if place != "DTU":
             plot.plot_legend(label, plot.id_c_matrix_legend, plot.linestyle[place][method],
                              plot.color[place][method], ncol)
-            plot.plot_legend(label, plot.id_c_fracture_legend, plot.linestyle[place][method],
-                             plot.color[place][method], ncol)
+            # plot.plot_legend(label, plot.id_c_fracture_legend, plot.linestyle[place][method],
+            #                  plot.color[place][method], ncol)
 
 # add reference to the pressure legend
 plot.plot_legend("reference", plot.id_p_matrix_legend, plot.linestyle["USTUTT"]["reference"],
@@ -96,7 +96,7 @@ plot.save(plot.id_p_matrix_legend, f"{case}_pol_p_matrix_legend")
 plot.crop_pdf(f"{case}_pol_p_matrix_legend")
 plot.save(plot.id_c_matrix_legend, f"{case}_pol_c_matrix_legend")
 plot.crop_pdf(f"{case}_pol_c_matrix_legend")
-plot.save(plot.id_c_fracture_legend, f"{case}_pol_c_fracture_legend")
-plot.crop_pdf(f"{case}_pol_c_fracture_legend")
+# plot.save(plot.id_c_fracture_legend, f"{case}_pol_c_fracture_legend")
+# plot.crop_pdf(f"{case}_pol_c_fracture_legend")
 
 #------------------------------------------------------------------------------#

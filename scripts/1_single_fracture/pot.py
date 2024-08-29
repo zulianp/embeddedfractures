@@ -27,7 +27,7 @@ places_and_methods = {
     "LANL": ["MFD"],
     "NCU\_TW": ["Hybrid\_FEM"],
     "UNICE\_UNIGE": ["VAG\_Cont", "HFV\_Cont", "VAG\_Disc", "HFV\_Disc"],
-    "ETHZ\_USI": ["FEM\_LM"],
+    "USI": ["FEM\_LM"],
     "UNICAMP": ["Hybrid\_Hdiv"],
     "UNIL\_USI": ["FE\_AMR\_AFC"],
     "INM": ["EDFM"],
