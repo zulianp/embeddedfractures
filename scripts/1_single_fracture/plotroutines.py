@@ -152,6 +152,56 @@ def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
 
 
+def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+
+    c = lambda s: float(s.decode().replace('D', 'e'))
+
+    # Determine the number of columns from the first data row (skip the header)
+    N_mean = len(np.genfromtxt(mean_filename, delimiter=",", max_rows=1, skip_header=1))
+    N_std = len(np.genfromtxt(std_filename, delimiter=",", max_rows=1, skip_header=1))
+
+    # Read the mean and standard deviation data
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N_mean), [c]*N_mean)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N_std), [c]*N_std)))
+
+    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+
+    if int(ref) > 0:
+        ax.yaxis.set_tick_params(length=0)
+
+    time = mean_data[:, 0] / (365 * 24 * 3600)
+    mean_values = mean_data[:, ID + 1]
+    std_values = std_data[:, ID + 1]
+
+    # Plot the mean with a shaded region for the standard deviation
+    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=clr, alpha=0.3)
+    ax.plot(time, mean_values, label=legend, linestyle=lineStyle, color=clr)
+    
+    ax.set_xlabel(styles.getTimeLabel('y'))
+    ax.grid(True)
+
+    if kwargs.get("has_title", True):
+        ax.set_title(title)
+    if kwargs.get("has_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0))
+    if kwargs.get("xlim", None):
+        ax.set_xlim(kwargs.get("xlim"))
+    if kwargs.get("ylim", None):
+        ax.set_ylim(kwargs.get("ylim"))
+
+    # Choose y-label depending on plot id
+    if ID == id_intc_matrix:
+        ax.set_ylabel("$\int_{\Omega_3} \phi_3 \, c_3$")
+    elif ID == id_intc_fracture:
+        ax.set_ylabel("$\int_{\Omega_2} \phi_2 \, c_2$")
+    elif ID == id_outflux:
+        ax.set_ylabel("outflux")
+    else:
+        print("Error. Invalid plot id provided.")
+        sys.exit(1)
+
+
+
 class MathTextSciFormatter(mticker.Formatter):
     def __init__(self, fmt="%1.2e"):
         self.fmt = fmt

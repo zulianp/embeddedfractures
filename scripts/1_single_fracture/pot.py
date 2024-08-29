@@ -54,15 +54,29 @@ for title, ref in zip(titles, refinement_index):
 
             label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
-            plot.plot_over_time(data, label, ref, plot.id_intc_matrix, title, axes_intc_matrix,
-                                plot.linestyle[place][method], plot.color[place][method],
-                                has_legend=False, ylim=(0-10, 175+10))
-            plot.plot_over_time(data, label, ref, plot.id_intc_fracture, title, axes_intc_fracture,
-                                plot.linestyle[place][method], plot.color[place][method],
-                                has_legend=False, ylim=(0, 0.45))
-            plot.plot_over_time(data, label, ref, plot.id_outflux, title, axes_outflux,
-                                plot.linestyle[place][method], plot.color[place][method],
-                                has_legend=False, ylim=(0-0.00000005, 0.0000014+0.00000005))
+            if place.replace("\_", "_") != "mean":
+                plot.plot_over_time(data, label, ref, plot.id_intc_matrix, title, axes_intc_matrix,
+                                    plot.linestyle[place][method], plot.color[place][method],
+                                    has_legend=False, ylim=(0-10, 175+10))
+                plot.plot_over_time(data, label, ref, plot.id_intc_fracture, title, axes_intc_fracture,
+                                    plot.linestyle[place][method], plot.color[place][method],
+                                    has_legend=False, ylim=(0, 0.45))
+                plot.plot_over_time(data, label, ref, plot.id_outflux, title, axes_outflux,
+                                    plot.linestyle[place][method], plot.color[place][method],
+                                    has_legend=False, ylim=(0-0.00000005, 0.0000014+0.00000005))
+            else:
+                std_data = data.replace("mean", "std")
+
+                plot.plot_mean_and_std_over_time(data, std_data, label, ref, plot.id_intc_matrix, title, axes_intc_matrix,
+                                    plot.linestyle[place][method], plot.color[place][method],
+                                    has_legend=False, ylim=(0-10, 175+10))
+                plot.plot_mean_and_std_over_time(data, std_data, label, ref, plot.id_intc_fracture, title, axes_intc_fracture,
+                                    plot.linestyle[place][method], plot.color[place][method],
+                                    has_legend=False, ylim=(0, 0.45))
+                plot.plot_mean_and_std_over_time(data, std_data, label, ref, plot.id_outflux, title, axes_outflux,
+                                    plot.linestyle[place][method], plot.color[place][method],
+                                    has_legend=False, ylim=(0-0.00000005, 0.0000014+0.00000005))
+
 # save figures
 plot.save(plot.id_intc_matrix, f"{case}_pot_c_matrix")
 plot.save(plot.id_intc_fracture, f"{case}_pot_c_fracture")
