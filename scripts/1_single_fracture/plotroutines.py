@@ -37,24 +37,16 @@ case = curr_dir.split(os.sep)[-1] # case we are dealing with
 def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
+    N = 5
 
-    # Determine the number of columns from the first data row (skip the header)
-    N = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
-
-    # Read the data, skipping the header row and applying converters (skip the header)
-    data = np.genfromtxt(file_name, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    try:
-        ax.plot(data[:, 2*ID], data[:, 2*ID+1], label=legend, linestyle=lineStyle, color=clr)
-    except Exception as e:
-        print(e)
-        print(f"Could not plot {file_name}, ID={ID}, 2*ID={2*ID}, 2*ID+1={2*ID+1}, N={N}")
-        return
+    ax.plot(data[:, 2*ID], data[:, 2*ID+1], label=legend, linestyle=lineStyle, color=clr)
     ax.set_xlabel( styles.getArcLengthLabel() )
     ax.grid(True)
     if kwargs.get("has_title", True):
@@ -72,6 +64,41 @@ def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
     else:
         print("Error. Invalid plot id provided.")
         sys.exit(1)
+
+def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+    
+        c = lambda s: float(s.decode().replace('D', 'e'))
+        N = 5
+    
+        # Read the mean and standard deviation data
+        mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
+        std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
+    
+        ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+    
+        if int(ref) > 0:
+            ax.yaxis.set_tick_params(length=0)
+    
+        ax.fill_between(mean_data[:, 0], mean_data[:, 2*ID+1] - std_data[:, 2*ID+1], mean_data[:, 2*ID+1] + std_data[:, 2*ID+1], color=clr, alpha=0.3)
+        ax.plot(mean_data[:, 2*ID], mean_data[:, 2*ID+1], label=legend, linestyle=lineStyle, color=clr)
+        ax.set_xlabel( styles.getArcLengthLabel() )
+        ax.grid(True)
+        if kwargs.get("has_title", True):
+            ax.set_title(title)
+        if kwargs.get("has_legend", True):
+            ax.legend(bbox_to_anchor=(1.0, 1.0))
+    
+        # Choose y-label depending on plot id
+        if ID == id_p_matrix:
+            ax.set_ylabel( styles.getHeadLabel(3) )
+        elif ID == id_c_matrix:
+            ax.set_ylabel( styles.getConcentrationLabel(3) )
+        elif ID == id_c_fracture:
+            ax.set_ylabel( styles.getConcentrationLabel(2) )
+        else:
+            print("Error. Invalid plot id provided.")
+            sys.exit(1)
+
 
 def save(simulation_id, filename, extension=".pdf", **kwargs):
     folder = f"./plots/{case}/"
@@ -108,14 +135,9 @@ id_outflux = 2       # integrated outflux across the outflow boundary
 id_outflux_legend = 12       # integrated outflux across the outflow boundary
 
 def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
-
-    # Determine the number of columns from the first data row (skip the header)
-    N = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
-
-    # Read the data, skipping the header row and applying converters (skip the header)
-    data = np.genfromtxt(file_name, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
+    N = 4
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
@@ -145,6 +167,7 @@ def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
         print("Error. Invalid plot id provided.")
         sys.exit(1)
 
+
 def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID+11)
@@ -153,16 +176,12 @@ def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
 
 
 def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
-
-    # Determine the number of columns from the first data row (skip the header)
-    N_mean = len(np.genfromtxt(mean_filename, delimiter=",", max_rows=1, skip_header=1))
-    N_std = len(np.genfromtxt(std_filename, delimiter=",", max_rows=1, skip_header=1))
+    N = 4
 
     # Read the mean and standard deviation data
-    mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N_mean), [c]*N_mean)))
-    std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N_std), [c]*N_std)))
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 

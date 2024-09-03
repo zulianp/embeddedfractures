@@ -103,8 +103,6 @@ def interpolate_and_align(df_list: list):
         
         # Combine the interpolated values with the reference x values
         interpolated_df = pd.DataFrame(np.column_stack([ref_column] + interpolated_values))
-        interpolated_df.columns = reference_df.columns
-
         interpolated_dfs.append(interpolated_df)
     
     return [reference_df] + interpolated_dfs
@@ -139,7 +137,7 @@ def create_df_from_csv(file: str, num_cols: int = None, column_names = None):
 
 def create_interpolated_dfs_from_csv_files(csv_files: list):
     focus_df = create_df_from_csv(csv_files[0])
-    df_list = [create_df_from_csv(file=file, num_cols=focus_df.shape[1], column_names=focus_df.columns) for file in csv_files[1:]]
+    df_list = [create_df_from_csv(file=file) for file in csv_files[1:]]
     df_list.insert(0, focus_df)
 
     return interpolate_and_align(df_list)
