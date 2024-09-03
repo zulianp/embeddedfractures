@@ -10,15 +10,16 @@ paraview.simple._DisableFirstRenderCameraReset()
 
 argv=sys.argv
 
-if len(argv) < 6:
-	print(f'usage: {argv[0]} <input_mesh_flow> <input_mesh_conc> <output_csv_col1> <output_csv_col2 <output_csv_col3>')
+if len(argv) < 7:
+	print(f'usage: {argv[0]} <input_mesh_flow> <input_mesh_conc> <input_mesh_frac_conc> <output_csv_col1> <output_csv_col2 <output_csv_col3>')
 	exit()
 
 path_matrix_flow=argv[1]
 path_matrix_conc=argv[2]
-path_csv_col1=argv[3]
-path_csv_col2=argv[4]
-path_csv_col3=argv[5]
+path_matrix_conc_frac = argv[3]
+path_csv_col1=argv[4]
+path_csv_col2=argv[5]
+path_csv_col3=argv[6]
 
 # create a new 'IOSS Reader'
 matrix_flowe = IOSSReader(registrationName='matrix_flow.e', FileName=[path_matrix_flow])
@@ -137,7 +138,7 @@ plotOverLine2 = PlotOverLine(registrationName='PlotOverLine2', Input=matrix_tran
 
 # Properties modified on plotOverLine2
 plotOverLine2.Point1 = [0.0, 100.0, 100.0]
-plotOverLine2.Point2 = [100.0, 0.0, 100.0]
+plotOverLine2.Point2 = [100.0, 0.0, 0]
 
 # show data in view
 plotOverLine2Display = Show(plotOverLine2, renderView1, 'GeometryRepresentation')
@@ -170,7 +171,7 @@ lineChartView2.Update()
 
 # save data
 SaveData(path_csv_col2, proxy=plotOverLine2, ChooseArraysToWrite=1,
-    PointDataArrays=['concentration'],
+    PointDataArrays=['arc_length','concentration'],
     AddMetaData=0)
 
 # set active source
@@ -178,6 +179,9 @@ SetActiveSource(matrix_transporte)
 
 # toggle interactive widget visibility (only when running from the GUI)
 HideInteractiveWidgets(proxy=plotOverLine2)
+
+
+matrix_transporte = IOSSReader(registrationName='matrix_transport.e', FileName=[path_matrix_conc_frac])
 
 # create a new 'Plot Over Line'
 plotOverLine3 = PlotOverLine(registrationName='PlotOverLine3', Input=matrix_transporte)
@@ -226,7 +230,7 @@ layout1.SetSplitFraction(0, 0.7373271889400922)
 
 # save data
 SaveData(path_csv_col3, proxy=plotOverLine3, ChooseArraysToWrite=1,
-    PointDataArrays=['concentration'],
+    PointDataArrays=['arc_length','concentration'],
     AddMetaData=0)
 
 # set active view

@@ -11,7 +11,7 @@ mkdir -p temp
 
 cd ..
 
-dirs=(small medium large) 
+dirs=(small) 
 
 
 refinment=0
@@ -23,8 +23,8 @@ do
 	pvpython bench2_dol_col1.py $d/matrix_flow.e results/temp/dol_swapped1.csv
 	pvpython bench2_dol_col2.py $d/matrix_flow.e results/temp/dol_swapped2.csv
 
-	python3 bench2_dol_swap_col_0.py results/temp/dol_swapped1.csv results/dol_line1_refinement$refinment.csv  
-	python3 bench2_dol_swap_col_0.py results/temp/dol_swapped2.csv results/dol_line2_refinement$refinment.csv  
+	python3 bench2_dol_swap_col_0.py results/temp/dol_swapped1.csv results/dol_line0.csv  
+	python3 bench2_dol_swap_col_0.py results/temp/dol_swapped2.csv results/dol_line1.csv  
 	
 	echo $refinment
 

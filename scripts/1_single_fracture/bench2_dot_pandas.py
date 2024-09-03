@@ -27,4 +27,4 @@ df3 = df3.rename(columns={df3.columns[1]: 'conc_out'})
 df=df1.set_index('Time').join(df2.set_index('Time')).join(df3.set_index('Time'))
 
 
-df.to_csv(output_csv, columns=None)
+df.to_csv(output_csv, columns=None, header=None)

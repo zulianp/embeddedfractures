@@ -9,7 +9,7 @@ mkdir -p temp
 
 cd ..
 
-dirs=(small medium large) 
+dirs=(small) 
 r=0
 
 
@@ -19,7 +19,7 @@ do
 
 	for b in {1..52}
 	do 
-		echo "$b"
+		#echo "$b"
 		pvpython bench2_dot_block.py $d/fracture_transport.e results/temp/dot_cond1_block$b.csv $b
 
 		if [ "$b" = 1 ]; 
@@ -30,12 +30,12 @@ do
 		 then
 
 		 	let "bb = $b - 1"
-			echo "$bb"
+			#echo "$bb"
 		    python3 bench2_dot_pandas.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/temp/dot_cond1_block$b.csv $b
 		
 		else 
 			let "bb = $b - 1"
-		    python3 bench2_dot_pandas.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/dot_cond1_$r.csv $b
+		    python3 bench2_dot_pandas_last.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/dot.csv $b
 
 		fi
     done 

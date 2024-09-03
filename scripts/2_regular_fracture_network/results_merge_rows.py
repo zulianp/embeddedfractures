@@ -26,4 +26,4 @@ for i in range(0,tot_ref):
 
 
 df_output = pd.DataFrame(df)
-df_output.to_csv(output_csv, index=False)
+df_output.to_csv(output_csv, index=False, header=None)

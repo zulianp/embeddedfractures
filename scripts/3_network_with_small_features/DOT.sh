@@ -8,7 +8,7 @@ mkdir -p temp
 
 cd ..
 
-dirs=(small medium large) 
+dirs=(small medium ) 
 r=0
 
 
@@ -34,7 +34,7 @@ do
 		
 		else 
 			let "bb = $b - 1"
-		    python3 bench2_dot_pandas.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/dot_cond1_$r.csv $b
+		    python3 bench2_dot_pandas_last.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/dot_refinment$r.csv $b
 
 		fi
     done 

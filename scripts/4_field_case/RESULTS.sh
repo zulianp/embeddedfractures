@@ -23,7 +23,7 @@ cd ..
 
 HERE=$PWD
 r=0
-dirs=('small' 'medium' 'large') 
+dirs=('small' 'medium') 
 
 for d in ${dirs[@]}
 do
@@ -41,8 +41,8 @@ done
 
 
 
-tot_ref=${#dirs[@]}
-python3 results_merge_rows.py results/results_cond1.csv  $tot_ref 'results/temp'
+#tot_ref=${#dirs[@]}
+#python3 results_merge_rows.py results/results.csv  $tot_ref 'results/temp'
 
 rm -r results/temp
 

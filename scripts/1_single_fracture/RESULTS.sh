@@ -37,7 +37,7 @@ done
 
 
 tot_ref=${#dirs[@]}
-python3 results_merge_rows.py results/results_cond1.csv  $tot_ref 'results/temp'
+python3 results_merge_rows.py results/results.csv  $tot_ref 'results/temp'
 
 rm -r results/temp
 

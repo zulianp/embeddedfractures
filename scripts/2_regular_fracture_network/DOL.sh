@@ -21,7 +21,7 @@ do
 	echo "DIR: $d"
 	
 	pvpython bench2_dol.py $d/matrix_flow.e results/temp/dol_swapped.csv
-	python3 bench2_dol_swap_col_0.py results/temp/dol_swapped.csv results/dol_cond1_$refinment.csv  $refinment
+	python3 bench2_dol_swap_col_0.py results/temp/dol_swapped.csv results/dol_cond1_refinment$refinment.csv  $refinment
 	
 	echo $refinment
 

@@ -11,19 +11,17 @@ cells2D=0
 
 for b in m.cells:
 	cells2D=b.data.shape[0] + cells2D
-	print(cells2D)
 
 for b in n.cells:
     cells3D= b.data.shape[0] + cells3D
 
-print(cells3D)
 
 points3D=n.points.shape[0]
+nnz = 0
 
-print('points')
-print(points3D)
 
-df=[0, 0, cells2D, cells3D, points3D, 0]
+
+df=[ 0,0, cells2D, cells3D, points3D, nnz]
 df = pd.DataFrame(df)
 df.transpose().to_csv(output_csv, index=False)
 

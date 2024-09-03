@@ -24,6 +24,6 @@ def swap_columns(df, col1, col2):
 
 #swap points and rebounds columns
 df = swap_columns(df, 'pressure', 'arc_length')
-df.to_csv(path_csv, index=False)
+df.to_csv(path_csv, index=False, header=None)
 #view updated DataFrame
 print(df)

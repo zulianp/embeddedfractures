@@ -34,4 +34,4 @@ df4 = df4.rename(columns={df4.columns[0]: '8' })
 df=df1.join(df2).join(df3).join(df4)
  
 
-df.to_csv(output_csv, columns=None, header= None)
+df.to_csv(output_csv, columns=None)

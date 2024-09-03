@@ -23,13 +23,18 @@ cd ..
 
 HERE=$PWD
 r=0
-dirs=('small' 'medium' 'large') 
+dirs=('small' 'medium') 
 
 for d in ${dirs[@]}
 do
 	echo "DIR: $d"
-	python3 results_pro.py $d/mesh_fracture.e $d/matrix_transport.e results/temp/results_cond1_ref$r.csv
-    
+	python3 results_pro.py $d/mesh_fracture.e $d/matrix_transport.e results/temp/results_mesh_cond1_ref$r.csv
+    pvpython results_inlet_pressure.py $d/matrix_flow.e results/temp/results_cond1_col9_ref$r.csv
+
+    pvpython results_inlet_pressure.py $d/matrix_flow.e results/temp/results_cond1_col7_ref$r.csv
+    pvpython results_inlet_pressure.py $d/matrix_flow.e results/temp/results_cond1_col8_ref$r.csv
+
+    python3  results_merge_cols.py results/temp/results_mesh_cond1_ref$r.csv results/temp/results_cond1_col7_ref$r.csv results/temp/results_cond1_col8_ref$r.csv results/temp/results_cond1_col9_ref$r.csv results/temp/results_cond1_ref$r.csv
     r=$(($r + 1))
 
 done
@@ -37,36 +42,11 @@ done
 
 
 tot_ref=${#dirs[@]}
-python3 results_merge_rows.py results/results_cond1.csv  $tot_ref 'results/temp'
+python3 results_merge_rows.py results/results.csv  $tot_ref 'results/temp'
 
 rm -r results/temp
 
 
 
 
-
-# col=(3 4 5)
-
-# HERE=$PWD
-# r=0
-
-# for d in ${dirs[@]}
-# do
-# 	echo "DIR: $d"
-# 	ls $d
-# 	cd $d
-
-# 	pvpython $HERE/results_cond0_3.py mesh_fracture.e $HERE/mesh_results/results_cond0_3$r.csv
-# 	pvpython $HERE/results_cond0_4.py matrix_flow.e $HERE/mesh_results/results_cond0_4$r.csv
-#     pvpython $HERE/results_cond0_5.py matrix_flow.e $HERE/mesh_results/results_cond0_5$r.csv
-
-# 	python3 $HERE/results_merge_col.py $HERE/mesh_results/results_cond0_3$r.csv $HERE/mesh_results/results_cond0_4$r.csv $HERE/mesh_results/results_cond0_5$r.csv $HERE/mesh_results/results_cond0_ref$r.csv 
-
-# 	cd $HERE
-
-#     r=$(($r + 1))
-
-# done
-# tot_ref=${#dirs[@]}
-# python3 $HERE/results_merge_rows.py $HERE/mesh_results/results/results_cond0.csv  $tot_ref $HERE 
 
