@@ -165,3 +165,19 @@ cases/field/results/.DS_Store
 *.tex
 *.pgf
 test.py
+
+# Directories
+/plots
+
+/results/1_single_fracture/mean
+/results/1_single_fracture/std
+
+/results/2_regular_fracture_network/mean
+/results/2_regular_fracture_network/std
+
+/results/3_network_with_small_features/mean
+/results/3_network_with_small_features/std
+
+/results/4_field_case/mean
+/results/4_field_case/std
+

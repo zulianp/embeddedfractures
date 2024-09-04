@@ -15,7 +15,14 @@ for f in files:
     os.system(f"pdfcrop {f_pdf}")
     os.system(f"mv {f_pdf} {f}-crop.pdf")
     os.system(f"mv {f}-crop.pdf ../../plots/{case}/")
-    os.system(f"rm {f}.aux {f}.log {f}.out")
+    
+    # Check if {f}.aux exists and remove it
+    if os.path.exists(f"{f}.aux"):
+        os.system(f"rm {f}.aux")
+    # Check if {f}.log exists and remove it
+    if os.path.exists(f"{f}.log"):
+        os.system(f"rm {f}.log")
+
 
 
 
