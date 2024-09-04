@@ -12,7 +12,6 @@ files = [f"{case}_pol_c_fracture",
 # Change working directory to the one containing this file 
 os.chdir(curr_dir)
 for f in files:
-    print(f"PDF latex for {f}")
     os.system(f"pdflatex {f}.tex")
     f_pdf = f"{f}.pdf"
     os.system(f"pdfcrop {f_pdf}")

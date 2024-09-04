@@ -9,4 +9,4 @@ os.system(f"python {curr_dir}/pol.py")
 os.system(f"python {curr_dir}/pot.py")
 
 # this goes after the others
-# os.system(f"python ./{curr_dir}/overlay.py")
+os.system(f"python {curr_dir}/overlay.py")

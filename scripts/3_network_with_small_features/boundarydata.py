@@ -5,6 +5,7 @@ The data is fluxes at the two outflow boundaries and hydraulic head at the inflo
 boundary. The reported data are the total outflux, the proportion of the flux exiting
 at the first outflow region and the hydraulic head, all for both refinement levels.
 """
+import os
 import numpy as np
 import csv
 import plotroutines as plot
@@ -39,7 +40,7 @@ with open(f"{curr_dir}_boundary_data_table.csv", "w", newline="") as outfile:
     for place in places_and_methods:
         for method in places_and_methods[place]:
             folder = f"./results/{case}/" + place + "/" + method + "/"
-            file_name = folder + "results.csv"
+            file_name = os.path.join(folder, "results.csv").replace("\_", "_")
             label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "")
             d = np.genfromtxt(file_name, delimiter=",")
             out = np.sum(d[:2, 6:8], axis=1)
@@ -61,7 +62,7 @@ with open(f"{curr_dir}_boundary_data_table.csv", "w", newline="") as outfile:
             linestyle.append(plot.linestyle[place][method])
     # reference
     folder = f"./results/{case}/USTUTT/MPFA/"
-    file_name = folder + "results.csv"
+    file_name = os.path.join(folder, "results.csv").replace("\_", "_")
     d = np.genfromtxt(file_name, delimiter=",")
     ind = 5
     out = np.sum(d[ind, 6:8])
