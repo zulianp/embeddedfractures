@@ -2,13 +2,16 @@ import os
 
 curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
 case = curr_dir.split(os.sep)[-1] # case we are dealing with
-files = [f"{curr_dir}/{case}_pol_line_1", f"{curr_dir}/{case}_pol_line_2",
-         f"{curr_dir}/{case}_pot"]
+files = [f"{case}_pol_line_1", 
+         f"{case}_pol_line_2",
+         f"{case}_pot"]
 
+# Change working directory to the one containing this file 
+os.chdir(curr_dir)
 for f in files:
-    os.system("pdflatex " + f)
-    f_pdf = f + ".pdf"
-    os.system("pdfcrop " + f_pdf)
-    os.system("mv " + f + f"-crop.pdf plots/{case}/{case}" + f_pdf )
-
-
+    os.system(f"pdflatex {f}.tex")
+    f_pdf = f"{f}.pdf"
+    os.system(f"pdfcrop {f_pdf}")
+    os.system(f"mv {f_pdf} {f}-crop.pdf")
+    os.system(f"mv {f}-crop.pdf ../../plots/{case}/")
+    os.system(f"rm {f}.aux {f}.log {f}.out")
