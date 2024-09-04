@@ -46,19 +46,9 @@ def find_csv_filenames(base_dir: str, focus_dir: str = "USI/FEM_LM", filename: s
     
     return csv_files
 
-def find_max_integer_in_filenames(base_dir: str, pattern:str ='dol_refinement_*.csv'):
-    """
-    Find the maximum integer X seen in filenames matching a specific pattern (e.g., dol_refinement_X.csv)
-    within a directory and its subdirectories.
-
-    Parameters:
-    - base_dir (str): The base directory to start searching for files.
-    - pattern (str): The pattern to match filenames. The default is 'dol_refinement_*.csv'.
-
-    Returns:
-    - max_int (int or None): The maximum integer X found in matching filenames, or None if no such filenames are found.
-    """
+def find_min_max_integer_in_filenames(base_dir: str, pattern: str = 'dol_refinement_*.csv'):
     max_int = None
+    min_int = None
     regex_pattern = re.escape(pattern).replace('\\*', r'(\d+)')
     
     num_matches = 0
@@ -69,8 +59,11 @@ def find_max_integer_in_filenames(base_dir: str, pattern:str ='dol_refinement_*.
                 num_matches += 1
                 num = int(match.group(1))
                 if max_int is None or num > max_int:
-                    max_int = num      
-    return max_int
+                    max_int = num
+                if min_int is None or num < min_int:
+                    min_int = num
+    
+    return min_int, max_int
 
 def find_direct_subdirectories(base_dir: str):
     """
@@ -143,11 +136,14 @@ def create_interpolated_dfs_from_csv_files(csv_files: list):
     return interpolate_and_align(df_list)
 
 def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI/FEM_LM"):
-    max_ref_num = find_max_integer_in_filenames(os.path.join(base_dir, focus_dir))  
-    if max_ref_num is None:
-        max_ref_num = 0
+    min_int_in_filenames, max_int_in_filenames = find_min_max_integer_in_filenames(base_dir=os.path.join(base_dir, focus_dir), pattern=pattern_filename)  
+    if min_int_in_filenames is None:
+        min_int_in_filenames = 0
 
-    for ref in range(0, max_ref_num + 1):
+    if max_int_in_filenames is None:
+        max_int_in_filenames = 0
+
+    for ref in range(min_int_in_filenames, max_int_in_filenames + 1):
         filename = pattern_filename.replace('*', str(ref))
 
         # Collect all the CSV files with the same name in base_dir, their subdirectories, their subdirectories, etc.

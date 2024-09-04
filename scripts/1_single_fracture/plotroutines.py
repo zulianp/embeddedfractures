@@ -168,14 +168,6 @@ def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
         print("Error. Invalid plot id provided.")
         sys.exit(1)
 
-
-def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
-    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
-    plt.figure(ID+11)
-    plt.plot(np.zeros(1), label=legend, linestyle=lineStyle, color=clr)
-    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
-
-
 def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 4
@@ -220,6 +212,11 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, ti
         print("Error. Invalid plot id provided.")
         sys.exit(1)
 
+def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
+    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
+    plt.figure(ID+11)
+    plt.plot(np.zeros(1), label=legend, linestyle=lineStyle, color=clr)
+    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
 
 
 class MathTextSciFormatter(mticker.Formatter):

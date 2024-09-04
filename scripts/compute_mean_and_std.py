@@ -19,6 +19,17 @@ def process_case_1(subdirectory: str):
 
     print("Processed case 1")
 
+
+def process_case_2(subdirectory: str):
+    pattern_filename = f"dol_cond_1_refinement_*.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
+
+    pattern_filename = f"dot_cond_*.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
+
+    print("Processed case 2")
+
+
 def main():
     # Base directory in which to process CSV files
     base_dir = project_root + "/results"
@@ -29,10 +40,10 @@ def main():
     for subdirectory in subdirectories:
         # Split based on os.path separator and get the last element
         case = subdirectory.split(os.sep)[-1]
-        if "1" in case:
-            process_case_1(subdirectory)
-        # elif "2" in case:
-        #     print("Hello")
+        # if "1" in case:
+        #     process_case_1(subdirectory)
+        if "2" in case:
+            process_case_2(subdirectory)
         # elif "3" in case:
         #     print("Salut")
         # elif "4" in case:
