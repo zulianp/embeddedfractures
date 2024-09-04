@@ -1,6 +1,10 @@
 # Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
+import os
 import numpy as np
 import plotroutines as plot
+
+curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
 places_and_methods = {
     "USI": ["FEM\_LM"],
@@ -23,4 +27,4 @@ for ref in ["0", "1"]:
     else:
         ax_title = "\\textbf{subfig. c}"
 
-    plot.save(int(ref), "case4_pol_p_line_"+ref+"_matrix_percentile_90_10", ax_title=ax_title)
+    plot.save(int(ref), f"{case}_pol_p_line_"+ref+"_matrix_percentile_90_10", ax_title=ax_title)

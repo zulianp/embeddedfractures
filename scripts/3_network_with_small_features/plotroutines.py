@@ -282,7 +282,7 @@ def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     ax.text(0.5, -0.2, text, horizontalalignment='center',
             verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder + "case3_boundary_head" + extension, bbox_inches="tight")
+    plt.savefig(folder + f"{case}_boundary_head" + extension, bbox_inches="tight")
 
 def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     N = da.shape[0]
@@ -320,7 +320,7 @@ def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     ax.text(0.5, -0.2, text, horizontalalignment='center',
             verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder + "case3_reference_flux" + extension, bbox_inches="tight")
+    plt.savefig(folder + f"{case}_reference_flux" + extension, bbox_inches="tight")
 
 
 def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
@@ -357,7 +357,7 @@ def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
     ax.text(0.5, -0.2, text, horizontalalignment='center',
             verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder + "case3_boundary_fluxes" + extension, bbox_inches="tight")
+    plt.savefig(folder + f"{case}_boundary_fluxes" + extension, bbox_inches="tight")
 
 def plot_percentiles(ref, line_id, places_and_methods, ax, **kwargs):
 
