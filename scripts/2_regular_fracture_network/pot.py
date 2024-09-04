@@ -16,7 +16,7 @@ conds = [1]
 places_and_methods = {
     "USI": ["FEM\_LM"],
     "mean": ["key"],
-};
+}
 
 regions = np.array([1, 10, 11])
 regions_fig = {1: f"{case}_region10pic.png", 10: f"{case}_region11pic.png", 11: f"{case}_region1pic.png"}
@@ -60,7 +60,7 @@ ncol = 4
 for cond in conds:
     for place in places_and_methods:
         for method in places_and_methods[place]:
-            label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+            label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "") + "}"
             plot.plot_legend(label, cond, plot.linestyle[place][method],
                              plot.color[place][method], ncol)
 

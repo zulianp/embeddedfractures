@@ -1,3 +1,4 @@
+# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 import os
 import plotroutines as plot
 import numpy as np
@@ -16,14 +17,15 @@ import numpy as np
 
 # TODO: add reference solution to plots as soon as available
 
+curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+case = curr_dir.split(os.sep)[-1] # case we are dealing with
 titles = ['$\\sim 30k$ cells', '$\\sim 150k$ cells']
-refinement_index = ['0', '1', '2']
-cond = 1
+refinement_index = ['0', '1']
 
-label = "USI"
-place = "ETHZ\_USI"
-method = "FEM\_LM"
-ncol = 4
+places_and_methods = {
+    "USI": ["FEM\_LM"],
+    "mean": ["key"],
+}
 
 for ID in np.arange(8):
 
@@ -34,24 +36,33 @@ for ID in np.arange(8):
 
         ax = fig.add_subplot(1, 2, int(ref) + 1, ylim=((0-0.01, 1+0.01)))
 
-        folder = "./cases/small_features/results/" 
-        data = os.path.join(folder, f"dot_cond{cond}_{ref}.csv")
+        for place in places_and_methods:
+            for method in places_and_methods[place]:
+                folder = f"./results/{case}/" + place + "/" + method + "/"
+                data = os.path.join(folder, f"dot_refinement_{ref}.csv").replace("\_", "_")
+                label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
-        plot.plot_over_time(data, label, ref, ID, title, ax,
-                            lineStyle=plot.linestyle[place][method], clr=plot.color[place][method],
-                            has_legend=False)
+                if place.replace("\_", "_") != "mean":
+                    plot.plot_over_time(data, label, ref, ID, title, ax,
+                                        lineStyle=plot.linestyle[place][method], clr=plot.color[place][method],
+                                        has_legend=False)
+                else:
+                    std_data = data.replace("mean", "std")
+                    plot.plot_mean_and_std_over_time(data, std_data, label, ref, ID, title, ax,
+                                                    lineStyle=plot.linestyle[place][method], clr=plot.color[place][method],
+                                                    has_legend=False)
 
 # save figures
-plot.save_over_time("case_small_features_pot")
+plot.save_over_time(f"{case}_pot")
 
-# ncol = 4
-# for place in places_and_methods:
-#     for method in places_and_methods[place]:
-#         label = "\\texttt{" + place + "-" + method + "}"
-#         plot.plot_legend(label, plot.id_pot_legend, plot.linestyle[place][method],
-#                          plot.color[place][method], ncol)
+ncol = 4
+for place in places_and_methods:
+    for method in places_and_methods[place]:
+        label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "") + "}"
+        plot.plot_legend(label, plot.id_pot_legend, plot.linestyle[place][method],
+                         plot.color[place][method], ncol)
 
-# plot.save(plot.id_pot_legend, "case_small_features_pot_legend")
-# plot.crop_pdf("case_small_features_pot_legend")
+plot.save(plot.id_pot_legend, f"{case}_pot_legend")
+plot.crop_pdf(f"{case}_pot_legend")
 
 #------------------------------------------------------------------------------#

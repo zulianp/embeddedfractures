@@ -1,3 +1,4 @@
+# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 from __future__ import print_function
 
 import matplotlib as mpl
@@ -11,7 +12,7 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-sys.path.insert(0, './utils')
+sys.path.insert(0, './scripts/utils')
 import styles
 
 #------------------------------------------------------------------------------#
@@ -30,12 +31,13 @@ id_pot_legend = 12   # p along (0, 100, 100)-(100, 0, 0)
 linestyle = styles.linestyle
 color = styles.color
 
-def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
+def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
-    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    data = np.genfromtxt(file_name, delimiter=",")
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
@@ -56,8 +58,51 @@ def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
 
     ax.set_ylabel(styles.getHeadLabel(3))
 
-def save(simulation_id, filename, extension=".pgf"):
-    folder = "./plots/"
+def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+    c = lambda s: float(s.decode().replace('D', 'e'))
+    N = 2
+
+    # Read the mean and standard deviation data
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+
+    # Set y-axis format
+    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+
+    # Remove y-axis ticks if reference is non-zero
+    if int(ref) > 0:
+        ax.yaxis.set_tick_params(length=0)
+
+    # Fill between the mean ± std values
+    ax.fill_between(mean_data[:, 0], 
+                    mean_data[:, 1] - std_data[:, 1], 
+                    mean_data[:, 1] + std_data[:, 1], 
+                    color=clr, alpha=0.3)
+
+    # Plot the mean line
+    ax.plot(mean_data[:, 0], mean_data[:, 1], label=legend, linestyle=lineStyle, color=clr)
+
+    # Set x-axis label and grid
+    ax.set_xlabel(styles.getArcLengthLabel())
+    ax.grid(True)
+
+    # Set optional title and legend
+    if kwargs.get("has_title", True):
+        ax.set_title(title)
+    if kwargs.get("has_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0))
+
+    # Set optional x and y limits
+    if kwargs.get("xlim", None):
+        plt.xlim(kwargs.get("xlim"))
+    if kwargs.get("ylim", None):
+        plt.ylim(kwargs.get("ylim"))
+
+    # Set y-axis label
+    ax.set_ylabel(styles.getHeadLabel(3))
+
+def save(simulation_id, filename, extension=".pdf"):
+    folder = f"./plots/{case}/"
 
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -76,7 +121,7 @@ def save(simulation_id, filename, extension=".pgf"):
     plt.gcf().clear()
 
 def crop_pdf(filename):
-    folder = "./plots/"
+    folder = f"./plots/{case}/"
     filename = folder + filename + ".pdf"
     if os.path.isfile(filename):
         os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
@@ -84,11 +129,9 @@ def crop_pdf(filename):
 
 
 def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 9
-    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    data = np.genfromtxt(file_name, delimiter=",")
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
@@ -111,6 +154,57 @@ def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
         plt.xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
         plt.ylim(kwargs.get("ylim"))
+
+
+def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+    # Converter to handle scientific notation
+    c = lambda s: float(s.decode().replace('D', 'e'))
+    N = 9
+
+    # Read the mean and standard deviation data
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+
+    # Format y-axis with the provided or default format
+    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+
+    # Adjust y-axis tick marks if `ref` is specified
+    if int(ref) > 0:
+        ax.yaxis.set_tick_params(length=0)
+
+    # Extract time, mean, and standard deviation values
+    time = mean_data[:, 0]
+    mean_values = mean_data[:, ID + 1]
+    std_values = std_data[:, ID + 1]
+
+    # Plot the shaded region (mean ± std) and the mean line
+    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=clr, alpha=0.3)
+    ax.plot(time, mean_values, label=legend, linestyle=lineStyle, color=clr)
+
+    # Set x-axis label using `styles.getTimeLabel`
+    ax.set_xlabel(styles.getTimeLabel('s'))
+    
+    # Display grid
+    ax.grid(True)
+
+    # Optionally set the title
+    if kwargs.get("has_title", True):
+        title_fig = title + " - fracture " + str(ID)
+        ax.set_title(title_fig)
+
+    # Optionally display the legend
+    if kwargs.get("has_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0))
+
+    # Set y-label as specified in the original function
+    ax.set_ylabel(r"$\overline{c_2}$")
+
+    # Apply optional xlim and ylim if provided in kwargs
+    if kwargs.get("xlim", None):
+        ax.set_xlim(kwargs.get("xlim"))
+    if kwargs.get("ylim", None):
+        ax.set_ylim(kwargs.get("ylim"))
+
 
 def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
@@ -141,7 +235,7 @@ class MathTextSciFormatter(mticker.Formatter):
         return "${}$".format(s)
 
 
-def save_over_time(filename, extension=".pgf"):
+def save_over_time(filename, extension=".pdf"):
     for ID in np.arange(8):
         save(ID, filename+"_fracture_"+str(ID), extension=extension)
 
@@ -180,7 +274,7 @@ def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     ax.set_xticks(ind + width)
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
-    folder = "./plots/"
+    folder = f"./plots/{case}/"
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -218,7 +312,7 @@ def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     ax.set_xticks(ind + width)
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
-    folder = "./plots/"
+    folder = f"./plots/{case}/"
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -255,7 +349,7 @@ def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
     ax.set_xticks(ind + width)
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
-    folder = "./plots/"
+    folder = f"./plots/{case}/"
     if not os.path.exists(folder):
         os.makedirs(folder)
 

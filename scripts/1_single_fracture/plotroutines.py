@@ -254,13 +254,12 @@ def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
     maxX = np.inf
 
     for place in places_and_methods:
-
         if place == "DTU" and ID != id_p_matrix:
             continue
 
         for method in places_and_methods[place]:
-            folder = "../results/" + place + "/" + method + "/"
-            datafile = folder.replace("\\", "") + "dol_refinement_" + ref + ".csv"
+            folder = f"./results/{case}/" + place + "/" + method + "/"
+            datafile = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
             data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c]*N)))
             # only take the interesting columns and eleminate nan rows
             data = data[:, 2*ID:2*ID+2];

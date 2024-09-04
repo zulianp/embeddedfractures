@@ -19,7 +19,7 @@ refinement_index = ['0', '1', '2']
 places_and_methods = {
     "USI": ["FEM\_LM"],
     "mean": ["key"],
-};
+}
 
 fig_p_matrix = plot.plt.figure(plot.id_p_matrix+11, figsize=(16, 6))
 fig_p_matrix.subplots_adjust(hspace=0, wspace=0)
@@ -86,7 +86,7 @@ plot.save(plot.id_c_fracture, f"{case}_pol_c_fracture")
 ncol = 4
 for place in places_and_methods:
     for method in places_and_methods[place]:
-        label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+        label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "") + "}"
         plot.plot_legend(label, plot.id_p_matrix_legend, plot.linestyle[place][method],
                          plot.color[place][method], ncol)
 

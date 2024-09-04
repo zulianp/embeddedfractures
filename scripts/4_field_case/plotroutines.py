@@ -1,3 +1,4 @@
+# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 from __future__ import print_function
 
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-sys.path.insert(0, './utils')
+sys.path.insert(0, './scripts/utils')
 import styles
 
 #------------------------------------------------------------------------------#
@@ -30,12 +31,13 @@ id_pot_legend = 12   # p along (0, 100, 100)-(100, 0, 0)
 linestyle = styles.linestyle
 color = styles.color
 
-def plot_over_line(file_name, legend, ID, title, ax, lineStyle="-", clr='C0', **kwargs):
+curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
+def plot_over_line(file_name, legend, ID, title, ax, lineStyle="-", clr='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
-    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    data = np.genfromtxt(file_name, delimiter=",")
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
@@ -61,9 +63,46 @@ def plot_over_line(file_name, legend, ID, title, ax, lineStyle="-", clr='C0', **
         ax.set_xticks([0, 500, 1000, 1500])
         ax.set_yticks([0, 50, 100, 150, 200, 250])
 
+def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ID, title, ax, lineStyle="-", clr='C0', **kwargs):
+    c = lambda s: float(s.decode().replace('D', 'e'))
+    N = 2
 
-def save(simulation_id, filename, extension=".pgf", ax_title=None):
-    folder = "./plots/"
+    # Read the mean and standard deviation data
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+
+    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+
+    # Plot the mean line and fill the area for standard deviation
+    ax.fill_between(mean_data[:, 0], mean_data[:, 1] - std_data[:, 1], mean_data[:, 1] + std_data[:, 1], color=clr, alpha=0.3)
+    ax.plot(mean_data[:, 0], mean_data[:, 1], label=legend, linestyle=lineStyle, color=clr)
+    ax.grid(True)
+
+    ax.set_xlabel(styles.getArcLengthLabel())
+    ax.grid(True)
+    ax.set_ylabel(styles.getHeadLabel(3))
+    
+    if kwargs.get("has_title", True):
+        ax.set_title(title)
+    if kwargs.get("has_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0))
+
+    if kwargs.get("xlim", None):
+        ax.set_xlim(kwargs.get("xlim"))
+    if kwargs.get("ylim", None):
+        ax.set_ylim(kwargs.get("ylim"))
+
+    # Set specific ticks depending on the ID
+    if ID == id_p_0_matrix:
+        ax.set_xticks([0, 500, 1000, 1500])
+        ax.set_yticks([0, 100, 200, 300, 400, 500, 600, 700])
+    elif ID == id_p_1_matrix:
+        ax.set_xticks([0, 500, 1000, 1500])
+        ax.set_yticks([0, 50, 100, 150, 200, 250])
+
+
+def save(simulation_id, filename, extension=".pdf", ax_title=None):
+    folder = f"./plots/{case}/"
 
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -84,7 +123,7 @@ def save(simulation_id, filename, extension=".pgf", ax_title=None):
     plt.gcf().clear()
 
 def crop_pdf(filename):
-    folder = "./plots/"
+    folder = f"./plots/{case}/"
     filename = folder + filename + ".pdf"
     if os.path.isfile(filename):
         os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
@@ -94,15 +133,8 @@ def crop_pdf(filename):
 def plot_over_time(file_name, legend, title, ID, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
 
     c = lambda s: float(s.decode().replace('D', 'e'))
-    # N = 53
-    # Read the first line of the file to determine the number of columns
-    with open(file_name, 'r') as f:
-        first_line = f.readline()
-        N = len(first_line.split(','))  # Assuming the delimiter is a comma
-
-    print(f"Number of columns: {N}, region: {region}, region_pos: {region_pos}, num_regions: {num_regions}")
-    # data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    data = np.genfromtxt(file_name, delimiter=",")
+    N = 53
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
     plt.rcParams.update({'figure.max_open_warning': 0})
 
@@ -126,9 +158,47 @@ def plot_over_time(file_name, legend, title, ID, region, region_pos, num_regions
     ax.set_xticks([0, 500, 1000, 1500])
 
 
+def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, ID, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
 
-def save_over_time(filename, extension=".pgf"):
-    folder = "./plots/"
+    c = lambda s: float(s.decode().replace('D', 'e'))
+    N = 53
+    
+    # Read the mean and standard deviation data
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+
+    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+    plt.rcParams.update({'figure.max_open_warning': 0})
+
+    if region_pos > 0:
+        ax.yaxis.set_tick_params(length=0)
+
+    time = mean_data[:, 0]
+    mean_values = mean_data[:, region + 1]
+    std_values = std_data[:, region + 1]
+
+    # Plot the mean with a shaded region for the standard deviation
+    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=clr, alpha=0.3)
+    ax.plot(time, mean_values, label=legend, linestyle=lineStyle, color=clr)
+
+    ax.set_xlabel(styles.getTimeLabel('s'))
+    ax.set_ylabel(styles.getAveragedConcentrationLabel(2))
+    ax.grid(True)
+
+    if kwargs.get("has_title", True):
+        ax.set_title(title)
+    if kwargs.get("has_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0))
+    if kwargs.get("xlim", None):
+        plt.xlim(kwargs.get("xlim"))
+    if kwargs.get("ylim", None):
+        plt.ylim(kwargs.get("ylim"))
+
+    ax.set_xticks([0, 500, 1000, 1500])
+
+
+def save_over_time(filename, extension=".pdf"):
+    folder = f"./plots/{case}/"
 
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -178,11 +248,11 @@ def plot_percentiles(ref, places_and_methods, ax, **kwargs):
 
     for place in places_and_methods:
         for method in places_and_methods[place]:
-            folder = "../results/" + place + "/" + method + "/"
-            datafile = folder.replace("\\", "") + "dol_line_" + ref + ".csv"
+            folder = f"./results/{case}/" + place + "/" + method + "/"
+            datafile = os.path.join(folder, f"dol_line_{ref}.csv").replace("\_", "_")
             data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c]*N)))
             # only take the interesting columns and eleminate nan rows
-            data = data[:, 0:2];
+            data = data[:, 0:2]
             data = data[~np.isnan(data).any(axis=1)]
 
             f.append(interpolate.interp1d(data[:, 0], data[:, 1]))

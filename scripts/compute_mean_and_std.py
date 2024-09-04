@@ -24,10 +24,36 @@ def process_case_2(subdirectory: str):
     pattern_filename = f"dol_cond_1_refinement_*.csv"
     csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
 
+    # NOTE: Waiting forArancia to fix the CSV files
     pattern_filename = f"dot_cond_*.csv"
     csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
 
     print("Processed case 2")
+
+def process_case_3(subdirectory: str):
+    pattern_filename = f"dol_line_0_refinement_*.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
+
+    pattern_filename = f"dol_line_1_refinement_*.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
+
+    pattern_filename = f"dot_refinement_*.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
+
+    # NOTE: Waiting forArancia to fix the CSV files
+    pattern_filename = f"results.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
+
+    print("Processed case 3")
+
+def process_case_4(subdirectory: str):
+    pattern_filename = f"dol_line_*.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
+
+    pattern_filename = f"dot.csv"
+    csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
+
+    print("Processed case 4")
 
 
 def main():
@@ -42,12 +68,12 @@ def main():
         case = subdirectory.split(os.sep)[-1]
         # if "1" in case:
         #     process_case_1(subdirectory)
-        if "2" in case:
-            process_case_2(subdirectory)
+        # elif "2" in case:
+        #     process_case_2(subdirectory)
         # elif "3" in case:
-        #     print("Salut")
-        # elif "4" in case:
-        #     print("Hola")
+        #     process_case_3(subdirectory)
+        if "4" in case:
+            process_case_4(subdirectory)
         # else:
         #     raise ValueError("Invalid case name")
 

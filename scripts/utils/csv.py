@@ -136,7 +136,11 @@ def create_interpolated_dfs_from_csv_files(csv_files: list):
     return interpolate_and_align(df_list)
 
 def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI/FEM_LM"):
-    min_int_in_filenames, max_int_in_filenames = find_min_max_integer_in_filenames(base_dir=os.path.join(base_dir, focus_dir), pattern=pattern_filename)  
+    min_int_in_filenames = None 
+    max_int_in_filenames = None 
+    if '*' in pattern_filename:
+        min_int_in_filenames, max_int_in_filenames = find_min_max_integer_in_filenames(base_dir=os.path.join(base_dir, focus_dir), pattern=pattern_filename)  
+    
     if min_int_in_filenames is None:
         min_int_in_filenames = 0
 
@@ -144,7 +148,10 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
         max_int_in_filenames = 0
 
     for ref in range(min_int_in_filenames, max_int_in_filenames + 1):
-        filename = pattern_filename.replace('*', str(ref))
+        if '*' in pattern_filename:
+            filename = pattern_filename.replace('*', str(ref))
+        else:
+            filename = pattern_filename
 
         # Collect all the CSV files with the same name in base_dir, their subdirectories, their subdirectories, etc.
         # csv_files[0] will correspond to that in the focus_dir
