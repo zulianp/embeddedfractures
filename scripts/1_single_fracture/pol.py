@@ -1,3 +1,4 @@
+# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 import os
 import plotroutines as plot
 
@@ -16,17 +17,8 @@ titles = ['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells']
 refinement_index = ['0', '1', '2']
 
 places_and_methods = {
-    # "UiB": ["TPFA", "MPFA", "MVEM", "RT0"],
-    # "USTUTT": ["MPFA", "TPFA\_Circ"],
-    # "LANL": ["MFD"],
-    # "NCU\_TW": ["Hybrid\_FEM"],
-    # "UNICE\_UNIGE": ["VAG\_Cont", "HFV\_Cont", "VAG\_Disc", "HFV\_Disc"],
     "USI": ["FEM\_LM"],
     "mean": ["key"],
-    # "UNICAMP": ["Hybrid\_Hdiv"],
-    # "UNIL\_USI": ["FE\_AMR\_AFC"],
-    # "INM": ["EDFM"],
-    # "DTU": ["FEM\_COMSOL"],
 };
 
 fig_p_matrix = plot.plt.figure(plot.id_p_matrix+11, figsize=(16, 6))
@@ -46,7 +38,7 @@ for title, ref in zip(titles, refinement_index):
         for method in places_and_methods[place]:
             folder = f"./results/{case}/" + place + "/" + method + "/"
             data = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
-            label = place + "-" + method
+            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
             if place.replace("\_", "_") != "mean":
                 plot.plot_over_line(data, label, ref, plot.id_p_matrix, title, axes_p_matrix,
@@ -94,7 +86,7 @@ plot.save(plot.id_c_fracture, f"{case}_pol_c_fracture")
 ncol = 4
 for place in places_and_methods:
     for method in places_and_methods[place]:
-        label = "\\texttt{" + place + "-" + method + "}"
+        label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "")
         plot.plot_legend(label, plot.id_p_matrix_legend, plot.linestyle[place][method],
                          plot.color[place][method], ncol)
 
