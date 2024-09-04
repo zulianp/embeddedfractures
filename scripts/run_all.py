@@ -10,7 +10,7 @@ if compute_mean_and_std_all:
     # Compute mean and standard deviation for all cases
     os.system("python scripts/compute_mean_and_std_all.py")
 
-if create_pdfs:")
+if create_pdfs:
     # Get the directory in which this file resides
     base_dir = os.path.dirname(os.path.realpath(__file__))
     # Get all direct subdirectories of the base directory
