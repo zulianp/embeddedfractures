@@ -117,6 +117,10 @@ def plot_over_time(file_name, legend, title, cond,  region, region_pos, num_regi
 
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 22
+    N_temp = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
+    if N_temp < N:
+        N = N_temp
+
     data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
@@ -143,6 +147,9 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, cond
 
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 22
+    N_temp = len(np.genfromtxt(mean_filename, delimiter=",", max_rows=1, skip_header=1))
+    if N_temp < N:
+        N = N_temp
 
     # Read the mean and standard deviation data
     mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))

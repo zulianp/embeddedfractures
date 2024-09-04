@@ -1,2 +1,4 @@
 Method,Outflow 30k,Outflow 150k,Out0/Out 30k,Out0/Out 150k,Inflow 30k,Inflow 150k
 \texttt{USI-FEM\_LM,0.076,0.076,0.000,0.000,0.076,0.076
+Reference,-,0.333334,-,0.473000053999892,-,0.214801
+Standard deviation,0.0,0.0,-,-,0.0,0.0

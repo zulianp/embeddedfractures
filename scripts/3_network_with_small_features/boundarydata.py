@@ -17,7 +17,7 @@ refinement_index = ["0", "1"]
 
 places_and_methods = {
     "USI": ["FEM\_LM"],
-    "mean": ["key"],
+    # "mean": ["key"],
 }
 
 all_data = []

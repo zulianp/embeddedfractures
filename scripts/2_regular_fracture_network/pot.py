@@ -18,8 +18,12 @@ places_and_methods = {
     "mean": ["key"],
 }
 
-regions = np.array([1, 10, 11])
-regions_fig = {1: f"{case}_region10pic.png", 10: f"{case}_region11pic.png", 11: f"{case}_region1pic.png"}
+# TODO: Verify with Arancia
+# regions = np.array([1, 10, 11])
+# regions_fig = {1: f"{case}_region10pic.png", 10: f"{case}_region11pic.png", 11: f"{case}_region1pic.png"}
+
+regions = np.array([1])
+regions_fig = {1: f"{case}_region10pic.png"}
 
 #------------------------------------------------------------------------------#
 

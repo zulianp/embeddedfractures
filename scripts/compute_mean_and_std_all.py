@@ -54,6 +54,7 @@ def process_case_2(subdirectory: str):
     if no_exceptions:
         print("Processed case 2")
 
+
 def process_case_3(subdirectory: str):
     no_exceptions = True
     pattern_filename = f"dol_line_0_refinement_*.csv"
@@ -92,6 +93,7 @@ def process_case_3(subdirectory: str):
     if no_exceptions:
         print("Processed case 3")
 
+
 def process_case_4(subdirectory: str):
     no_exceptions = True
     pattern_filename = f"dol_line_*.csv"
@@ -114,6 +116,7 @@ def process_case_4(subdirectory: str):
         print("Processed case 4")
 
 def main():
+    print("Computing mean and standard deviations for all cases...")
     # Base directory in which to process CSV files
     base_dir = project_root + "/results"
 

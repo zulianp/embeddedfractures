@@ -38,7 +38,9 @@ def find_csv_filenames(base_dir: str, focus_dir: str = "USI/FEM_LM", filename: s
             if os.path.abspath(root) == os.path.abspath(focus_dir):
                 focus_file = file_path  # Save the focus_dir file to add it first
             else:
-                csv_files.append(file_path)
+                # Check if mean or std is in the path
+                if not('mean' in root or 'std' in root):
+                    csv_files.append(file_path)
     
     # Place the focus_dir file at the beginning of the list, if it was found
     if focus_file:
@@ -110,9 +112,8 @@ def create_df_from_csv(file: str, num_cols: int = None, column_names = None):
     # Load the first row to check for a header
     first_row_df = pd.read_csv(file, header=None, nrows=1)
     first_row = first_row_df.iloc[0].apply(lambda x: isinstance(x, str))
-    # Number of valid columns to read
-    num_valid_columns = first_row_df.notna().sum(axis=1).iloc[0] if num_cols is None else num_cols
 
+    num_valid_columns = first_row_df.shape[1] 
     if first_row.any():
         # If any entry in the first row is a string, it's likely a header
         df = pd.read_csv(file, usecols=range(num_valid_columns), converters={i: lambda x: convert_to_float(x.encode()) for i in range(num_valid_columns)})
@@ -132,6 +133,12 @@ def create_interpolated_dfs_from_csv_files(csv_files: list):
     focus_df = create_df_from_csv(csv_files[0])
     df_list = [create_df_from_csv(file=file) for file in csv_files[1:]]
     df_list.insert(0, focus_df)
+
+    # Ensure all DataFrames have the same number of rows and columns
+    min_num_rows = min([df.shape[0] for df in df_list])
+    min_num_cols = min([df.shape[1] for df in df_list])
+    for idx, df in enumerate(df_list):
+        df_list[idx] = df.iloc[:min_num_rows, :min_num_cols]
 
     return interpolate_and_align(df_list)
 
@@ -174,9 +181,9 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
         # Compute the mean (assumes the first column is the reference)
         mean_df = combined_df.groupby(combined_df.columns[0]).mean().reset_index()
 
-        # Compute the standard deviation using the custom formula
+        # Compute the standard deviation (assumes the first column is the reference)
         std_df = combined_df.groupby(combined_df.columns[0]).std().reset_index()
-
+        
         # Create a mean_and_std directory if it doesn't exist
         mean_dir = os.path.join(base_dir, 'mean/key')
         if not os.path.exists(mean_dir):
@@ -189,9 +196,7 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
         # Save the mean and standard deviation DataFrames to CSV files
         mean_csv_filename = os.path.join(mean_dir, filename)
         std_csv_filename = os.path.join(std_dir, filename)
-        # print("Saving mean_df to ", mean_csv_filename)
         mean_df.to_csv(mean_csv_filename, index=False, header=False)
-        # print("Saving std_df to ", std_csv_filename)
         std_df.to_csv(std_csv_filename, index=False, header=False)
 
         
