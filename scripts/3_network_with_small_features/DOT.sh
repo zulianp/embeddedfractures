@@ -34,7 +34,7 @@ do
 		
 		else 
 			let "bb = $b - 1"
-		    python3 bench2_dot_pandas_last.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/dot_refinment$r.csv $b
+		    python3 bench2_dot_pandas_last.py results/temp/dot_cond1_block$bb.csv results/temp/dot_cond1_block$b.csv results/dot_refinement_$r.csv $b
 
 		fi
     done 

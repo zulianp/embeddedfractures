@@ -19,7 +19,7 @@ do
 	pvpython bench2_dot_col12.py $d/matrix_transport.e results/temp/dot_cond1_col1.csv results/temp/dot_cond1_col2.csv 
 	pvpython bench2_dot_col3.py $d/matrix_transport.e results/temp/dot_cond1_col3.csv 
 
-	python3 bench2_dot_pandas.py results/temp/dot_cond1_col1.csv results/temp/dot_cond1_col2.csv results/temp/dot_cond1_col3.csv results/dot_refinment_$r.csv
+	python3 bench2_dot_pandas.py results/temp/dot_cond1_col1.csv results/temp/dot_cond1_col2.csv results/temp/dot_cond1_col3.csv results/dot_refinement_$r.csv
     r=$(($r + 1))
 
 done
