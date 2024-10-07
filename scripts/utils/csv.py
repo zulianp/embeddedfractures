@@ -118,25 +118,22 @@ def create_df_from_csv(file: str, num_cols: int = None, column_names=None):
     def convert_to_float(s):
         try:
             return float(s.replace('D', 'e'))
-        except ValueError:
+        except (ValueError, AttributeError):
             return s
 
     # Read the first few rows to sample data
     sample_df = pd.read_csv(file, header=None, nrows=5)
 
     # Check if the first row contains non-numeric strings
-    first_row = sample_df.iloc[0]
-
-    # Attempt to convert the first row to numeric values
+    first_row = sample_df.iloc[0].apply(convert_to_float)
     numeric_first_row = pd.to_numeric(first_row, errors='coerce')
-    # Identify non-numeric entries
     non_numeric_in_first_row = numeric_first_row.isna()
 
     # Check if subsequent rows are mostly numeric
     subsequent_rows = sample_df.iloc[1:]
-    # Convert the DataFrame to numeric, non-convertible values become NaN
-    numeric_subsequent_rows = subsequent_rows.applymap(lambda x: pd.to_numeric(x, errors='coerce'))
-    # Check if all values in each row are numeric (not NaN)
+    # Apply 'convert_to_float' to each element
+    subsequent_rows_converted = subsequent_rows.apply(lambda col: col.map(convert_to_float))
+    numeric_subsequent_rows = subsequent_rows_converted.apply(pd.to_numeric, errors='coerce')
     numeric_in_subsequent_rows = numeric_subsequent_rows.notna().all(axis=1)
 
     # Decide if header exists
@@ -146,16 +143,24 @@ def create_df_from_csv(file: str, num_cols: int = None, column_names=None):
 
     # Now read the full CSV with the detected header
     header = 0 if has_header else None
+
+    # Read the CSV and apply 'convert_to_float' to all columns
     df = pd.read_csv(
         file,
         header=header,
-        converters={i: convert_to_float for i in range(num_cols)} if num_cols else None,
+        converters={col: convert_to_float for col in range(num_cols)} if num_cols else None,
         usecols=range(num_cols) if num_cols else None
     )
 
-    # Convert columns to numeric where appropriate
+    # Apply 'convert_to_float' to each element in the DataFrame
+    df = df.apply(lambda col: col.map(convert_to_float))
+
+    # Convert columns to numeric where possible
     for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='ignore')
+        try:
+            df[col] = pd.to_numeric(df[col])
+        except ValueError:
+            pass
 
     # Sort the DataFrame by the first column if it's numeric
     if pd.api.types.is_numeric_dtype(df[df.columns[0]]):
@@ -240,7 +245,7 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
         dfs = create_interpolated_dfs_from_csv_files(csv_files=csv_files)
 
         # Combine the dataframes
-        combined_df = pd.concat(dfs, ignore_index=True)
+        combined_df = pd.concat(dfs[1:], ignore_index=True)
 
         # Ensure the first column is numeric and the other columns are consistent
         combined_df.iloc[:, 0] = pd.to_numeric(combined_df.iloc[:, 0], errors='coerce')
