@@ -38,7 +38,7 @@ def find_csv_filenames(base_dir: str, focus_dir: str = "USI/FEM_LM", filename: s
             if os.path.abspath(root) == os.path.abspath(focus_dir):
                 focus_file = file_path  # Save the focus_dir file to add it first
             else:
-                # Check if mean or std is in the path
+                # Exclude any previously computed mean and standard deviation files
                 if not('mean' in root or 'std' in root):
                     csv_files.append(file_path)
     
@@ -85,62 +85,133 @@ def find_direct_subdirectories(base_dir: str):
 def interpolate_and_align(df_list: list):
     reference_df = df_list[0]
     ref_column = reference_df.iloc[:, 0].values
-    
+
+    # Ensure ref_column is sorted and unique
+    ref_column = np.unique(ref_column)
+
     interpolated_dfs = []
     for idx, df in enumerate(df_list[1:]):
         x = df.iloc[:, 0].values
-        
+
         # Create an interpolator for each column (except the first)
         interpolated_values = []
         for i in range(1, df.shape[1]):
-            interpolator = interp1d(x, df.iloc[:, i].values, kind='linear', fill_value="extrapolate")
+            interpolator = interp1d(
+                x,
+                df.iloc[:, i].values,
+                kind='linear',
+                bounds_error=False,
+                fill_value=np.nan
+            )
             interpolated_values.append(interpolator(ref_column))
-        
+
         # Combine the interpolated values with the reference x values
-        interpolated_df = pd.DataFrame(np.column_stack([ref_column] + interpolated_values))
+        interpolated_df = pd.DataFrame(
+            np.column_stack([ref_column] + interpolated_values)
+        )
         interpolated_dfs.append(interpolated_df)
-    
+
     return [reference_df] + interpolated_dfs
 
-def create_df_from_csv(file: str, num_cols: int = None, column_names = None):
+
+def create_df_from_csv(file: str, num_cols: int = None, column_names=None):
     def convert_to_float(s):
         try:
-            return float(s.decode().replace('D', 'e'))
+            return float(s.replace('D', 'e'))
         except ValueError:
-            return s.decode()
+            return s
 
-    # Load the first row to check for a header
-    first_row_df = pd.read_csv(file, header=None, nrows=1)
-    first_row = first_row_df.iloc[0].apply(lambda x: isinstance(x, str))
+    # Read the first few rows to sample data
+    sample_df = pd.read_csv(file, header=None, nrows=5)
 
-    num_valid_columns = first_row_df.shape[1] 
-    if first_row.any():
-        # If any entry in the first row is a string, it's likely a header
-        df = pd.read_csv(file, usecols=range(num_valid_columns), converters={i: lambda x: convert_to_float(x.encode()) for i in range(num_valid_columns)})
-    else:
-        # No header present, treat all data as numeric
-        df = pd.read_csv(file, header=None, usecols=range(num_valid_columns), converters={i: lambda x: convert_to_float(x.encode()) for i in range(num_valid_columns)})
-    
-    # Convert all columns to numeric, ignoring any headers
-    df = df.apply(pd.to_numeric, errors='coerce').dropna()
-    # Set a header if it doesn't exist and set it to the provided column names
+    # Check if the first row contains non-numeric strings
+    first_row = sample_df.iloc[0]
+
+    # Attempt to convert the first row to numeric values
+    numeric_first_row = pd.to_numeric(first_row, errors='coerce')
+    # Identify non-numeric entries
+    non_numeric_in_first_row = numeric_first_row.isna()
+
+    # Check if subsequent rows are mostly numeric
+    subsequent_rows = sample_df.iloc[1:]
+    # Convert the DataFrame to numeric, non-convertible values become NaN
+    numeric_subsequent_rows = subsequent_rows.applymap(lambda x: pd.to_numeric(x, errors='coerce'))
+    # Check if all values in each row are numeric (not NaN)
+    numeric_in_subsequent_rows = numeric_subsequent_rows.notna().all(axis=1)
+
+    # Decide if header exists
+    has_header = False
+    if non_numeric_in_first_row.any() and numeric_in_subsequent_rows.sum() >= len(subsequent_rows) - 1:
+        has_header = True
+
+    # Now read the full CSV with the detected header
+    header = 0 if has_header else None
+    df = pd.read_csv(
+        file,
+        header=header,
+        converters={i: convert_to_float for i in range(num_cols)} if num_cols else None,
+        usecols=range(num_cols) if num_cols else None
+    )
+
+    # Convert columns to numeric where appropriate
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors='ignore')
+
+    # Sort the DataFrame by the first column if it's numeric
+    if pd.api.types.is_numeric_dtype(df[df.columns[0]]):
+        df = df.sort_values(by=df.columns[0]).reset_index(drop=True)
+
+    # Set column names if provided
     if column_names is not None:
         df.columns = column_names
-    
+
+    return df
+
+
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+def standardize_dataframe(df):
+    # Ensure consistent data types
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col])
+
+    # Convert column names to strings for consistency
+    df.columns = df.columns.astype(str)
+
     return df
 
 def create_interpolated_dfs_from_csv_files(csv_files: list):
-    focus_df = create_df_from_csv(csv_files[0])
-    df_list = [create_df_from_csv(file=file) for file in csv_files[1:]]
-    df_list.insert(0, focus_df)
+    df_list = [create_df_from_csv(file) for file in csv_files]
 
-    # Ensure all DataFrames have the same number of rows and columns
+    # Standardize all DataFrames
+    df_list = [standardize_dataframe(df) for df in df_list]
+
+    # Get the intersection of all column names
+    common_columns = set(df_list[0].columns)
+    for df in df_list[1:]:
+        common_columns = common_columns.intersection(df.columns)
+    common_columns = sorted(common_columns)
+
+    # Select only the common columns
+    df_list = [df[common_columns] for df in df_list]
+
+    # Ensure all DataFrames have the same number of rows
     min_num_rows = min([df.shape[0] for df in df_list])
-    min_num_cols = min([df.shape[1] for df in df_list])
-    for idx, df in enumerate(df_list):
-        df_list[idx] = df.iloc[:min_num_rows, :min_num_cols]
+    df_list = [df.iloc[:min_num_rows].reset_index(drop=True) for df in df_list]
 
     return interpolate_and_align(df_list)
+
+def exclude_some_csv_files(filenames):
+    filtered_filenames = []
+    for filename in filenames:
+        if not ("LANL" in filename and "MFD/" in filename) and not ("USTUTT" in filename and ("TPFA/" in filename or "BOX" in filename)):
+            filtered_filenames.append(filename)
+    return filtered_filenames
 
 def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI/FEM_LM"):
     min_int_in_filenames = None 
@@ -163,6 +234,7 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
         # Collect all the CSV files with the same name in base_dir, their subdirectories, their subdirectories, etc.
         # csv_files[0] will correspond to that in the focus_dir
         csv_files = find_csv_filenames(base_dir=base_dir, filename=filename)
+        csv_files = exclude_some_csv_files(csv_files)
         
         # Create Pandas DataFrames from the CSV files
         dfs = create_interpolated_dfs_from_csv_files(csv_files=csv_files)

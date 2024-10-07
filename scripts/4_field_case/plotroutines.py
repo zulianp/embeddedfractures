@@ -11,7 +11,9 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-sys.path.insert(0, './scripts/utils')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utils_dir = os.path.abspath(os.path.join(current_dir, '../utils'))
+sys.path.insert(0, utils_dir)
 import styles
 
 #------------------------------------------------------------------------------#

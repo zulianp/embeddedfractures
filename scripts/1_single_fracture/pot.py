@@ -18,6 +18,7 @@ import plotroutines as plot
 # TODO: add reference solution to plots as soon as available
 
 curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+results_dir = curr_dir.replace("scripts", "results")
 case = curr_dir.split(os.sep)[-1] # case we are dealing with
 titles = np.array(['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells'])
 refinement_index = ['0', '1', '2']
@@ -42,7 +43,7 @@ for title, ref in zip(titles, refinement_index):
 
     for place in places_and_methods:
         for method in places_and_methods[place]:
-            folder = f"./results/{case}/" + place + "/" + method + "/"
+            folder = os.path.join(results_dir, place, method)
             data = os.path.join(folder, f"dot_refinement_{ref}.csv").replace("\_", "_")
 
             label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")

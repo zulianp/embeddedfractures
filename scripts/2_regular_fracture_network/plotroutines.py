@@ -11,7 +11,9 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-sys.path.insert(0, './scripts/utils')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utils_dir = os.path.abspath(os.path.join(current_dir, '../utils'))
+sys.path.insert(0, utils_dir)
 import styles
 
 #------------------------------------------------------------------------------#
@@ -226,9 +228,11 @@ def plot_percentiles(ref, cond, places_and_methods, ax, **kwargs):
 
     for place in places_and_methods:
         for method in places_and_methods[place]:
-            folder = "../results/" + place + "/" + method + "/"
-            datafile = folder.replace("\\", "") + "dol_cond_" + cond + "_refinement_" + ref + ".csv"
-            data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+            base_dir = os.getcwd().replace("scripts", "results")
+            folder = os.path.join(base_dir, place, method)
+            datafile = os.path.join(folder, f"dol_cond_{cond}_refinement_{ref}.csv").replace("\_", "_")
+            data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+
             data = data[:, 0:2];
             data = data[~np.isnan(data).any(axis=1)]
 

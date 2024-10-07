@@ -12,7 +12,10 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-sys.path.insert(0, './scripts/utils')
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+plots_dir = curr_dir.replace("scripts", "plots")
+utils_dir = os.path.abspath(os.path.join(curr_dir, '../utils'))
+sys.path.insert(0, utils_dir)
 import styles
 
 #------------------------------------------------------------------------------#
@@ -102,9 +105,8 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, ti
 
 
 def save(simulation_id, filename, extension=".pdf", **kwargs):
-    folder = f"./plots/{case}/"
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    if not os.path.exists(plots_dir):
+        os.makedirs(plots_dir)
 
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     fig = plt.figure(simulation_id+11)
@@ -117,12 +119,11 @@ def save(simulation_id, filename, extension=".pdf", **kwargs):
             ax.text(0.5, -0.2, text, horizontalalignment='center',
                     verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder+filename+extension, bbox_inches='tight')
+    plt.savefig(os.path.join(plots_dir, filename+extension), bbox_inches='tight')
     plt.gcf().clear()
 
 def crop_pdf(filename):
-    folder = f"./plots/{case}/"
-    filename = folder + filename + ".pdf"
+    filename = os.path.join(plots_dir, f"{filename}.pdf")
     if os.path.isfile(filename):
         os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
         os.system("pdfcrop " + filename + " " + filename)
@@ -258,8 +259,10 @@ def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
             continue
 
         for method in places_and_methods[place]:
-            folder = f"./results/{case}/" + place + "/" + method + "/"
+            base_dir = os.getcwd().replace("scripts", "results")
+            folder = os.path.join(base_dir, place, method)
             datafile = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
+
             data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c]*N)))
             # only take the interesting columns and eleminate nan rows
             data = data[:, 2*ID:2*ID+2];

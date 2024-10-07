@@ -12,6 +12,7 @@ import plotroutines as plot
 # The second argument defines the legend you want to add to your data (Institution / Numerical method)
 
 curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+results_dir = curr_dir.replace("scripts", "results")
 case = curr_dir.split(os.sep)[-1] # case we are dealing with
 titles = ['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells']
 refinement_index = ['0', '1', '2']
@@ -36,7 +37,7 @@ for title, ref in zip(titles, refinement_index):
 
     for place in places_and_methods:
         for method in places_and_methods[place]:
-            folder = f"./results/{case}/" + place + "/" + method + "/"
+            folder = os.path.join(results_dir, place, method).replace("\_", "_")
             data = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
             label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
@@ -73,7 +74,7 @@ for title, ref in zip(titles, refinement_index):
     place = "USTUTT"
     method = "reference"
     label = "reference"
-    data = f"./results/{case}/USTUTT/MPFA/dol_refinement_5.csv".replace("\_", "_")
+    data = os.path.join(results_dir, "USTUTT/MPFA/dol_refinement_5.csv".replace("\_", "_"))
     plot.plot_over_line(data, label, ref, plot.id_p_matrix, title, axes_p_matrix,
                         plot.linestyle[place][method], plot.color[place][method],
                         has_legend=False, ylim=(1-0.1, 4+0.1))
