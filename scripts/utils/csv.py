@@ -245,7 +245,7 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
         dfs = create_interpolated_dfs_from_csv_files(csv_files=csv_files)
 
         # Combine the dataframes
-        combined_df = pd.concat(dfs[1:], ignore_index=True)
+        combined_df = pd.concat(dfs[1:], ignore_index=True) # TODO: once ours is OK, include in mean and std computations
 
         # Ensure the first column is numeric and the other columns are consistent
         combined_df.iloc[:, 0] = pd.to_numeric(combined_df.iloc[:, 0], errors='coerce')

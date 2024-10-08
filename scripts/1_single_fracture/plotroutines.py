@@ -39,7 +39,6 @@ curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
 case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
 def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 5
 
@@ -70,39 +69,38 @@ def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
         sys.exit(1)
 
 def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
-    
-        c = lambda s: float(s.decode().replace('D', 'e'))
-        N = 5
-    
-        # Read the mean and standard deviation data
-        mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
-        std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
-    
-        ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
-    
-        if int(ref) > 0:
-            ax.yaxis.set_tick_params(length=0)
-    
-        ax.fill_between(mean_data[:, 0], mean_data[:, 2*ID+1] - std_data[:, 2*ID+1], mean_data[:, 2*ID+1] + std_data[:, 2*ID+1], color=clr, alpha=0.3)
-        ax.plot(mean_data[:, 2*ID], mean_data[:, 2*ID+1], label=legend, linestyle=lineStyle, color=clr)
-        ax.set_xlabel( styles.getArcLengthLabel() )
-        ax.grid(True)
-        if kwargs.get("has_title", True):
-            ax.set_title(title)
-        if kwargs.get("has_legend", True):
-            ax.legend(bbox_to_anchor=(1.0, 1.0))
-    
-        # Choose y-label depending on plot id
-        if ID == id_p_matrix:
-            ax.set_ylabel( styles.getHeadLabel(3) )
-        elif ID == id_c_matrix:
-            ax.set_ylabel( styles.getConcentrationLabel(3) )
-        elif ID == id_c_fracture:
-            ax.set_ylabel( styles.getConcentrationLabel(2) )
-        else:
-            print("Error. Invalid plot id provided.")
-            sys.exit(1)
+    c = lambda s: float(s.decode().replace('D', 'e'))
+    N = 5
 
+    # Read the mean and standard deviation data
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c]*N)))
+
+    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+
+    if int(ref) > 0:
+        ax.yaxis.set_tick_params(length=0)
+
+    # Corrected x-axis values in fill_between
+    ax.fill_between(mean_data[:, 2*ID], mean_data[:, 2*ID+1] - std_data[:, 2*ID+1], mean_data[:, 2*ID+1] + std_data[:, 2*ID+1], color=clr, alpha=0.3)
+    ax.plot(mean_data[:, 2*ID], mean_data[:, 2*ID+1], label=legend, linestyle=lineStyle, color=clr)
+    ax.set_xlabel(styles.getArcLengthLabel())
+    ax.grid(True)
+    if kwargs.get("has_title", True):
+        ax.set_title(title)
+    if kwargs.get("has_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0))
+
+    # Choose y-label depending on plot id
+    if ID == id_p_matrix:
+        ax.set_ylabel(styles.getHeadLabel(3))
+    elif ID == id_c_matrix:
+        ax.set_ylabel(styles.getConcentrationLabel(3))
+    elif ID == id_c_fracture:
+        ax.set_ylabel(styles.getConcentrationLabel(2))
+    else:
+        print("Error. Invalid plot id provided.")
+        sys.exit(1)
 
 def save(simulation_id, filename, extension=".pdf", **kwargs):
     if not os.path.exists(plots_dir):
@@ -263,7 +261,11 @@ def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
             folder = os.path.join(base_dir, place, method)
             datafile = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
 
-            data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+            try:
+                data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+            except Exception as e:
+                print(f"An error occurred STOP PLEASE: {e}")
+                # Add your debug marker here, for example:
             # only take the interesting columns and eleminate nan rows
             data = data[:, 2*ID:2*ID+2];
             data = data[~np.isnan(data).any(axis=1)]

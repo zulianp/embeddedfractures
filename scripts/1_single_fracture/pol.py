@@ -18,7 +18,7 @@ titles = ['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells']
 refinement_index = ['0', '1', '2']
 
 places_and_methods = {
-    "USI": ["FEM\_LM"],
+    "USI": ["FEM\_LM"], # TODO: uncomment once done debugging
     "mean": ["key"],
 }
 
