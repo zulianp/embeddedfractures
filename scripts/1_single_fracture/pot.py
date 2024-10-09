@@ -5,10 +5,11 @@ import plotroutines as plot
 
 def run_pot():
     curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+    plots_dir = curr_dir.replace("scripts", "plots")
     results_dir = curr_dir.replace("scripts", "results")
     case = curr_dir.split(os.sep)[-1] # case we are dealing with
     titles = np.array(['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells'])
-    refinement_index = ['0', '1', '2']
+    refinement_index = [0, 1, 2]
 
     places_and_methods = {
         "USI": ["FEM\_LM"],
@@ -59,9 +60,9 @@ def run_pot():
                                         has_legend=False, ylim=(0-0.00000005, 0.0000014+0.00000005))
 
     # save figures
-    plot.save(plot.id_intc_matrix, f"{case}_pot_c_matrix")
-    plot.save(plot.id_intc_fracture, f"{case}_pot_c_fracture")
-    plot.save(plot.id_outflux, f"{case}_pot_outflux")
+    plot.save(plot.id_intc_matrix, f"{case}_pot_c_matrix", plots_dir=plots_dir)
+    plot.save(plot.id_intc_fracture, f"{case}_pot_c_fracture", plots_dir=plots_dir)
+    plot.save(plot.id_outflux, f"{case}_pot_outflux", plots_dir=plots_dir)
 
     # Plot legend
     ncol = 4
@@ -75,9 +76,13 @@ def run_pot():
             plot.plot_legend(label, plot.id_outflux_legend, plot.linestyle[place][method],
                              plot.color[place][method], ncol)
 
-    plot.save(plot.id_intc_matrix_legend, f"{case}_pot_c_matrix_legend")
-    plot.crop_pdf(f"{case}_pot_c_matrix_legend")
-    plot.save(plot.id_intc_fracture_legend, f"{case}_pot_c_fracture_legend")
-    plot.crop_pdf(f"{case}_pot_c_fracture_legend")
-    plot.save(plot.id_outflux_legend, f"{case}_pot_outflux_legend")
-    plot.crop_pdf(f"{case}_pot_outflux_legend")
+    plot.save(plot.id_intc_matrix_legend, f"{case}_pot_c_matrix_legend", plots_dir=plots_dir)
+    plot.crop_pdf(f"{case}_pot_c_matrix_legend", plots_dir=plots_dir)
+    plot.save(plot.id_intc_fracture_legend, f"{case}_pot_c_fracture_legend", plots_dir=plots_dir)
+    plot.crop_pdf(f"{case}_pot_c_fracture_legend", plots_dir=plots_dir)
+    plot.save(plot.id_outflux_legend, f"{case}_pot_outflux_legend", plots_dir=plots_dir)
+    plot.crop_pdf(f"{case}_pot_outflux_legend", plots_dir=plots_dir)
+
+
+if __name__ == "__main__":
+    run_pot()

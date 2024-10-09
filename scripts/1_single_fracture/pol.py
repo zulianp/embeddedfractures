@@ -4,11 +4,11 @@ import plotroutines as plot
 
 def run_pol():
     curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+    plots_dir = curr_dir.replace("scripts", "plots")
     results_dir = curr_dir.replace("scripts", "results")
     case = curr_dir.split(os.sep)[-1] # case we are dealing with
     titles = ['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells']
-    refinement_index = ['0', '1', '2']
-
+    refinement_index = [0, 1, 2]
     places_and_methods = {
         "USI": ["FEM\_LM"], # TODO: uncomment once done debugging
         "mean": ["key"],
@@ -22,7 +22,6 @@ def run_pol():
     fig_c_fracture.subplots_adjust(hspace=0, wspace=0)
 
     for title, ref in zip(titles, refinement_index):
-
         axes_p_matrix = fig_p_matrix.add_subplot(1, 3, int(ref) + 1, ylim=(1-0.1, 4+0.1))
         axes_c_matrix = fig_c_matrix.add_subplot(1, 3, int(ref) + 1, ylim=(0-0.0005, 0.01+0.0005))
         axes_c_fracture = fig_c_fracture.add_subplot(1, 3, int(ref) + 1, ylim=(0.0075, 0.0101))
@@ -72,31 +71,47 @@ def run_pol():
                             has_legend=False, ylim=(1-0.1, 4+0.1))
 
     # Save figures
-    plot.save(plot.id_p_matrix, f"{case}_pol_p_matrix")
-    plot.save(plot.id_c_matrix, f"{case}_pol_c_matrix")
-    plot.save(plot.id_c_fracture, f"{case}_pol_c_fracture")
+    plot.save(ID=plot.id_p_matrix, filename=f"{case}_pol_p_matrix", plots_dir=plots_dir)
+    plot.save(ID=plot.id_c_matrix, filename=f"{case}_pol_c_matrix", plots_dir=plots_dir)
+    plot.save(ID=plot.id_c_fracture, filename=f"{case}_pol_c_fracture", plots_dir=plots_dir)
 
     ncol = 4
     for place in places_and_methods:
         for method in places_and_methods[place]:
             label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "") + "}"
-            plot.plot_legend(label, plot.id_p_matrix_legend, plot.linestyle[place][method],
-                             plot.color[place][method], ncol)
+            plot.plot_legend(legend=label,
+                             ID=plot.id_p_matrix_legend,
+                             linestyle=plot.linestyle[place][method],
+                             color=plot.color[place][method],
+                             ncol=ncol)
 
             # DTU could only provide results for pressure
             if place != "DTU":
-                plot.plot_legend(label, plot.id_c_matrix_legend, plot.linestyle[place][method],
-                                 plot.color[place][method], ncol)
-                plot.plot_legend(label, plot.id_c_fracture_legend, plot.linestyle[place][method],
-                                 plot.color[place][method], ncol)
+                plot.plot_legend(legend=label,
+                                 ID=plot.id_c_matrix_legend,
+                                 linestyle=plot.linestyle[place][method],
+                                 color=plot.color[place][method],
+                                 ncol=ncol)
+                plot.plot_legend(legend=label,
+                                 ID=plot.id_c_fracture_legend,
+                                 linestyle=plot.linestyle[place][method],
+                                 color=plot.color[place][method],
+                                 ncol=ncol)
 
     # Add reference to the pressure legend
-    plot.plot_legend("reference", plot.id_p_matrix_legend, plot.linestyle["USTUTT"]["reference"],
-                     plot.color["USTUTT"]["reference"], ncol)
+    plot.plot_legend(legend="reference",
+                     ID=plot.id_p_matrix_legend,
+                     linestyle=plot.linestyle["USTUTT"]["reference"],
+                     color=plot.color["USTUTT"]["reference"],
+                     ncol=ncol)
 
-    plot.save(plot.id_p_matrix_legend, f"{case}_pol_p_matrix_legend")
-    plot.crop_pdf(f"{case}_pol_p_matrix_legend")
-    plot.save(plot.id_c_matrix_legend, f"{case}_pol_c_matrix_legend")
-    plot.crop_pdf(f"{case}_pol_c_matrix_legend")
-    plot.save(plot.id_c_fracture_legend, f"{case}_pol_c_fracture_legend")
-    plot.crop_pdf(f"{case}_pol_c_fracture_legend")
+    plot.save(ID=plot.id_p_matrix_legend, filename=f"{case}_pol_p_matrix_legend", plots_dir=plots_dir)
+    plot.crop_pdf(filename=f"{case}_pol_p_matrix_legend", plots_dir=plots_dir)
+    plot.save(ID=plot.id_c_matrix_legend, filename=f"{case}_pol_c_matrix_legend", plots_dir=plots_dir)
+    plot.crop_pdf(filename=f"{case}_pol_c_matrix_legend", plots_dir=plots_dir)
+    plot.save(ID=plot.id_c_fracture_legend, filename=f"{case}_pol_c_fracture_legend", plots_dir=plots_dir)
+    plot.crop_pdf(filename=f"{case}_pol_c_fracture_legend", plots_dir=plots_dir)
+
+
+if __name__ == "__main__":
+    run_pol()

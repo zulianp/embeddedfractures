@@ -5,9 +5,9 @@ from pot import run_pot
 from scripts.utils.overlay import run_overlay
 
 def run_all():
-    print("Running all scripts in sequence...")
     curr_dir = os.path.dirname(os.path.abspath(__file__))
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+    print(f"Running all scripts in sequence for case {case}...")
 
     run_percentiles()
     print("Finished running percentiles")

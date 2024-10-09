@@ -4,6 +4,7 @@ import plotroutines as plot
 
 def run_percentiles():
     curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+    plots_dir = curr_dir.replace("scripts", "plots")
     case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
     places_and_methods = {
@@ -27,6 +28,10 @@ def run_percentiles():
         plot.plot_percentiles(ref, plot.id_c_fracture, places_and_methods, axes_c_fracture)
 
     # save figures
-    plot.save(plot.id_p_matrix, f"{case}_pol_p_matrix_percentile_90_10", starting_from=3)
-    plot.save(plot.id_c_matrix, f"{case}_pol_c_matrix_percentile_90_10", starting_from=3)
-    plot.save(plot.id_c_fracture, f"{case}_pol_c_fracture_percentile_90_10", starting_from=3)
+    plot.save(plot.id_p_matrix, f"{case}_pol_p_matrix_percentile_90_10", starting_from=3, plots_dir=plots_dir)
+    plot.save(plot.id_c_matrix, f"{case}_pol_c_matrix_percentile_90_10", starting_from=3, plots_dir=plots_dir)
+    plot.save(plot.id_c_fracture, f"{case}_pol_c_fracture_percentile_90_10", starting_from=3, plots_dir=plots_dir)
+
+
+if __name__ == "__main__":
+    run_percentiles()

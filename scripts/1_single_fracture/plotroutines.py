@@ -12,11 +12,12 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-plots_dir = curr_dir.replace("scripts", "plots")
+curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+case = curr_dir.split(os.sep)[-1] # case we are dealing with
 utils_dir = os.path.abspath(os.path.join(curr_dir, '../utils'))
 sys.path.insert(0, utils_dir)
 import styles
+from plot_routines_utils import *
 
 #------------------------------------------------------------------------------#
 
@@ -34,9 +35,6 @@ id_c_fracture_legend = 12 # c along (0, 100, 80)-(100, 0, 20)
 
 linestyle = styles.linestyle
 color = styles.color
-
-curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
-case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
 def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
@@ -101,30 +99,6 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, ti
     else:
         print("Error. Invalid plot id provided.")
         sys.exit(1)
-
-def save(simulation_id, filename, extension=".pdf", **kwargs):
-    if not os.path.exists(plots_dir):
-        os.makedirs(plots_dir)
-
-    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
-    fig = plt.figure(simulation_id+11)
-
-    for idx, ax in enumerate(fig.get_axes()):
-        ax.label_outer()
-        if len(fig.get_axes()) > 1:
-            index = 97 + idx + kwargs.get("starting_from", 0)
-            text = "\\textbf{subfig. " + chr(index) + "}"
-            ax.text(0.5, -0.2, text, horizontalalignment='center',
-                    verticalalignment='bottom', transform=ax.transAxes)
-
-    plt.savefig(os.path.join(plots_dir, filename+extension), bbox_inches='tight')
-    plt.gcf().clear()
-
-def crop_pdf(filename):
-    filename = os.path.join(plots_dir, f"{filename}.pdf")
-    if os.path.isfile(filename):
-        os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
-        os.system("pdfcrop " + filename + " " + filename)
 
 # ids of the different plots
 id_intc_matrix = 0   # integral of c*porosity in the lower matrix sub-domain
@@ -210,33 +184,6 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, ti
     else:
         print("Error. Invalid plot id provided.")
         sys.exit(1)
-
-def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
-    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
-    plt.figure(ID+11)
-    plt.plot(np.zeros(1), label=legend, linestyle=lineStyle, color=clr)
-    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
-
-
-class MathTextSciFormatter(mticker.Formatter):
-    def __init__(self, fmt="%1.2e"):
-        self.fmt = fmt
-    def __call__(self, x, pos=None):
-        s = self.fmt % x
-        decimal_point = '.'
-        positive_sign = '+'
-        tup = s.split('e')
-        significand = tup[0].rstrip(decimal_point)
-        sign = tup[1][0].replace(positive_sign, '')
-        exponent = tup[1][1:].lstrip('0')
-        if exponent:
-            exponent = '10^{%s%s}' % (sign, exponent)
-        if significand and exponent:
-            s =  r'%s{\times}%s' % (significand, exponent)
-        else:
-            s =  r'%s%s' % (significand, exponent)
-        return "${}$".format(s)
-
 
 def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))

@@ -11,8 +11,9 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-utils_dir = os.path.abspath(os.path.join(current_dir, '../utils'))
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+plots_dir = curr_dir.replace("scripts", "plots")
+utils_dir = os.path.abspath(os.path.join(curr_dir, '../utils'))
 sys.path.insert(0, utils_dir)
 import styles
 
@@ -29,7 +30,6 @@ curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
 case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
 def plot_over_line(file_name, ID, simulation_id, title, cond, ax, lineStyle='-', clr='C0', **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
     data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
@@ -53,7 +53,6 @@ def plot_over_line(file_name, ID, simulation_id, title, cond, ax, lineStyle='-',
         plt.ylim(kwargs.get("ylim"))
 
 def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, title, cond, ax, lineStyle='-', clr='C0', **kwargs):
-    
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
     
@@ -89,34 +88,7 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, 
     if kwargs.get("ylim", None):
         ax.set_ylim(kwargs.get("ylim"))
 
-
-def save(simulation_id, filename, extension=".pdf", **kwargs):
-    folder = f"./plots/{case}/"
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-
-    fig = plt.figure(simulation_id+11)
-
-    for idx, ax in enumerate(fig.get_axes()):
-        ax.label_outer()
-        if len(fig.get_axes()) > 1:
-            index = 97 + idx + kwargs.get("starting_from", 0)
-            text = "\\textbf{subfig. " + chr(index) + "}"
-            ax.text(0.5, -0.2, text, horizontalalignment='center',
-                    verticalalignment='bottom', transform=ax.transAxes)
-
-    plt.savefig(folder+filename+extension, bbox_inches='tight')
-    plt.gcf().clear()
-
-def crop_pdf(filename):
-    folder = f"./plots/{case}/"
-    filename = folder + filename + ".pdf"
-    if os.path.isfile(filename):
-        os.system("pdfcrop --margins '0 -400 0 0' " + filename + " " + filename)
-        os.system("pdfcrop " + filename + " " + filename)
-
 def plot_over_time(file_name, legend, title, cond,  region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 22
     N_temp = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
@@ -146,7 +118,6 @@ def plot_over_time(file_name, legend, title, cond,  region, region_pos, num_regi
         plt.ylim(kwargs.get("ylim"))
 
 def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, cond, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 22
     N_temp = len(np.genfromtxt(mean_filename, delimiter=",", max_rows=1, skip_header=1))
@@ -192,31 +163,7 @@ def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
     plt.plot(np.zeros(1), label=legend, linestyle=lineStyle, color=clr)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
 
-
-class MathTextSciFormatter(mticker.Formatter):
-    def __init__(self, fmt="%1.2e"):
-        self.fmt = fmt
-    def __call__(self, x, pos=None):
-        s = self.fmt % x
-        if "f" in self.fmt:
-            return "${}$".format(s)
-        decimal_point = '.'
-        positive_sign = '+'
-        tup = s.split('e')
-        significand = tup[0].rstrip(decimal_point)
-        sign = tup[1][0].replace(positive_sign, '')
-        exponent = tup[1][1:].lstrip('0')
-        if exponent:
-            exponent = '10^{%s%s}' % (sign, exponent)
-        if significand and exponent:
-            s =  r'%s{\times}%s' % (significand, exponent)
-        else:
-            s =  r'%s%s' % (significand, exponent)
-        return "${}$".format(s)
-
-
 def plot_percentiles(ref, cond, places_and_methods, ax, **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
 
