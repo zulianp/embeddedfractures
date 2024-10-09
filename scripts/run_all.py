@@ -28,11 +28,11 @@ def main():
         for subdirectory in subdirectories:
                 case = subdirectory.split(os.sep)[-1] # e.g. 1_single_fracture
                 if case[0] in ["1"]:#["1", "2", "3", "4"]:
-                    print(f"Changing directory to {subdirectory}")
+                    print(f"Changing directory to {subdirectory} and running run_all.py there")
                     os.system(f"cd {subdirectory} && python run_all.py")
 
                     plots_directory = os.path.join('plots', subdirectory).replace("scripts", "plots")
-                    # os.system(f"python combine_pdfs.py {plots_directory}")
+                    os.system(f"python combine_pdfs.py {plots_directory}")
 
     if copy_pdfs_to_overleaf:
         base_dir = "plots"
