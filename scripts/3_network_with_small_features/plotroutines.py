@@ -12,8 +12,10 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-utils_dir = os.path.abspath(os.path.join(current_dir, '../utils'))
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+plots_dir = curr_dir.replace('scripts', 'plots')
+results_dir = curr_dir.replace('scripts', 'results')
+utils_dir = os.path.abspath(os.path.join(curr_dir, '../utils'))
 sys.path.insert(0, utils_dir)
 import styles
 
@@ -36,7 +38,7 @@ color = styles.color
 curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
 case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
-def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_over_line(file_name, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
     data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
@@ -46,7 +48,7 @@ def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, 1], label=legend, linestyle=lineStyle, color=clr)
+    ax.plot(data[:, 0], data[:, 1], label=legend, linestyle=linestyle, color=color)
     ax.set_xlabel( styles.getArcLengthLabel() )
     ax.grid(True)
     if kwargs.get("has_title", True):
@@ -60,7 +62,7 @@ def plot_over_line(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
 
     ax.set_ylabel(styles.getHeadLabel(3))
 
-def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
 
@@ -79,10 +81,10 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, ti
     ax.fill_between(mean_data[:, 0], 
                     mean_data[:, 1] - std_data[:, 1], 
                     mean_data[:, 1] + std_data[:, 1], 
-                    color=clr, alpha=0.3)
+                    color=color, alpha=0.3)
 
     # Plot the mean line
-    ax.plot(mean_data[:, 0], mean_data[:, 1], label=legend, linestyle=lineStyle, color=clr)
+    ax.plot(mean_data[:, 0], mean_data[:, 1], label=legend, linestyle=linestyle, color=color)
 
     # Set x-axis label and grid
     ax.set_xlabel(styles.getArcLengthLabel())
@@ -104,10 +106,7 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, ti
     ax.set_ylabel(styles.getHeadLabel(3))
 
 def save(simulation_id, filename, extension=".pdf"):
-    folder = f"./plots/{case}/"
-
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(plots_dir, exist_ok=True)
 
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     fig = plt.figure(simulation_id+11)
@@ -119,18 +118,17 @@ def save(simulation_id, filename, extension=".pdf"):
             ax.text(0.5, -0.2, text, horizontalalignment='center',
                     verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder+filename+extension, bbox_inches='tight')
+    plt.savefig(os.path.join(plots_dir, filename+extension), bbox_inches='tight')
     plt.gcf().clear()
 
 def crop_pdf(filename):
-    folder = f"./plots/{case}/"
-    filename = folder + filename + ".pdf"
+    filename = os.path.join(plots_dir, filename + ".pdf")
     if os.path.isfile(filename):
         os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
         os.system("pdfcrop " + filename + " " + filename)
 
 
-def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_over_time(file_name, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 9
     data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
@@ -140,7 +138,7 @@ def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, ID+1], label=legend, linestyle=lineStyle, color=clr)
+    ax.plot(data[:, 0], data[:, ID+1], label=legend, linestyle=linestyle, color=color)
     ax.set_xlabel( styles.getTimeLabel('s') )
     ax.grid(True)
 
@@ -158,7 +156,7 @@ def plot_over_time(file_name, legend, ref, ID, title, ax, lineStyle='-', clr='C0
         plt.ylim(kwargs.get("ylim"))
 
 
-def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, title, ax, lineStyle='-', clr='C0', **kwargs):
+def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     # Converter to handle scientific notation
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 9
@@ -180,8 +178,8 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, ti
     std_values = std_data[:, ID + 1]
 
     # Plot the shaded region (mean ± std) and the mean line
-    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=clr, alpha=0.3)
-    ax.plot(time, mean_values, label=legend, linestyle=lineStyle, color=clr)
+    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
+    ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
 
     # Set x-axis label using `styles.getTimeLabel`
     ax.set_xlabel(styles.getTimeLabel('s'))
@@ -208,10 +206,10 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, ti
         ax.set_ylim(kwargs.get("ylim"))
 
 
-def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
+def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID+11)
-    plt.plot(np.zeros(1), label=legend, linestyle=lineStyle, color=clr)
+    plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
 
 
@@ -276,15 +274,13 @@ def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     ax.set_xticks(ind + width)
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
-    folder = f"./plots/{case}/"
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(plots_dir, exist_ok=True)
 
     text = "\\textbf{subfig. b}"
     ax.text(0.5, -0.2, text, horizontalalignment='center',
             verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder + f"{case}_boundary_head" + extension, bbox_inches="tight")
+    plt.savefig(os.path.join(plots_dir, f"{case}_boundary_head" + extension), bbox_inches="tight")
 
 def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     N = da.shape[0]
@@ -314,15 +310,13 @@ def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     ax.set_xticks(ind + width)
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
-    folder = f"./plots/{case}/"
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(plots_dir, exist_ok=True)
 
     text = "\\textbf{subfig. a}"
     ax.text(0.5, -0.2, text, horizontalalignment='center',
             verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder + f"{case}_reference_flux" + extension, bbox_inches="tight")
+    plt.savefig(os.path.join(plots_dir, f"{case}_reference_flux" + extension), bbox_inches="tight")
 
 
 def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
@@ -351,15 +345,14 @@ def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
     ax.set_xticks(ind + width)
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
-    folder = f"./plots/{case}/"
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+
+    os.makedirs(plots_dir, exist_ok=True)
 
     text = "\\textbf{subfig. c}"
     ax.text(0.5, -0.2, text, horizontalalignment='center',
             verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder + f"{case}_boundary_fluxes" + extension, bbox_inches="tight")
+    plt.savefig(os.path.join(plots_dir, f"{case}_boundary_fluxes" + extension), bbox_inches="tight")
 
 def plot_percentiles(ref, line_id, places_and_methods, ax, **kwargs):
 
