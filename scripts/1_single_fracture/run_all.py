@@ -1,11 +1,31 @@
-# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 import os
+from percentiles import run_percentiles
+from pol import run_pol
+from pot import run_pot
+from scripts.utils.overlay import run_overlay
 
-curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+def run_all():
+    print("Running all scripts in sequence...")
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    case = curr_dir.split(os.sep)[-1]  # case we are dealing with
 
-os.system(f"python {curr_dir}/percentiles.py")
-os.system(f"python {curr_dir}/pol.py")
-os.system(f"python {curr_dir}/pot.py")
+    run_percentiles()
+    print("Finished running percentiles")
 
-# this goes after the others
-os.system(f"python {curr_dir}/overlay.py")
+    run_pol()
+    print("Finished running pol")
+
+    run_pot()
+    print("Finished running pot")
+
+    files = [f"{curr_dir}/{case}_pol_c_fracture",
+             f"{curr_dir}/{case}_pol_c_matrix",
+             f"{curr_dir}/{case}_pol_p_matrix",
+             f"{curr_dir}/{case}_pot_outflux"
+             ]
+    run_overlay(files, working_directory=curr_dir)
+    print("Finished running overlay")
+
+
+if __name__ == "__main__":
+    run_all()

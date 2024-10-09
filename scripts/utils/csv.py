@@ -3,7 +3,6 @@ import re
 import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
-from functools import reduce
 
 def get_num_rows(csv_file: str):
     with open(csv_file, 'r') as f:
@@ -37,11 +36,8 @@ def find_min_max_integer_in_filenames(base_dir: str, pattern: str = 'dol_refinem
     return min_int, max_int
 
 def extract_institute_and_method(filename):
-    # Split the string by '/'
     parts = filename.split('/')
-
-    # Extract the second last and third last parts
-    institute_method = '/'.join(parts[-3:-1])
+    institute_method = '/'.join(parts[-3:-1]) # Extract the second last and third last parts
     return institute_method
 
 def filter_csv_files(csv_files, methods_included):
@@ -53,17 +49,6 @@ def filter_csv_files(csv_files, methods_included):
     return filtered_csv_files
 
 def find_csv_filenames(base_dir: str, focus_dir: str = "USI/FEM_LM", filename: str = 'results.csv'):
-    """
-    Find all CSV files with a given filename in a directory and its subdirectories.
-
-    Parameters:
-    - base_dir (str): The base directory to start searching for CSV files.
-    - focus_dir (str): The directory whose corresponding CSV file should be listed first.
-    - filename (str): The name of the CSV file to search for. Default is 'results.csv'.
-
-    Returns:
-    - csv_files (list): A list of file paths to the found CSV files, with the file from focus_dir listed first.
-    """
     csv_files = []
     focus_file = None
     focus_dir = os.path.join(base_dir, focus_dir)
@@ -85,25 +70,16 @@ def find_csv_filenames(base_dir: str, focus_dir: str = "USI/FEM_LM", filename: s
     return csv_files
 
 def find_direct_subdirectories(base_dir: str):
-    """
-    Find all direct subdirectories of a given directory.
-
-    Parameters:
-    - base_dir (str): The base directory to search for subdirectories.
-
-    Returns:
-    - subdirectories (list): A list of the direct subdirectories of the base directory, sorted alphabetically.
-    """
     subdirectories = [f.path for f in os.scandir(base_dir) if f.is_dir()]
     subdirectories.sort()  # Sort the subdirectories alphabetically
     return subdirectories
 
 def create_interpolated_dfs(df_list):
     ref_df = df_list[0]
-
     interpolated_dfs = [ref_df]
+
     for other_df in df_list[1:]:
-        # Step 2: Extract x-values from the reference CSV
+        # Extract x-values from the reference CSV
         ref_x = ref_df.iloc[:, 0].values  # Assuming x-values are in the first column
 
         # Extract x-values and y-values from the other CSV
@@ -115,79 +91,54 @@ def create_interpolated_dfs(df_list):
         other_x_sorted = other_x[sort_idx]
         other_y_sorted = other_y[sort_idx, :]
 
-        # Step 3: Interpolate the other CSV's data to the reference x-values
+        # Prepare for interpolation by handling duplicate x-values
         interpolated_y = np.empty((len(ref_x), other_y.shape[1]))
 
         for i in range(other_y.shape[1]):
-            # Create an interpolation function for each column
-            f = interp1d(other_x_sorted, other_y_sorted[:, i], kind='cubic', fill_value='extrapolate')
+            # Create DataFrame for x and y
+            data_df = pd.DataFrame({'x': other_x_sorted, 'y': other_y_sorted[:, i]})
+
+            # Group by x and compute mean y-values to handle duplicates
+            data_df = data_df.groupby('x', as_index=False).mean()
+
+            # Extract unique x-values and corresponding y-values
+            other_x_unique = data_df['x'].values
+            other_y_unique = data_df['y'].values
+
+            # Create an interpolation function using cubic interpolation
+            f = interp1d(other_x_unique, other_y_unique, kind='linear', fill_value='extrapolate')
+
             # Interpolate to ref_x
             interpolated_y[:, i] = f(ref_x)
 
-        # Step 4: Combine ref_x with interpolated data
+        # Combine ref_x with interpolated data
         interpolated_df = pd.DataFrame(np.column_stack((ref_x, interpolated_y)))
-
-        # Optionally, set column names if known
-        interpolated_df.columns = ref_df.columns
-
         interpolated_dfs.append(interpolated_df)
+
     return interpolated_dfs
 
 def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI/FEM_LM", methods_included: list[str] = ["USI/FEM_LM"]):
-    min_int_in_filenames = None 
-    max_int_in_filenames = None 
+    min_int_in_filenames, max_int_in_filenames = (0, 0)
     if '*' in pattern_filename:
-        min_int_in_filenames, max_int_in_filenames = find_min_max_integer_in_filenames(base_dir=os.path.join(base_dir, focus_dir), pattern=pattern_filename)  
-    
-    if min_int_in_filenames is None:
-        min_int_in_filenames = 0
-
-    if max_int_in_filenames is None:
-        max_int_in_filenames = 0
+        min_int_in_filenames, max_int_in_filenames = find_min_max_integer_in_filenames(base_dir=os.path.join(base_dir, focus_dir), pattern=pattern_filename)
 
     for ref in range(min_int_in_filenames, max_int_in_filenames + 1):
-        if '*' in pattern_filename:
-            filename = pattern_filename.replace('*', str(ref))
-        else:
-            filename = pattern_filename
-
-        # Collect all the CSV files with the same name in base_dir, their subdirectories, their subdirectories, etc.
-        # csv_files[0] will correspond to that in the focus_dir
+        filename = pattern_filename.replace('*', str(ref)) if '*' in pattern_filename else pattern_filename
+        # Collect all the CSV files with the same name in any (recursive) subdirectory of base_dir
+        # csv_files[0] corresponds to that in the focus_dir
         csv_files = filter_csv_files(find_csv_filenames(base_dir=base_dir, filename=filename), methods_included)
 
-        # Create Pandas DataFrames from the CSV files
+        # Create combined DataFrame
         dfs = create_interpolated_dfs(df_list=[pd.read_csv(file, header=None) for file in csv_files])
+        # TODO: once ours is OK, include in mean and std computations
+        combined_df = pd.concat(dfs[1:], ignore_index=True).sort_values(by=dfs[0].columns[0]).reset_index(drop=True)
 
-        # Combine the dataframes
-        combined_df = pd.concat(dfs[1:], ignore_index=True) # TODO: once ours is OK, include in mean and std computations
-
-        # Ensure the first column is numeric and the other columns are consistent
-        combined_df.iloc[:, 0] = pd.to_numeric(combined_df.iloc[:, 0], errors='coerce')
-        for col in combined_df.columns[1:]:
-            combined_df[col] = pd.to_numeric(combined_df[col], errors='coerce')
-
-        # Sort by the first column to ensure proper alignment during groupby
-        combined_df = combined_df.sort_values(by=combined_df.columns[0]).reset_index(drop=True)
-
-        # Compute the mean (assumes the first column is the reference)
+        # Compute the mean and standard deviation (assumes the first column is the reference)
         mean_df = combined_df.groupby(combined_df.columns[0]).mean().reset_index()
-
-        # Compute the standard deviation (assumes the first column is the reference)
         std_df = combined_df.groupby(combined_df.columns[0]).std().reset_index()
-        
-        # Create a mean_and_std directory if it doesn't exist
-        mean_dir = os.path.join(base_dir, 'mean/key')
-        if not os.path.exists(mean_dir):
-            os.makedirs(mean_dir)
 
-        std_dir = os.path.join(base_dir, 'std/key')
-        if not os.path.exists(std_dir):
-            os.makedirs(std_dir)
-
-        # Save the mean and standard deviation DataFrames to CSV files
-        mean_csv_filename = os.path.join(mean_dir, filename)
-        std_csv_filename = os.path.join(std_dir, filename)
-        mean_df.to_csv(mean_csv_filename, index=False, header=False)
-        std_df.to_csv(std_csv_filename, index=False, header=False)
-
-        
+        # Save mean and standard deviation to CSV files
+        for stat, dir_name in [('mean', 'mean/key'), ('std', 'std/key')]:
+            stat_dir = os.path.join(base_dir, dir_name)
+            os.makedirs(stat_dir, exist_ok=True)
+            (mean_df if stat == 'mean' else std_df).to_csv(os.path.join(stat_dir, filename), index=False, header=False)

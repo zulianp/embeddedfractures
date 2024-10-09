@@ -16,12 +16,10 @@ def process_patterns(subdirectory: str, patterns: list, case_id: str, methods_in
                                                 methods_included=methods_included)
         print(f"Processed {case_id}")
 
-def main(methods_included):
-    print("Computing mean and standard deviations for all cases...")
-    if methods_included:
+def compute_mean_and_std(methods_included):
+    if type(methods_included) == str:
         methods_included = methods_included.split(',')  # Split the comma-separated string into a list
 
-    print(f"Methods included: {methods_included}")
     # Base directory in which to process CSV files
     base_dir = project_root + "/results"
 
@@ -76,4 +74,4 @@ if __name__ == "__main__":
     # Call main with parsed methods_included argument
     args.methods_included = ["USI/FEM_LM", "USTUTT/MPFA", "UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
     args.methods_included = ",".join(args.methods_included)
-    main(args.methods_included)
+    compute_mean_and_std(args.methods_included)

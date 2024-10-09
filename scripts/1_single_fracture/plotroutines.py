@@ -239,7 +239,6 @@ class MathTextSciFormatter(mticker.Formatter):
 
 
 def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
-
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 6
 

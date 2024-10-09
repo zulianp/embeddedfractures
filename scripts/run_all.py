@@ -1,5 +1,9 @@
-import os 
+import os
+import sys
+seen = set()
+sys.path = [path for path in sys.path if path not in seen and not seen.add(path)]
 import utils.csv as csv_tools
+from compute_mean_and_std_all import compute_mean_and_std
 
 compute_mean_and_std_all = False
 create_pdfs = True
@@ -11,27 +15,24 @@ methods_included = ["USI/FEM_LM",
                     "UiB/MPFA",
                     "UiB/MVEM",
                     "UiB/RT0"]
-methods_included_str = ",".join(methods_included)
 
 def main():
     # Compute mean and standard deviation for all cases
     if compute_mean_and_std_all:
-        os.system(f"python compute_mean_and_std_all.py --methods_included {methods_included_str}")
+        print("Computing mean and standard deviations for all cases...")
+        compute_mean_and_std(methods_included)
 
     if create_pdfs:
         base_dir = os.path.dirname(os.path.realpath(__file__))
         subdirectories = csv_tools.find_direct_subdirectories(base_dir)
         for subdirectory in subdirectories:
                 case = subdirectory.split(os.sep)[-1] # e.g. 1_single_fracture
-
                 if case[0] in ["1"]:#["1", "2", "3", "4"]:
-                    # Run the file case/run_all.py
-                    run_all = os.path.join(subdirectory, "run_all.py")
-                    print(f"Running {run_all}")
-                    os.system(f"python {run_all}")
+                    print(f"Changing directory to {subdirectory}")
+                    os.system(f"cd {subdirectory} && python run_all.py")
 
                     plots_directory = os.path.join('plots', subdirectory).replace("scripts", "plots")
-                    os.system(f"python combine_pdfs.py {plots_directory}")
+                    # os.system(f"python combine_pdfs.py {plots_directory}")
 
     if copy_pdfs_to_overleaf:
         base_dir = "plots"
