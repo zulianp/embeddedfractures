@@ -1,26 +1,27 @@
 import os
 import sys
+import argparse
 
 # Ensure the working directory is the project root
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 import scripts.utils.csv as csv_tools
 
-def process_patterns(subdirectory: str, patterns: list, case_id: str):
+def process_patterns(subdirectory: str, patterns: list, case_id: str, methods_included: list[str]):
     no_exceptions = True
 
     for pattern_filename in patterns:
-        try:
-            csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory, pattern_filename=pattern_filename)
-        except Exception as e:
-            print(f"Error processing {case_id} {pattern_filename}: {e}")
-            no_exceptions = False
-
-    if no_exceptions:
+        csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory,
+                                                pattern_filename=pattern_filename,
+                                                methods_included=methods_included)
         print(f"Processed {case_id}")
 
-def main():
+def main(methods_included):
     print("Computing mean and standard deviations for all cases...")
+    if methods_included:
+        methods_included = methods_included.split(',')  # Split the comma-separated string into a list
+
+    print(f"Methods included: {methods_included}")
     # Base directory in which to process CSV files
     base_dir = project_root + "/results"
 
@@ -57,10 +58,22 @@ def main():
         for key in case_patterns:
             if key in case:
                 patterns = case_patterns[key]
-                process_patterns(subdirectory, patterns, case)
+                process_patterns(subdirectory, patterns, case, methods_included=methods_included)
                 break
         else:
             raise ValueError(f"Invalid case name: {case}")
 
+
 if __name__ == "__main__":
-    main()
+    # Create argument parser
+    parser = argparse.ArgumentParser(description="Process patterns with optional methods.")
+    parser.add_argument('--methods_included', type=str, required=False, default=None,
+                        help="Specify methods to include.")
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Call main with parsed methods_included argument
+    args.methods_included = ["USI/FEM_LM", "USTUTT/MPFA", "UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
+    args.methods_included = ",".join(args.methods_included)
+    main(args.methods_included)

@@ -261,11 +261,8 @@ def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
             folder = os.path.join(base_dir, place, method)
             datafile = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
 
-            try:
-                data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c] * N)))
-            except Exception as e:
-                print(f"An error occurred STOP PLEASE: {e}")
-                # Add your debug marker here, for example:
+            data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+
             # only take the interesting columns and eleminate nan rows
             data = data[:, 2*ID:2*ID+2];
             data = data[~np.isnan(data).any(axis=1)]

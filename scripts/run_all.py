@@ -1,14 +1,22 @@
 import os 
 import utils.csv as csv_tools
 
-compute_mean_and_std_all = True
+compute_mean_and_std_all = False
 create_pdfs = True
 copy_pdfs_to_overleaf = False
 
+methods_included = ["USI/FEM_LM",
+                    "USTUTT/MPFA",
+                    "UiB/TPFA",
+                    "UiB/MPFA",
+                    "UiB/MVEM",
+                    "UiB/RT0"]
+methods_included_str = ",".join(methods_included)
+
 def main():
+    # Compute mean and standard deviation for all cases
     if compute_mean_and_std_all:
-        # Compute mean and standard deviation for all cases
-        os.system("python compute_mean_and_std_all.py")
+        os.system(f"python compute_mean_and_std_all.py --methods_included {methods_included_str}")
 
     if create_pdfs:
         base_dir = os.path.dirname(os.path.realpath(__file__))
