@@ -11,8 +11,10 @@ from operator import methodcaller
 import numpy as np
 import os
 import sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-utils_dir = os.path.abspath(os.path.join(current_dir, '../utils'))
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+plots_dir = curr_dir.replace('scripts', 'plots')
+results_dir = curr_dir.replace('scripts', 'results')
+utils_dir = os.path.abspath(os.path.join(curr_dir, '../utils'))
 sys.path.insert(0, utils_dir)
 import styles
 
@@ -36,14 +38,14 @@ color = styles.color
 curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
 case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
-def plot_over_line(file_name, legend, ID, title, ax, lineStyle="-", clr='C0', **kwargs):
+def plot_over_line(file_name, legend, ID, title, ax, linestyle="-", color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
     data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
-    ax.plot(data[:, 0], data[:, 1], label=legend, linestyle=lineStyle, color=clr)
+    ax.plot(data[:, 0], data[:, 1], label=legend, linestyle=linestyle, color=color)
     ax.grid(True)
 
     ax.set_xlabel( styles.getArcLengthLabel() )
@@ -65,7 +67,7 @@ def plot_over_line(file_name, legend, ID, title, ax, lineStyle="-", clr='C0', **
         ax.set_xticks([0, 500, 1000, 1500])
         ax.set_yticks([0, 50, 100, 150, 200, 250])
 
-def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ID, title, ax, lineStyle="-", clr='C0', **kwargs):
+def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ID, title, ax, linestyle="-", color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
 
@@ -76,8 +78,8 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ID, title, 
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
     # Plot the mean line and fill the area for standard deviation
-    ax.fill_between(mean_data[:, 0], mean_data[:, 1] - std_data[:, 1], mean_data[:, 1] + std_data[:, 1], color=clr, alpha=0.3)
-    ax.plot(mean_data[:, 0], mean_data[:, 1], label=legend, linestyle=lineStyle, color=clr)
+    ax.fill_between(mean_data[:, 0], mean_data[:, 1] - std_data[:, 1], mean_data[:, 1] + std_data[:, 1], color=color, alpha=0.3)
+    ax.plot(mean_data[:, 0], mean_data[:, 1], label=legend, linestyle=linestyle, color=color)
     ax.grid(True)
 
     ax.set_xlabel(styles.getArcLengthLabel())
@@ -104,10 +106,7 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ID, title, 
 
 
 def save(simulation_id, filename, extension=".pdf", ax_title=None):
-    folder = f"./plots/{case}/"
-
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(plots_dir, exist_ok=True)
 
     fig = plt.figure(simulation_id+11)
 
@@ -121,19 +120,17 @@ def save(simulation_id, filename, extension=".pdf", ax_title=None):
             ax.text(0.5, -0.25, ax_title, horizontalalignment='center',
                     verticalalignment='bottom', transform=ax.transAxes)
 
-    plt.savefig(folder+filename+extension, bbox_inches='tight')
+    plt.savefig(os.path.join(plots_dir, filename+extension), bbox_inches='tight')
     plt.gcf().clear()
 
 def crop_pdf(filename):
-    folder = f"./plots/{case}/"
-    filename = folder + filename + ".pdf"
+    filename = os.path.join(plots_dir, filename + ".pdf")
     if os.path.isfile(filename):
         os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
         os.system("pdfcrop " + filename + " " + filename)
 
 
-def plot_over_time(file_name, legend, title, ID, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
-
+def plot_over_time(file_name, legend, title, ID, region, region_pos, num_regions, ax, linestyle='-', color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 53
     data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
@@ -143,7 +140,7 @@ def plot_over_time(file_name, legend, title, ID, region, region_pos, num_regions
     if region_pos > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, region+1], label=legend, linestyle=lineStyle, color=clr)
+    ax.plot(data[:, 0], data[:, region+1], label=legend, linestyle=linestyle, color=color)
 
     ax.set_xlabel( styles.getTimeLabel('s') )
     ax.set_ylabel(styles.getAveragedConcentrationLabel(2))
@@ -160,8 +157,7 @@ def plot_over_time(file_name, legend, title, ID, region, region_pos, num_regions
     ax.set_xticks([0, 500, 1000, 1500])
 
 
-def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, ID, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
-
+def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, ID, region, region_pos, num_regions, ax, linestyle='-', color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 53
     
@@ -180,8 +176,8 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, ID, 
     std_values = std_data[:, region + 1]
 
     # Plot the mean with a shaded region for the standard deviation
-    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=clr, alpha=0.3)
-    ax.plot(time, mean_values, label=legend, linestyle=lineStyle, color=clr)
+    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
+    ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
 
     ax.set_xlabel(styles.getTimeLabel('s'))
     ax.set_ylabel(styles.getAveragedConcentrationLabel(2))
@@ -200,20 +196,17 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, ID, 
 
 
 def save_over_time(filename, extension=".pdf"):
-    folder = f"./plots/{case}/"
-
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(plots_dir, exist_ok=True)
 
     for ID in np.arange(52):
         plt.figure(ID)
-        plt.savefig(folder+filename+"_fracture_"+str(ID)+extension, bbox_inches='tight')
+        plt.savefig(os.path.join(plots_dir, filename+"_fracture_"+str(ID)+extension), bbox_inches='tight')
         plt.gcf().clear()
 
-def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
+def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID+11)
-    plt.plot(np.zeros(1), label=legend, linestyle=lineStyle, color=clr)
+    plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
 
 class MathTextSciFormatter(mticker.Formatter):
@@ -250,7 +243,7 @@ def plot_percentiles(ref, places_and_methods, ax, **kwargs):
 
     for place in places_and_methods:
         for method in places_and_methods[place]:
-            folder = f"./results/{case}/" + place + "/" + method + "/"
+            folder = os.path.join(results_dir, place, method)
             datafile = os.path.join(folder, f"dol_line_{ref}.csv").replace("\_", "_")
             data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c]*N)))
             # only take the interesting columns and eleminate nan rows

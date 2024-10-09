@@ -3,65 +3,55 @@ import os
 import numpy as np
 import plotroutines as plot
 
-#------------------------------------------------------------------------------#
-# add data to plots
+def run_pot():
+    curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+    results_dir = curr_dir.replace('scripts', 'results')
+    case = curr_dir.split(os.sep)[-1] # case we are dealing with
+    title = ""
+    places_and_methods = {
+        "USI": ["FEM\_LM"],
+        "mean": ["key"],
+    }
 
-# add plots for the different schemes
-# The first argument is the path to your data, where the data is assumed to be ordered comma-separated in the following order:
-#   -> 1. time
-#      2. integral of \phi c within matrix sub-domain \Omega_3
-#      3. integral of \phi c within fracture domain \Omega_f
-#      4. outlux of the domain across the outfow boundary
-# The second argument defines the legend you want to add to your data (Institution / Numerical method)
-# The third argument specifies the plot id - use the ids defined in lines 35-37 for the different plots
+    regions = [15, 45, 48]
 
-# TODO: add reference solution to plots as soon as available
+    for region_pos, region in enumerate(regions):
 
-curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
-case = curr_dir.split(os.sep)[-1] # case we are dealing with
-title = ""
-places_and_methods = {
-    "USI": ["FEM\_LM"],
-    "mean": ["key"],
-}
+        title = "fracture " + str(region)
+        fig = plot.plt.figure(plot.id_pot+11, figsize=(16, 6))
+        fig.subplots_adjust(hspace=0, wspace=0)
 
-regions = [15, 45, 48]
+        ax = fig.add_subplot(1, len(regions), region_pos + 1, ylim=(0-0.01, 1+0.01), xlim=(-100, 1800))
 
-for region_pos, region in enumerate(regions):
+        for place in places_and_methods:
+            for method in places_and_methods[place]:
+                folder = os.path.join(results_dir, place, method)
+                data = os.path.join(folder, "dot.csv").replace("\_", "_")
+                label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
-    title = "fracture " + str(region)
-    fig = plot.plt.figure(plot.id_pot+11, figsize=(16, 6))
-    fig.subplots_adjust(hspace=0, wspace=0)
+                if place.replace("\_", "_") != "mean":
+                    plot.plot_over_time(data, label, title, plot.id_pot, region, region_pos, len(regions), ax,
+                                        plot.linestyle[place][method], plot.color[place][method],
+                                        has_legend=False, fmt="%1.2f")
+                else:
+                    std_data = data.replace("mean", "std")
+                    plot.plot_mean_and_std_over_time(data, std_data, label, title, plot.id_pot, region, region_pos, len(regions), ax,
+                                                     plot.linestyle[place][method], plot.color[place][method],
+                                                     has_legend=False, fmt="%1.2f")
 
-    ax = fig.add_subplot(1, len(regions), region_pos + 1, ylim=(0-0.01, 1+0.01), xlim=(-100, 1800))
+    # save figures
+    plot.save(plot.id_pot, f"{case}_pot")
 
+    ncol = 4
     for place in places_and_methods:
         for method in places_and_methods[place]:
-            folder = f"./results/{case}/" + place + "/" + method + "/"
-            data = os.path.join(folder, "dot.csv").replace("\_", "_")
-            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+            label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "") + "}"
+            plot.plot_legend(label, plot.id_pot_legend, plot.linestyle[place][method],
+                             plot.color[place][method], ncol)
 
-            if place.replace("\_", "_") != "mean":
-                plot.plot_over_time(data, label, title, plot.id_pot, region, region_pos, len(regions), ax,
-                                    plot.linestyle[place][method], plot.color[place][method],
-                                    has_legend=False, fmt="%1.2f")
-            else:
-                std_data = data.replace("mean", "std")
-                plot.plot_mean_and_std_over_time(data, std_data, label, title, plot.id_pot, region, region_pos, len(regions), ax,
-                                                 plot.linestyle[place][method], plot.color[place][method],
-                                                 has_legend=False, fmt="%1.2f")
+    plot.save(plot.id_pot_legend, f"{case}_pot_legend")
+    plot.crop_pdf(f"{case}_pot_legend")
 
-# save figures
-plot.save(plot.id_pot, f"{case}_pot")
 
-ncol = 4
-for place in places_and_methods:
-    for method in places_and_methods[place]:
-        label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "") + "}"
-        plot.plot_legend(label, plot.id_pot_legend, plot.linestyle[place][method],
-                         plot.color[place][method], ncol)
-
-plot.save(plot.id_pot_legend, f"{case}_pot_legend")
-plot.crop_pdf(f"{case}_pot_legend")
-
-#------------------------------------------------------------------------------#
+if __name__ == "__main__":
+    run_pot()
