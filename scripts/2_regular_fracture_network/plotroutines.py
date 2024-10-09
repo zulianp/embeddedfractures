@@ -12,12 +12,13 @@ import numpy as np
 import os
 import sys
 curr_dir = os.path.dirname(os.path.abspath(__file__))
-plots_dir = curr_dir.replace("scripts", "plots")
+plots_dir = curr_dir.replace('scripts', 'plots')
+results_dir = curr_dir.replace('scripts', 'results')
 utils_dir = os.path.abspath(os.path.join(curr_dir, '../utils'))
 sys.path.insert(0, utils_dir)
 import styles
 
-#------------------------------------------------------------------------------#
+# ------------------------------------------------------------------------------#
 
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
@@ -26,23 +27,24 @@ plt.rc('font', size=15)
 linestyle = styles.linestyle
 color = styles.color
 
-curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
-case = curr_dir.split(os.sep)[-1] # case we are dealing with
+curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
 
-def plot_over_line(file_name, ID, simulation_id, title, cond, ax, lineStyle='-', clr='C0', **kwargs):
+
+def plot_over_line(file_name, ID, simulation_id, title, cond, ax, linestyle='-', color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
     if simulation_id > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, 1], label=ID, linestyle=lineStyle, color=clr)
-    ax.set_xlabel( styles.getArcLengthLabel() )
+    ax.plot(data[:, 0], data[:, 1], label=ID, linestyle=linestyle, color=color)
+    ax.set_xlabel(styles.getArcLengthLabel())
     ax.grid(True)
-    ax.set_ylabel( styles.getHeadLabel(3) )
+    ax.set_ylabel(styles.getHeadLabel(3))
     if kwargs.get("has_title", True):
         ax.set_title(title)
     if kwargs.get("has_legend", True):
@@ -52,14 +54,16 @@ def plot_over_line(file_name, ID, simulation_id, title, cond, ax, lineStyle='-',
     if kwargs.get("ylim", None):
         plt.ylim(kwargs.get("ylim"))
 
-def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, title, cond, ax, lineStyle='-', clr='C0', **kwargs):
+
+def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, title, cond, ax, linestyle='-',
+                                color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 2
-    
+
     # Read the mean and standard deviation data
-    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+
     # Format the y-axis
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
@@ -68,9 +72,10 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, 
         ax.yaxis.set_tick_params(length=0)
 
     # Plot the mean and the filled standard deviation area
-    ax.fill_between(mean_data[:, 0], mean_data[:, 1] - std_data[:, 1], mean_data[:, 1] + std_data[:, 1], color=clr, alpha=0.3)
-    ax.plot(mean_data[:, 0], mean_data[:, 1], label=ID, linestyle=lineStyle, color=clr)
-    
+    ax.fill_between(mean_data[:, 0], mean_data[:, 1] - std_data[:, 1], mean_data[:, 1] + std_data[:, 1], color=color,
+                    alpha=0.3)
+    ax.plot(mean_data[:, 0], mean_data[:, 1], label=ID, linestyle=linestyle, color=color)
+
     # Set labels and grid
     ax.set_xlabel(styles.getArcLengthLabel())
     ax.grid(True)
@@ -88,14 +93,39 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, 
     if kwargs.get("ylim", None):
         ax.set_ylim(kwargs.get("ylim"))
 
-def plot_over_time(file_name, legend, title, cond,  region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
+
+def save(simulation_id, filename, extension=".pdf", **kwargs):
+    os.makedirs(plots_dir, exist_ok=True)
+    fig = plt.figure(simulation_id + 11)
+
+    for idx, ax in enumerate(fig.get_axes()):
+        ax.label_outer()
+        if len(fig.get_axes()) > 1:
+            index = 97 + idx + kwargs.get("starting_from", 0)
+            text = "\\textbf{subfig. " + chr(index) + "}"
+            ax.text(0.5, -0.2, text, horizontalalignment='center',
+                    verticalalignment='bottom', transform=ax.transAxes)
+
+    plt.savefig(os.path.join(plots_dir, filename + extension), bbox_inches='tight')
+    plt.gcf().clear()
+
+
+def crop_pdf(filename):
+    filename = os.path.join(plots_dir, filename + ".pdf")
+    if os.path.isfile(filename):
+        os.system("pdfcrop --margins '0 -400 0 0' " + filename + " " + filename)
+        os.system("pdfcrop " + filename + " " + filename)
+
+
+def plot_over_time(file_name, legend, title, cond, region, region_pos, num_regions, ax, linestyle='-', color='C0',
+                   **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 22
     N_temp = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
     if N_temp < N:
         N = N_temp
 
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
     plt.rcParams.update({'figure.max_open_warning': 0})
@@ -103,9 +133,9 @@ def plot_over_time(file_name, legend, title, cond,  region, region_pos, num_regi
     if region_pos > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.plot(data[:, 0], data[:, region+1], label=legend, linestyle=lineStyle, color=clr)
+    ax.plot(data[:, 0], data[:, region + 1], label=legend, linestyle=linestyle, color=color)
 
-    ax.set_xlabel( styles.getTimeLabel() )
+    ax.set_xlabel(styles.getTimeLabel())
     ax.set_ylabel(styles.getConcentrationLabel(3))
     ax.grid(True)
     if kwargs.get("has_title", True):
@@ -117,7 +147,9 @@ def plot_over_time(file_name, legend, title, cond,  region, region_pos, num_regi
     if kwargs.get("ylim", None):
         plt.ylim(kwargs.get("ylim"))
 
-def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, cond, region, region_pos, num_regions, ax, lineStyle='-', clr='C0', **kwargs):
+
+def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, cond, region, region_pos, num_regions, ax,
+                                linestyle='-', color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 22
     N_temp = len(np.genfromtxt(mean_filename, delimiter=",", max_rows=1, skip_header=1))
@@ -125,8 +157,8 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, cond
         N = N_temp
 
     # Read the mean and standard deviation data
-    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
-    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c]*N)))
+    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
 
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
@@ -140,8 +172,8 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, cond
     std_values = std_data[:, region + 1]
 
     # Plot the mean with a shaded region for the standard deviation
-    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=clr, alpha=0.3)
-    ax.plot(time, mean_values, label=legend, linestyle=lineStyle, color=clr)
+    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
+    ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
 
     ax.set_xlabel(styles.getTimeLabel())
     ax.set_ylabel(styles.getConcentrationLabel(3))
@@ -157,11 +189,35 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, cond
         ax.set_ylim(kwargs.get("ylim"))
 
 
-def plot_legend(legend, ID, lineStyle="-", clr="C0", ncol=1):
+def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
-    plt.figure(ID+11)
-    plt.plot(np.zeros(1), label=legend, linestyle=lineStyle, color=clr)
+    plt.figure(ID + 11)
+    plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
+
+
+class MathTextSciFormatter(mticker.Formatter):
+    def __init__(self, fmt="%1.2e"):
+        self.fmt = fmt
+
+    def __call__(self, x, pos=None):
+        s = self.fmt % x
+        if "f" in self.fmt:
+            return "${}$".format(s)
+        decimal_point = '.'
+        positive_sign = '+'
+        tup = s.split('e')
+        significand = tup[0].rstrip(decimal_point)
+        sign = tup[1][0].replace(positive_sign, '')
+        exponent = tup[1][1:].lstrip('0')
+        if exponent:
+            exponent = '10^{%s%s}' % (sign, exponent)
+        if significand and exponent:
+            s = r'%s{\times}%s' % (significand, exponent)
+        else:
+            s = r'%s%s' % (significand, exponent)
+        return "${}$".format(s)
+
 
 def plot_percentiles(ref, cond, places_and_methods, ax, **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
@@ -175,11 +231,9 @@ def plot_percentiles(ref, cond, places_and_methods, ax, **kwargs):
 
     for place in places_and_methods:
         for method in places_and_methods[place]:
-            base_dir = os.getcwd().replace("scripts", "results")
-            folder = os.path.join(base_dir, place, method)
-            datafile = os.path.join(folder, f"dol_cond_{cond}_refinement_{ref}.csv").replace("\_", "_")
+            folder = os.path.join(results_dir, place, method)
+            datafile = folder.replace("\\", "") + "dol_cond_" + cond + "_refinement_" + ref + ".csv"
             data = np.genfromtxt(datafile, delimiter=",", converters=dict(zip(range(N), [c] * N)))
-
             data = data[:, 0:2];
             data = data[~np.isnan(data).any(axis=1)]
 
@@ -196,15 +250,14 @@ def plot_percentiles(ref, cond, places_and_methods, ax, **kwargs):
 
     ax.fill_between(ls, lowerpercentile, upperpercentile, color="gray")
     ax.grid(True)
-    ax.set_xlabel( styles.getArcLengthLabel() )
+    ax.set_xlabel(styles.getArcLengthLabel())
     weightedarea = (simps(upperpercentile, ls) -
-                    simps(lowerpercentile, ls))/simps(meanvalues, ls)
+                    simps(lowerpercentile, ls)) / simps(meanvalues, ls)
     title = "weighted area " + MathTextSciFormatter("%1.2e")(weightedarea)
     ax.title.set_text(title)
     if kwargs.get("ylim", None):
         plt.ylim(kwargs.get("ylim"))
 
-    ax.set_ylabel( styles.getHeadLabel(3) )
+    ax.set_ylabel(styles.getHeadLabel(3))
 
     return (ls, lowerpercentile, upperpercentile)
-

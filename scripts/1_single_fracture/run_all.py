@@ -25,7 +25,7 @@ def run_all():
              ]
     run_overlay(files, working_directory=curr_dir)
     print("Finished running overlay")
-    
+
 
 if __name__ == "__main__":
     run_all()

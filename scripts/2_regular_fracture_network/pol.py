@@ -70,3 +70,7 @@ def run_pol():
 
         plot.save(cond, f"{case}_pol_cond_{cond}_legend")
         plot.crop_pdf(f"{case}_pol_cond_{cond}_legend")
+
+
+if __name__ == "__main__":
+    run_pol()
