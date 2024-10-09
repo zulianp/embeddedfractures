@@ -4,7 +4,6 @@ import plotroutines as plot
 
 def run_pol():
     curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
-    plots_dir = curr_dir.replace("scripts", "plots")
     results_dir = curr_dir.replace("scripts", "results")
     case = curr_dir.split(os.sep)[-1] # case we are dealing with
     titles = ['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells']
@@ -71,9 +70,9 @@ def run_pol():
                             has_legend=False, ylim=(1-0.1, 4+0.1))
 
     # Save figures
-    plot.save(ID=plot.id_p_matrix, filename=f"{case}_pol_p_matrix", plots_dir=plots_dir)
-    plot.save(ID=plot.id_c_matrix, filename=f"{case}_pol_c_matrix", plots_dir=plots_dir)
-    plot.save(ID=plot.id_c_fracture, filename=f"{case}_pol_c_fracture", plots_dir=plots_dir)
+    plot.save(ID=plot.id_p_matrix, filename=f"{case}_pol_p_matrix")
+    plot.save(ID=plot.id_c_matrix, filename=f"{case}_pol_c_matrix")
+    plot.save(ID=plot.id_c_fracture, filename=f"{case}_pol_c_fracture")
 
     ncol = 4
     for place in places_and_methods:
@@ -105,12 +104,12 @@ def run_pol():
                      color=plot.color["USTUTT"]["reference"],
                      ncol=ncol)
 
-    plot.save(ID=plot.id_p_matrix_legend, filename=f"{case}_pol_p_matrix_legend", plots_dir=plots_dir)
-    plot.crop_pdf(filename=f"{case}_pol_p_matrix_legend", plots_dir=plots_dir)
-    plot.save(ID=plot.id_c_matrix_legend, filename=f"{case}_pol_c_matrix_legend", plots_dir=plots_dir)
-    plot.crop_pdf(filename=f"{case}_pol_c_matrix_legend", plots_dir=plots_dir)
-    plot.save(ID=plot.id_c_fracture_legend, filename=f"{case}_pol_c_fracture_legend", plots_dir=plots_dir)
-    plot.crop_pdf(filename=f"{case}_pol_c_fracture_legend", plots_dir=plots_dir)
+    plot.save(ID=plot.id_p_matrix_legend, filename=f"{case}_pol_p_matrix_legend")
+    plot.crop_pdf(filename=f"{case}_pol_p_matrix_legend")
+    plot.save(ID=plot.id_c_matrix_legend, filename=f"{case}_pol_c_matrix_legend")
+    plot.crop_pdf(filename=f"{case}_pol_c_matrix_legend")
+    plot.save(ID=plot.id_c_fracture_legend, filename=f"{case}_pol_c_fracture_legend")
+    plot.crop_pdf(filename=f"{case}_pol_c_fracture_legend")
 
 
 if __name__ == "__main__":
