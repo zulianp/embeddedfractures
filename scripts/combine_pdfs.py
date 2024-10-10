@@ -1,6 +1,6 @@
 import os
-from PyPDF2 import PdfMerger
 import argparse
+from PyPDF2 import PdfMerger
 
 def combine_pdfs(plot_pdf, legend_pdf, output_pdf):
     merger = PdfMerger()
