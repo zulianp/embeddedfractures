@@ -27,7 +27,7 @@ def main():
         subdirectories = csv_tools.find_direct_subdirectories(base_dir)
         for subdirectory in subdirectories:
                 case = subdirectory.split(os.sep)[-1] # e.g. 1_single_fracture
-                if case[0] in ["2"]:#["1", "2", "3", "4"]:
+                if case[0] in ["1", "2", "3", "4"]:
                     print(f"Changing directory to {subdirectory} and running run_all.py there")
                     os.system(f"cd {subdirectory} && python run_all.py")
 

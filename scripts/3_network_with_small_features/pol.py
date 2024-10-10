@@ -3,14 +3,6 @@ import os
 import plotroutines as plot
 from matplotlib import rc
 
-# ------------------------------------------------------------------------------#
-# add data to plots
-
-# add plots for the different schemes
-# The first argument is the path to your data, where the data is assumed to be ordered comma-separated in the following order:
-#   -> 1. arc length, 2. value of either c or pressure
-# The second argument defines the legend you want to add to your data (Institution / Numerical method)
-
 def run_pol():
     curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
     results_dir = curr_dir.replace('scripts', 'results')
@@ -37,8 +29,8 @@ def run_pol():
             for method in places_and_methods[place]:
                 folder = os.path.join(results_dir, place, method)
                 label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
-                data = os.path.join(folder, f"dol_line_0_refinement_{ref}.csv").replace("\_", "_")
 
+                data = os.path.join(folder, f"dol_line_0_refinement_{ref}.csv").replace("\_", "_")
                 if place.replace("\_", "_") != "mean":
                     plot.plot_over_line(data, label, ref,
                                         plot.id_p_0_matrix, title, ax_p_0,
@@ -51,8 +43,8 @@ def run_pol():
                                                      plot.linestyle[place][method], plot.color[place][method],
                                                      has_legend=False, fmt="%1.2f")
 
+                data = os.path.join(folder, f"dol_line_1_refinement_{ref}.csv").replace("\_", "_")
                 if place.replace("\_", "_") != "mean":
-                    data = os.path.join(folder, f"dol_line_1_refinement_{ref}.csv").replace("\_", "_")
                     plot.plot_over_line(data, label, ref,
                                         plot.id_p_1_matrix, title, ax_p_1,
                                         plot.linestyle[place][method], plot.color[place][method],

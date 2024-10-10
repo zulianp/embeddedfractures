@@ -73,25 +73,43 @@ def plot_over_line(file_name, legend, ref, ID, title, ax, linestyle='-', color='
 
 def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, title, ax, linestyle='-', color='C0',
                                 **kwargs):
+    # Define the converter for the input data
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 5
+    N = 5  # Assumes the number of columns is 5
 
-    # Read the mean and standard deviation data
+    # Read mean and standard deviation data from files
     mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
     std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
 
+    # Ensure that the mean and std arrays have consistent shapes
+    if mean_data.shape != std_data.shape:
+        raise ValueError("Mean and standard deviation data do not have the same shape!")
+
+    # Format y-axis using scientific notation
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
+    # Remove y-axis ticks if ref is set
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    ax.fill_between(mean_data[:, 0], mean_data[:, 2 * ID + 1] - std_data[:, 2 * ID + 1],
-                    mean_data[:, 2 * ID + 1] + std_data[:, 2 * ID + 1], color=color, alpha=0.3)
+    # Plot standard deviation band (mean +/- std)
+    ax.fill_between(mean_data[:, 2 * ID],
+                    mean_data[:, 2 * ID + 1] - std_data[:, 2 * ID + 1],
+                    mean_data[:, 2 * ID + 1] + std_data[:, 2 * ID + 1],
+                    color=color, alpha=0.5)  # Adjusted transparency for visibility
+
+    # Plot the mean data line
     ax.plot(mean_data[:, 2 * ID], mean_data[:, 2 * ID + 1], label=legend, linestyle=linestyle, color=color)
+
+    # Set x-axis label and grid
     ax.set_xlabel(styles.getArcLengthLabel())
     ax.grid(True)
+
+    # Set plot title if needed
     if kwargs.get("has_title", True):
         ax.set_title(title)
+
+    # Set legend if needed
     if kwargs.get("has_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
 
@@ -103,8 +121,9 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, ti
     elif ID == id_c_fracture:
         ax.set_ylabel(styles.getConcentrationLabel(2))
     else:
-        print("Error. Invalid plot id provided.")
+        print("Error: Invalid plot id provided.")
         sys.exit(1)
+
 
 
 def save(ID, filename, extension=".pdf", **kwargs):
