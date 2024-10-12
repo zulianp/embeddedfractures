@@ -39,6 +39,19 @@ color = styles.color
 curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
 case = curr_dir.split(os.sep)[-1]  # case we are dealing with
 
+def setup_figure(id_offset, num_axes, ylim):
+    fig = plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend
+    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
+    axes_list = [fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)]
+    return fig, axes_list
+
+def get_paths():
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    plots_dir = curr_dir.replace('scripts', 'plots')
+    results_dir = curr_dir.replace('scripts', 'results')
+    utils_dir = os.path.join(curr_dir, 'utils')
+    return curr_dir, plots_dir, results_dir, utils_dir
+
 
 def plot_over_line(file_name, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     # Define the converter for the input data

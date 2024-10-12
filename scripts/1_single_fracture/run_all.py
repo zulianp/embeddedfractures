@@ -2,7 +2,7 @@ import os
 from percentiles import run_percentiles
 from pol import run_pol
 from pot import run_pot
-from utils import get_paths
+from plotroutines import get_paths
 
 def run_all():
     curr_dir, plots_dir, results_dir, utils_dir = get_paths()

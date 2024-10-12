@@ -1,12 +1,6 @@
 import os
 import plotroutines as plot
 
-def setup_figure(id_offset, num_axes, ylim):
-    fig = plot.plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend
-    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
-    axes_list = [fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)]
-    return fig, axes_list
-
 def plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_matrix, axes_c_matrix, axes_c_fracture, title, show_legend=False):
     for place in places_and_methods:
         for method in places_and_methods[place]:
@@ -41,9 +35,9 @@ def run_pol():
     places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
 
     # Setup figures and axes
-    fig_p_matrix, axes_p_matrix_list = setup_figure(plot.id_p_matrix, 3, ylim=(1-0.1, 4+0.1))
-    fig_c_matrix, axes_c_matrix_list = setup_figure(plot.id_c_matrix, 3, ylim=(0-0.0005, 0.01+0.0005))
-    fig_c_fracture, axes_c_fracture_list = setup_figure(plot.id_c_fracture, 3, ylim=(0.0075, 0.0101))
+    fig_p_matrix, axes_p_matrix_list = plot.setup_figure(plot.id_p_matrix, 3, ylim=(1-0.1, 4+0.1))
+    fig_c_matrix, axes_c_matrix_list = plot.setup_figure(plot.id_c_matrix, 3, ylim=(0-0.0005, 0.01+0.0005))
+    fig_c_fracture, axes_c_fracture_list = plot.setup_figure(plot.id_c_fracture, 3, ylim=(0.0075, 0.0101))
 
     # Plot data
     for title, ref, idx, axes_p_matrix, axes_c_matrix, axes_c_fracture in zip(titles, refinement_index, range(3), axes_p_matrix_list, axes_c_matrix_list, axes_c_fracture_list):

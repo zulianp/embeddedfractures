@@ -2,12 +2,6 @@ import os
 import numpy as np
 import plotroutines as plot
 
-def setup_figure(id_offset, num_axes, ylim):
-    fig = plot.plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend
-    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
-    axes_list = [fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)]
-    return fig, axes_list
-
 def plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, axes_intc_fracture, axes_outflux, title, show_legend=False):
     for place in places_and_methods:
         for method in places_and_methods[place]:
@@ -41,9 +35,9 @@ def run_pot():
     places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
 
     # Setup figures and axes
-    fig_intc_matrix, axes_intc_matrix_list = setup_figure(plot.id_intc_matrix, 3, ylim=(0-10, 175+10))
-    fig_intc_fracture, axes_intc_fracture_list = setup_figure(plot.id_intc_fracture, 3, ylim=(0, 0.45))
-    fig_outflux, axes_outflux_list = setup_figure(plot.id_outflux, 3, ylim=(0-0.00000005, 0.0000014+0.00000005))
+    fig_intc_matrix, axes_intc_matrix_list = plot.setup_figure(plot.id_intc_matrix, 3, ylim=(0-10, 175+10))
+    fig_intc_fracture, axes_intc_fracture_list = plot.setup_figure(plot.id_intc_fracture, 3, ylim=(0, 0.45))
+    fig_outflux, axes_outflux_list = plot.setup_figure(plot.id_outflux, 3, ylim=(0-0.00000005, 0.0000014+0.00000005))
 
     # Plot data
     for title, ref, idx, axes_intc_matrix, axes_intc_fracture, axes_outflux in zip(titles, refinement_index, range(3), axes_intc_matrix_list, axes_intc_fracture_list, axes_outflux_list):
