@@ -20,12 +20,6 @@ def plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, 
                                 plot.linestyle[place][method], plot.color[place][method],
                                 has_legend=show_legend, ylim=(0-0.00000005, 0.0000014+0.00000005))
 
-def plot_legend_in_middle(ax, idx, total_axes, places_and_methods):
-    # Only add the legend to the middle subplot (index 1)
-    if total_axes == 3 and idx == 1:
-        handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=4, fontsize=10)  # Legend below middle plot
-
 def run_pot():
     curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
     results_dir = curr_dir.replace("scripts", "results")
@@ -46,9 +40,9 @@ def run_pot():
 
         # Only add the legend to the middle subplot (subfigure b)
         if idx == 1:
-            plot_legend_in_middle(axes_intc_matrix, idx, 3, places_and_methods)
-            plot_legend_in_middle(axes_intc_fracture, idx, 3, places_and_methods)
-            plot_legend_in_middle(axes_outflux, idx, 3, places_and_methods)
+            plot.plot_legend_in_middle(axes_intc_matrix)
+            plot.plot_legend_in_middle(axes_intc_fracture)
+            plot.plot_legend_in_middle(axes_outflux)
 
     # Save figures with integrated legends
     plot.save(plot.id_intc_matrix, f"{case}_pot_c_matrix")

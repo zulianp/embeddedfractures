@@ -21,11 +21,6 @@ def plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_matrix, ax
                                     plot.linestyle[place][method], plot.color[place][method],
                                     has_legend=show_legend)
 
-def plot_legend_in_middle(ax, places_and_methods):
-    # Add the legend below the middle plot (subfigure b)
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=4, fontsize=10)  # Legend below the plot
-
 def run_pol():
     curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
     results_dir = curr_dir.replace("scripts", "results")
@@ -52,9 +47,9 @@ def run_pol():
 
         # Only add the legend to the middle subplot (subfigure b)
         if idx == 1:
-            plot_legend_in_middle(axes_p_matrix, places_and_methods)
-            plot_legend_in_middle(axes_c_matrix, places_and_methods)
-            plot_legend_in_middle(axes_c_fracture, places_and_methods)
+            plot.plot_legend_in_middle(axes_p_matrix)
+            plot.plot_legend_in_middle(axes_c_matrix)
+            plot.plot_legend_in_middle(axes_c_fracture)
 
     # Save figures with integrated legends
     plot.save(ID=plot.id_p_matrix, filename=f"{case}_pol_p_matrix")
