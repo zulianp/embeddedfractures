@@ -3,9 +3,11 @@ from percentiles import run_percentiles
 from pol import run_pol
 from pot import run_pot
 from scripts.utils.overlay import run_overlay
+import scripts.combine_pdfs as cpdf
 
 def run_all():
     curr_dir = os.path.dirname(os.path.abspath(__file__))
+    plots_dir = curr_dir.replace('scripts', 'plots')
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     print(f"Running all scripts in sequence for case {case}...")
 
@@ -26,6 +28,8 @@ def run_all():
     run_overlay(files, working_directory=curr_dir)
     print("Finished running overlay")
 
+    cpdf.combine_pdfs(plots_dir)
+    print("Finished combined pdfs")
 
 if __name__ == "__main__":
     run_all()

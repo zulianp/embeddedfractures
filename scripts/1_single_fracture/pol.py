@@ -31,34 +31,18 @@ def run_pol():
                 data = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
                 label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
-                if place.replace("\_", "_") != "mean":
-                    plot.plot_over_line(data, label, ref, plot.id_p_matrix, title, axes_p_matrix,
-                                        plot.linestyle[place][method], plot.color[place][method],
-                                        has_legend=False, ylim=(1-0.1, 4+0.1))
-                else:
-                    std_data = data.replace("mean", "std")
-
-                    plot.plot_mean_and_std_over_line(data, std_data, label, ref, plot.id_p_matrix, title, axes_p_matrix,
-                                                     plot.linestyle[place][method], plot.color[place][method],
-                                                     has_legend=False, ylim=(1-0.1, 4+0.1))
+                plot.plot_over_line(data, label, ref, plot.id_p_matrix, title, axes_p_matrix,
+                                    plot.linestyle[place][method], plot.color[place][method],
+                                    has_legend=False, ylim=(1-0.1, 4+0.1))
 
                 # DTU could only provide results for pressure
-                if place != "DTU" and place.replace("\_", "_") != "mean":
+                if place != "DTU":
                     plot.plot_over_line(data, label, ref, plot.id_c_matrix, title, axes_c_matrix,
                                         plot.linestyle[place][method], plot.color[place][method],
                                         has_legend=False, ylim=(0-0.0005, 0.01+0.0005))
                     plot.plot_over_line(data, label, ref, plot.id_c_fracture, title, axes_c_fracture,
                                         plot.linestyle[place][method], plot.color[place][method],
                                         has_legend=False, ylim=(0.0075, 0.0101))
-                else:
-                    std_data = data.replace("mean", "std")
-
-                    plot.plot_mean_and_std_over_line(data, std_data, label, ref, plot.id_c_matrix, title, axes_c_matrix,
-                                                     plot.linestyle[place][method], plot.color[place][method],
-                                                     has_legend=False, ylim=(0-0.0005, 0.01+0.0005))
-                    plot.plot_mean_and_std_over_line(data, std_data, label, ref, plot.id_c_fracture, title, axes_c_fracture,
-                                                     plot.linestyle[place][method], plot.color[place][method],
-                                                     has_legend=False, ylim=(0.0075, 0.0101))
 
         # Add reference (5th refinement USTUTT-MPFA)
         place = "USTUTT"

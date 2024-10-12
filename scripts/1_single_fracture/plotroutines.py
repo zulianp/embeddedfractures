@@ -41,49 +41,35 @@ case = curr_dir.split(os.sep)[-1]  # case we are dealing with
 
 
 def plot_over_line(file_name, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
-    c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 5
-
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
-
-    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
-
-    if int(ref) > 0:
-        ax.yaxis.set_tick_params(length=0)
-
-    ax.plot(data[:, 2 * ID], data[:, 2 * ID + 1], label=legend, linestyle=linestyle, color=color)
-    ax.set_xlabel(styles.getArcLengthLabel())
-    ax.grid(True)
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
-    if kwargs.get("has_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0))
-
-    # choose y-label depending on plot id
-    if ID == id_p_matrix:
-        ax.set_ylabel(styles.getHeadLabel(3))
-    elif ID == id_c_matrix:
-        ax.set_ylabel(styles.getConcentrationLabel(3))
-    elif ID == id_c_fracture:
-        ax.set_ylabel(styles.getConcentrationLabel(2))
-    else:
-        print("Error. Invalid plot id provided.")
-        sys.exit(1)
-
-
-def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, title, ax, linestyle='-', color='C0',
-                                **kwargs):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 5  # Assumes the number of columns is 5
 
-    # Read mean and standard deviation data from files
-    mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
-    std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
+    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
+    if 'mean' in file_name:
+        # Generate the std filename by replacing 'mean' with 'std'
+        std_filename = file_name.replace('mean', 'std')
 
-    # Ensure that the mean and std arrays have consistent shapes
-    if mean_data.shape != std_data.shape:
-        raise ValueError("Mean and standard deviation data do not have the same shape!")
+        # Read mean and standard deviation data from files
+        mean_data = np.genfromtxt(file_name, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
+        std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
+
+        # Ensure that the mean and std arrays have consistent shapes
+        if mean_data.shape != std_data.shape:
+            raise ValueError("Mean and standard deviation data do not have the same shape!")
+
+        # Plot standard deviation band (mean +/- std)
+        ax.fill_between(mean_data[:, 2 * ID],
+                        mean_data[:, 2 * ID + 1] - std_data[:, 2 * ID + 1],
+                        mean_data[:, 2 * ID + 1] + std_data[:, 2 * ID + 1],
+                        color=color, alpha=0.5)  # Adjust transparency for visibility
+
+        # Plot the mean data line
+        ax.plot(mean_data[:, 2 * ID], mean_data[:, 2 * ID + 1], label=legend, linestyle=linestyle, color=color)
+    else:
+        # Plot only the mean data
+        data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+        ax.plot(data[:, 2 * ID], data[:, 2 * ID + 1], label=legend, linestyle=linestyle, color=color)
 
     # Format y-axis using scientific notation
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
@@ -91,15 +77,6 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, ti
     # Remove y-axis ticks if ref is set
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
-
-    # Plot standard deviation band (mean +/- std)
-    ax.fill_between(mean_data[:, 2 * ID],
-                    mean_data[:, 2 * ID + 1] - std_data[:, 2 * ID + 1],
-                    mean_data[:, 2 * ID + 1] + std_data[:, 2 * ID + 1],
-                    color=color, alpha=0.5)  # Adjusted transparency for visibility
-
-    # Plot the mean data line
-    ax.plot(mean_data[:, 2 * ID], mean_data[:, 2 * ID + 1], label=legend, linestyle=linestyle, color=color)
 
     # Set x-axis label and grid
     ax.set_xlabel(styles.getArcLengthLabel())
@@ -123,7 +100,6 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, legend, ref, ID, ti
     else:
         print("Error: Invalid plot id provided.")
         sys.exit(1)
-
 
 
 def save(ID, filename, extension=".pdf", **kwargs):
@@ -161,68 +137,56 @@ id_outflux_legend = 12  # integrated outflux across the outflow boundary
 
 
 def plot_over_time(file_name, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
+    # Define the converter for the input data
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 4
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+    N = 4  # Assumes the number of columns is 4
 
-    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
+    if 'mean' in file_name:
+        # Generate the std filename by replacing 'mean' with 'std'
+        std_filename = file_name.replace('mean', 'std')
 
-    if int(ref) > 0:
-        ax.yaxis.set_tick_params(length=0)
+        # Read mean and standard deviation data from files
+        mean_data = np.genfromtxt(file_name, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
+        std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
 
-    ax.plot(data[:, 0] / (365 * 24 * 3600), data[:, ID + 1], label=legend, linestyle=linestyle, color=color)
-    ax.set_xlabel(styles.getTimeLabel('y'))
-    ax.grid(True)
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
-    if kwargs.get("has_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0))
-    if kwargs.get("xlim", None):
-        plt.xlim(kwargs.get("xlim"))
-    if kwargs.get("ylim", None):
-        plt.ylim(kwargs.get("ylim"))
+        # Ensure that the mean and std arrays have consistent shapes
+        if mean_data.shape != std_data.shape:
+            raise ValueError("Mean and standard deviation data do not have the same shape!")
 
-    # choose y-label depending on plot id
-    if ID == id_intc_matrix:
-        ax.set_ylabel("$\int_{\Omega_3} \phi_3 \, c_3$")
-    elif ID == id_intc_fracture:
-        ax.set_ylabel("$\int_{\Omega_2} \phi_2 \, c_2$")
-    elif ID == id_outflux:
-        ax.set_ylabel("outflux")
+        time = mean_data[:, 0] / (365 * 24 * 3600)  # Convert time to years
+        mean_values = mean_data[:, ID + 1]
+        std_values = std_data[:, ID + 1]
+
+        # Plot the mean with a shaded region for the standard deviation
+        ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
+        ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
     else:
-        print("Error. Invalid plot id provided.")
-        sys.exit(1)
+        # Plot only the mean data
+        data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+        time = data[:, 0] / (365 * 24 * 3600)  # Convert time to years
+        ax.plot(time, data[:, ID + 1], label=legend, linestyle=linestyle, color=color)
 
-
-def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, title, ax, linestyle='-', color='C0',
-                                **kwargs):
-    c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 4
-
-    # Read the mean and standard deviation data
-    mean_data = np.genfromtxt(mean_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
-    std_data = np.genfromtxt(std_filename, delimiter=",", skip_header=1, converters=dict(zip(range(N), [c] * N)))
-
+    # Format y-axis using scientific notation
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
+    # Remove y-axis ticks if ref is set
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    time = mean_data[:, 0] / (365 * 24 * 3600)
-    mean_values = mean_data[:, ID + 1]
-    std_values = std_data[:, ID + 1]
-
-    # Plot the mean with a shaded region for the standard deviation
-    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
-    ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
-
+    # Set x-axis label and grid
     ax.set_xlabel(styles.getTimeLabel('y'))
     ax.grid(True)
 
+    # Set plot title if needed
     if kwargs.get("has_title", True):
         ax.set_title(title)
+
+    # Set legend if needed
     if kwargs.get("has_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
+
+    # Set x and y limits if provided
     if kwargs.get("xlim", None):
         ax.set_xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
@@ -236,7 +200,7 @@ def plot_mean_and_std_over_time(mean_filename, std_filename, legend, ref, ID, ti
     elif ID == id_outflux:
         ax.set_ylabel("outflux")
     else:
-        print("Error. Invalid plot id provided.")
+        print("Error: Invalid plot id provided.")
         sys.exit(1)
 
 
