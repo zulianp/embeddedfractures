@@ -8,9 +8,9 @@ def run_overlay(files, working_directory):
     for f in files:
         os.system(f"pdflatex {f}.tex")
         f_pdf = f"{f}.pdf"
-        os.system(f"pdfcrop {f_pdf}")
-        os.system(f"mv {f_pdf} {f}-crop.pdf")
-        os.system(f"mv {f}-crop.pdf ../../plots/{case}/")
+        os.system(f"pdfcrop {f_pdf} {f}-overlay.pdf")
+        os.system(f"mv {f}-overlay.pdf ../../plots/{case}/")
+        os.system(f"rm {f}.pdf")
 
         # Check if {f}.aux exists and remove it
         if os.path.exists(f"{f}.aux"):

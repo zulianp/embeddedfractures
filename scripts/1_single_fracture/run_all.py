@@ -2,6 +2,8 @@ import os
 from percentiles import run_percentiles
 from pol import run_pol
 from pot import run_pot
+from scripts.utils.overlay import run_overlay
+import scripts.combine_pdfs as cpdf
 from plotroutines import get_paths
 
 def run_all():
@@ -17,6 +19,14 @@ def run_all():
 
     run_pot()
     print("Finished running pot")
+
+    files = [f"{curr_dir}/{case}_pol_c_fracture",
+             f"{curr_dir}/{case}_pol_c_matrix",
+             f"{curr_dir}/{case}_pol_p_matrix",
+             f"{curr_dir}/{case}_pot_outflux"
+             ]
+    run_overlay(files, working_directory=curr_dir)
+    print("Finished running overlay")
 
 if __name__ == "__main__":
     run_all()
