@@ -135,7 +135,6 @@ id_intc_fracture_legend = 11  # indegral of c*porosity in the fracture
 id_outflux = 2  # integrated outflux across the outflow boundary
 id_outflux_legend = 12  # integrated outflux across the outflow boundary
 
-
 def plot_over_time(file_name, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace('D', 'e'))

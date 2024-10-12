@@ -1,74 +1,65 @@
-# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 import os
 import numpy as np
 import plotroutines as plot
 
+def setup_figure(id_offset, num_axes, ylim):
+    fig = plot.plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend
+    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
+    axes_list = [fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)]
+    return fig, axes_list
+
+def plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, axes_intc_fracture, axes_outflux, title, show_legend=False):
+    for place in places_and_methods:
+        for method in places_and_methods[place]:
+            folder = os.path.join(results_dir, place, method)
+            data = os.path.join(folder, f"dot_refinement_{ref}.csv").replace("\_", "_")
+
+            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+
+            plot.plot_over_time(data, label, ref, plot.id_intc_matrix, title, axes_intc_matrix,
+                                plot.linestyle[place][method], plot.color[place][method],
+                                has_legend=show_legend, ylim=(0-10, 175+10))
+            plot.plot_over_time(data, label, ref, plot.id_intc_fracture, title, axes_intc_fracture,
+                                plot.linestyle[place][method], plot.color[place][method],
+                                has_legend=show_legend, ylim=(0, 0.45))
+            plot.plot_over_time(data, label, ref, plot.id_outflux, title, axes_outflux,
+                                plot.linestyle[place][method], plot.color[place][method],
+                                has_legend=show_legend, ylim=(0-0.00000005, 0.0000014+0.00000005))
+
+def plot_legend_in_middle(ax, idx, total_axes, places_and_methods):
+    # Only add the legend to the middle subplot (index 1)
+    if total_axes == 3 and idx == 1:
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=4, fontsize=10)  # Legend below middle plot
+
 def run_pot():
-    curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+    curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
     results_dir = curr_dir.replace("scripts", "results")
-    case = curr_dir.split(os.sep)[-1] # case we are dealing with
+    case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = np.array(['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells'])
     refinement_index = [0, 1, 2]
+    places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
 
-    places_and_methods = {
-        "USI": ["FEM\_LM"],
-        "mean": ["key"],
-    }
+    # Setup figures and axes
+    fig_intc_matrix, axes_intc_matrix_list = setup_figure(plot.id_intc_matrix, 3, ylim=(0-10, 175+10))
+    fig_intc_fracture, axes_intc_fracture_list = setup_figure(plot.id_intc_fracture, 3, ylim=(0, 0.45))
+    fig_outflux, axes_outflux_list = setup_figure(plot.id_outflux, 3, ylim=(0-0.00000005, 0.0000014+0.00000005))
 
-    fig_intc_matrix = plot.plt.figure(plot.id_intc_matrix+11, figsize=(16, 6))
-    fig_intc_matrix.subplots_adjust(hspace=0, wspace=0)
-    fig_intc_fracture = plot.plt.figure(plot.id_intc_fracture+11, figsize=(16, 6))
-    fig_intc_fracture.subplots_adjust(hspace=0, wspace=0)
-    fig_outflux = plot.plt.figure(plot.id_outflux+11, figsize=(16, 6))
-    fig_outflux.subplots_adjust(hspace=0, wspace=0)
+    # Plot data
+    for title, ref, idx, axes_intc_matrix, axes_intc_fracture, axes_outflux in zip(titles, refinement_index, range(3), axes_intc_matrix_list, axes_intc_fracture_list, axes_outflux_list):
+        show_legend = (idx == 1)  # Show the legend only for the middle subplot (index 1, subfigure b)
+        plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, axes_intc_fracture, axes_outflux, title, show_legend)
 
-    for title, ref in zip(titles, refinement_index):
+        # Only add the legend to the middle subplot (subfigure b)
+        if idx == 1:
+            plot_legend_in_middle(axes_intc_matrix, idx, 3, places_and_methods)
+            plot_legend_in_middle(axes_intc_fracture, idx, 3, places_and_methods)
+            plot_legend_in_middle(axes_outflux, idx, 3, places_and_methods)
 
-        axes_intc_matrix = fig_intc_matrix.add_subplot(1, 3, int(ref) + 1, ylim=(0-10, 175+10))
-        axes_intc_fracture = fig_intc_fracture.add_subplot(1, 3, int(ref) + 1, ylim=(0, 0.45))
-        axes_outflux = fig_outflux.add_subplot(1, 3, int(ref) + 1, ylim=(0-0.00000005, 0.0000014+0.00000005))
-
-        for place in places_and_methods:
-            for method in places_and_methods[place]:
-                folder = os.path.join(results_dir, place, method)
-                data = os.path.join(folder, f"dot_refinement_{ref}.csv").replace("\_", "_")
-
-                label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
-
-                # if place.replace("\_", "_") != "mean":
-                plot.plot_over_time(data, label, ref, plot.id_intc_matrix, title, axes_intc_matrix,
-                                    plot.linestyle[place][method], plot.color[place][method],
-                                    has_legend=False, ylim=(0-10, 175+10))
-                plot.plot_over_time(data, label, ref, plot.id_intc_fracture, title, axes_intc_fracture,
-                                    plot.linestyle[place][method], plot.color[place][method],
-                                    has_legend=False, ylim=(0, 0.45))
-                plot.plot_over_time(data, label, ref, plot.id_outflux, title, axes_outflux,
-                                    plot.linestyle[place][method], plot.color[place][method],
-                                    has_legend=False, ylim=(0-0.00000005, 0.0000014+0.00000005))
-
-    # save figures
+    # Save figures with integrated legends
     plot.save(plot.id_intc_matrix, f"{case}_pot_c_matrix")
     plot.save(plot.id_intc_fracture, f"{case}_pot_c_fracture")
     plot.save(plot.id_outflux, f"{case}_pot_outflux")
-
-    # Plot legend
-    ncol = 4
-    for place in places_and_methods:
-        for method in places_and_methods[place]:
-            label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "") + "}"
-            plot.plot_legend(label, plot.id_intc_matrix_legend, plot.linestyle[place][method],
-                             plot.color[place][method], ncol)
-            plot.plot_legend(label, plot.id_intc_fracture_legend, plot.linestyle[place][method],
-                             plot.color[place][method], ncol)
-            plot.plot_legend(label, plot.id_outflux_legend, plot.linestyle[place][method],
-                             plot.color[place][method], ncol)
-
-    plot.save(plot.id_intc_matrix_legend, f"{case}_pot_c_matrix_legend")
-    plot.crop_pdf(f"{case}_pot_c_matrix_legend")
-    plot.save(plot.id_intc_fracture_legend, f"{case}_pot_c_fracture_legend")
-    plot.crop_pdf(f"{case}_pot_c_fracture_legend")
-    plot.save(plot.id_outflux_legend, f"{case}_pot_outflux_legend")
-    plot.crop_pdf(f"{case}_pot_outflux_legend")
 
 
 if __name__ == "__main__":
