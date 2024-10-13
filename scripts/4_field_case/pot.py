@@ -14,9 +14,7 @@ def run_pot():
     }
 
     regions = [15, 45, 48]
-
     for region_pos, region in enumerate(regions):
-
         title = "fracture " + str(region)
         fig = plot.plt.figure(plot.id_pot+11, figsize=(16, 6))
         fig.subplots_adjust(hspace=0, wspace=0)
@@ -29,16 +27,9 @@ def run_pot():
                 data = os.path.join(folder, "dot.csv").replace("\_", "_")
                 label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
-                if place.replace("\_", "_") != "mean":
-                    plot.plot_over_time(data, label, title, plot.id_pot, region, region_pos, len(regions), ax,
-                                        plot.linestyle[place][method], plot.color[place][method],
-                                        has_legend=False, fmt="%1.2f")
-                else:
-                    std_data = data.replace("mean", "std")
-                    plot.plot_mean_and_std_over_time(data, std_data, label, title, plot.id_pot, region, region_pos, len(regions), ax,
-                                                     plot.linestyle[place][method], plot.color[place][method],
-                                                     has_legend=False, fmt="%1.2f")
-
+                plot.plot_over_time(data, label, title, plot.id_pot, region, region_pos, len(regions), ax,
+                                    plot.linestyle[place][method], plot.color[place][method],
+                                    has_legend=False, fmt="%1.2f")
     # save figures
     plot.save(plot.id_pot, f"{case}_pot")
 

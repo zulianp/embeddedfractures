@@ -56,7 +56,6 @@ def get_paths():
     utils_dir = os.path.join(curr_dir, 'utils')
     return curr_dir, plots_dir, results_dir, utils_dir
 
-
 def plot_over_line(file_name, label, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace('D', 'e'))
