@@ -21,8 +21,7 @@ def plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, 
                                 has_legend=show_legend, ylim=(0-0.00000005, 0.0000014+0.00000005))
 
 def run_pot():
-    curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
-    results_dir = curr_dir.replace("scripts", "results")
+    curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = np.array(['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells'])
     refinement_index = [0, 1, 2]

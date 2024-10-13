@@ -30,39 +30,53 @@ color = styles.color
 curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
 case = curr_dir.split(os.sep)[-1]  # case we are dealing with
 
+def plot_legend_in_middle(ax):
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=4, fontsize=10)  # Legend below the plot
 
-def plot_over_line(file_name, ID, simulation_id, title, cond, ax, linestyle='-', color='C0', **kwargs):
+def setup_figure(id_offset, num_axes, ylim):
+    fig = plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend
+    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
+    axes_list = [fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)]
+    return fig, axes_list
+
+def get_paths():
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    plots_dir = curr_dir.replace('scripts', 'plots')
+    results_dir = curr_dir.replace('scripts', 'results')
+    utils_dir = os.path.join(curr_dir, 'utils')
+    return curr_dir, plots_dir, results_dir, utils_dir
+
+def plot_over_line(file_name, label, simulation_id, title, cond, ax, linestyle='-', color='C0', **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 2
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+    N = 2  # Assuming two columns of data (x, y)
 
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
+    if 'mean' in file_name:
+        # Generate the std filename by replacing 'mean' with 'std'
+        std_filename = file_name.replace('mean', 'std')
 
-    if simulation_id > 0:
-        ax.yaxis.set_tick_params(length=0)
+        # Read mean and standard deviation data from files
+        mean_data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+        std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
 
-    ax.plot(data[:, 0], data[:, 1], label=ID, linestyle=linestyle, color=color)
-    ax.set_xlabel(styles.getArcLengthLabel())
-    ax.grid(True)
-    ax.set_ylabel(styles.getHeadLabel(3))
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
-    if kwargs.get("has_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0))
-    if kwargs.get("xlim", None):
-        plt.xlim(kwargs.get("xlim"))
-    if kwargs.get("ylim", None):
-        plt.ylim(kwargs.get("ylim"))
+        # Ensure that the mean and std arrays have consistent shapes
+        if mean_data.shape != std_data.shape:
+            raise ValueError("Mean and standard deviation data do not have the same shape!")
 
+        # Plot standard deviation band (mean +/- std)
+        ax.fill_between(mean_data[:, 0],
+                        mean_data[:, 1] - std_data[:, 1],
+                        mean_data[:, 1] + std_data[:, 1],
+                        color=color, alpha=0.5)  # Adjust transparency for visibility
 
-def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, title, cond, ax, linestyle='-',
-                                color='C0', **kwargs):
-    c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 2
+        # Plot the mean data line
+        ax.plot(mean_data[:, 0], mean_data[:, 1], label=label, linestyle=linestyle, color=color)
 
-    # Read the mean and standard deviation data
-    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
-    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+    else:
+        # Plot only the mean data if 'mean' is not in the file name
+        data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+        ax.plot(data[:, 0], data[:, 1], label=label, linestyle=linestyle, color=color)
 
     # Format the y-axis
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
@@ -71,19 +85,14 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, 
     if simulation_id > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    # Plot the mean and the filled standard deviation area
-    ax.fill_between(mean_data[:, 0], mean_data[:, 1] - std_data[:, 1], mean_data[:, 1] + std_data[:, 1], color=color,
-                    alpha=0.3)
-    ax.plot(mean_data[:, 0], mean_data[:, 1], label=ID, linestyle=linestyle, color=color)
-
-    # Set labels and grid
+    # Set labels, grid, and title
     ax.set_xlabel(styles.getArcLengthLabel())
-    ax.grid(True)
     ax.set_ylabel(styles.getHeadLabel(3))
+    ax.grid(True)
 
-    # Set title and legend if needed
     if kwargs.get("has_title", True):
         ax.set_title(title)
+
     if kwargs.get("has_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
 
@@ -94,9 +103,9 @@ def plot_mean_and_std_over_line(mean_filename, std_filename, ID, simulation_id, 
         ax.set_ylim(kwargs.get("ylim"))
 
 
-def save(simulation_id, filename, extension=".pdf", **kwargs):
+def save(ID, filename, extension=".pdf", **kwargs):
     os.makedirs(plots_dir, exist_ok=True)
-    fig = plt.figure(simulation_id + 11)
+    fig = plt.figure(ID + 11)
 
     for idx, ax in enumerate(fig.get_axes()):
         ax.label_outer()
@@ -116,77 +125,78 @@ def crop_pdf(filename):
         os.system("pdfcrop --margins '0 -400 0 0' " + filename + " " + filename)
         os.system("pdfcrop " + filename + " " + filename)
 
-
 def plot_over_time(file_name, legend, title, cond, region, region_pos, num_regions, ax, linestyle='-', color='C0',
                    **kwargs):
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 22
-    N_temp = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
-    if N_temp < N:
-        N = N_temp
 
-    data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+    # Determine if the file contains 'mean' to plot mean and std
+    if 'mean' in file_name:
+        # Generate the std filename by replacing 'mean' with 'std'
+        std_filename = file_name.replace('mean', 'std')
 
-    plt.rcParams.update({'figure.max_open_warning': 0})
+        # Get the number of columns
+        N_temp = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
+        if N_temp < N:
+            N = N_temp
 
-    if region_pos > 0:
-        ax.yaxis.set_tick_params(length=0)
+        # Read the mean and standard deviation data
+        mean_data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+        std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
 
-    ax.plot(data[:, 0], data[:, region + 1], label=legend, linestyle=linestyle, color=color)
+        # Format the y-axis
+        ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
+        plt.rcParams.update({'figure.max_open_warning': 0})
+
+        # Modify tick parameters if needed
+        if region_pos > 0:
+            ax.yaxis.set_tick_params(length=0)
+
+        # Plot the mean with a shaded region for the standard deviation
+        time = mean_data[:, 0]
+        mean_values = mean_data[:, region + 1]
+        std_values = std_data[:, region + 1]
+
+        ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
+        ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
+
+    else:
+        # Plot only the mean data if 'mean' is not in the file name
+        N_temp = len(np.genfromtxt(file_name, delimiter=",", max_rows=1, skip_header=1))
+        if N_temp < N:
+            N = N_temp
+
+        data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
+
+        ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+
+        plt.rcParams.update({'figure.max_open_warning': 0})
+
+        # Modify tick parameters if needed
+        if region_pos > 0:
+            ax.yaxis.set_tick_params(length=0)
+
+        # Plot the mean data
+        ax.plot(data[:, 0], data[:, region + 1], label=legend, linestyle=linestyle, color=color)
+
+    # Set labels and grid
     ax.set_xlabel(styles.getTimeLabel())
     ax.set_ylabel(styles.getConcentrationLabel(3))
     ax.grid(True)
+
+    # Set title and legend if required
     if kwargs.get("has_title", True):
         ax.set_title(title)
     if kwargs.get("has_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
-    if kwargs.get("xlim", None):
-        plt.xlim(kwargs.get("xlim"))
-    if kwargs.get("ylim", None):
-        plt.ylim(kwargs.get("ylim"))
 
-
-def plot_mean_and_std_over_time(mean_filename, std_filename, legend, title, cond, region, region_pos, num_regions, ax,
-                                linestyle='-', color='C0', **kwargs):
-    c = lambda s: float(s.decode().replace('D', 'e'))
-    N = 22
-    N_temp = len(np.genfromtxt(mean_filename, delimiter=",", max_rows=1, skip_header=1))
-    if N_temp < N:
-        N = N_temp
-
-    # Read the mean and standard deviation data
-    mean_data = np.genfromtxt(mean_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
-    std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
-
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
-
-    plt.rcParams.update({'figure.max_open_warning': 0})
-
-    if region_pos > 0:
-        ax.yaxis.set_tick_params(length=0)
-
-    time = mean_data[:, 0]
-    mean_values = mean_data[:, region + 1]
-    std_values = std_data[:, region + 1]
-
-    # Plot the mean with a shaded region for the standard deviation
-    ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
-    ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
-
-    ax.set_xlabel(styles.getTimeLabel())
-    ax.set_ylabel(styles.getConcentrationLabel(3))
-    ax.grid(True)
-
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
-    if kwargs.get("has_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0))
+    # Apply x and y limits if provided
     if kwargs.get("xlim", None):
         ax.set_xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
         ax.set_ylim(kwargs.get("ylim"))
+
 
 
 def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):

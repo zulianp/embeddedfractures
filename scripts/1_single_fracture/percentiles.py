@@ -5,7 +5,7 @@ def plot_percentiles(ref, plot_id, places_and_methods, ax):
     plot.plot_percentiles(ref, plot_id, places_and_methods, ax)
 
 def run_percentiles():
-    curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
+    curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
 
     places_and_methods = {

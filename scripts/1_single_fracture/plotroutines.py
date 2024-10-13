@@ -57,7 +57,7 @@ def get_paths():
     return curr_dir, plots_dir, results_dir, utils_dir
 
 
-def plot_over_line(file_name, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
+def plot_over_line(file_name, label, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 5  # Assumes the number of columns is 5
@@ -82,11 +82,11 @@ def plot_over_line(file_name, legend, ref, ID, title, ax, linestyle='-', color='
                         color=color, alpha=0.5)  # Adjust transparency for visibility
 
         # Plot the mean data line
-        ax.plot(mean_data[:, 2 * ID], mean_data[:, 2 * ID + 1], label=legend, linestyle=linestyle, color=color)
+        ax.plot(mean_data[:, 2 * ID], mean_data[:, 2 * ID + 1], label=label, linestyle=linestyle, color=color)
     else:
         # Plot only the mean data
         data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
-        ax.plot(data[:, 2 * ID], data[:, 2 * ID + 1], label=legend, linestyle=linestyle, color=color)
+        ax.plot(data[:, 2 * ID], data[:, 2 * ID + 1], label=label, linestyle=linestyle, color=color)
 
     # Format y-axis using scientific notation
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
@@ -152,7 +152,7 @@ id_intc_fracture_legend = 11  # indegral of c*porosity in the fracture
 id_outflux = 2  # integrated outflux across the outflow boundary
 id_outflux_legend = 12  # integrated outflux across the outflow boundary
 
-def plot_over_time(file_name, legend, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
+def plot_over_time(file_name, label, ref, ID, title, ax, linestyle='-', color='C0', **kwargs):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 4  # Assumes the number of columns is 4
@@ -176,12 +176,12 @@ def plot_over_time(file_name, legend, ref, ID, title, ax, linestyle='-', color='
 
         # Plot the mean with a shaded region for the standard deviation
         ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
-        ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
+        ax.plot(time, mean_values, label=label, linestyle=linestyle, color=color)
     else:
         # Plot only the mean data
         data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
         time = data[:, 0] / (365 * 24 * 3600)  # Convert time to years
-        ax.plot(time, data[:, ID + 1], label=legend, linestyle=linestyle, color=color)
+        ax.plot(time, data[:, ID + 1], label=label, linestyle=linestyle, color=color)
 
     # Format y-axis using scientific notation
     ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))

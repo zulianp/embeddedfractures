@@ -3,9 +3,10 @@ import os
 from pol import run_pol
 from pot import run_pot
 from scripts.utils.overlay import run_overlay
+from plotroutines import get_paths
 
 def run_all():
-    curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
+    curr_dir, plots_dir, results_dir, utils_dir = get_paths()
     case = curr_dir.split(os.sep)[-1] # case we are dealing with
     print(f"Running all scripts in sequence for case {case}...")
 

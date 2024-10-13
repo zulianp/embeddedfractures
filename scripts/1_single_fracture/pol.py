@@ -22,8 +22,7 @@ def plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_matrix, ax
                                     has_legend=show_legend)
 
 def run_pol():
-    curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
-    results_dir = curr_dir.replace("scripts", "results")
+    curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = ['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells']
     refinement_index = [0, 1, 2]

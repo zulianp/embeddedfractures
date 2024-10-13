@@ -1,73 +1,42 @@
-# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 import os
 import numpy as np
 import plotroutines as plot
 
+def plot_cond_over_time(places_and_methods, results_dir, cond, ax, title, region, region_pos, num_regions, ylim, show_legend=False):
+    for place in places_and_methods:
+        for method in places_and_methods[place]:
+            folder = os.path.join(results_dir, place, method)
+            data_file = os.path.join(folder, f"dot_cond_{cond}.csv").replace("\\_",  "_")
+            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+
+            plot.plot_over_time(data_file, label, title, cond, region, region_pos, num_regions, ax,
+                                linestyle=plot.linestyle[place][method], color=plot.color[place][method],
+                                has_legend=show_legend, ylim=ylim)
+
 def run_pot():
-    curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
-    results_dir = curr_dir.replace("scripts", "results")
-    case = curr_dir.split(os.sep)[-1] # case we are dealing with
-    titles = ['$\\sim 4k$ cells  - permeability 1e4', '$\\sim 4k$ cells  - permeability 1e-4']
-    conds = [1]
+    curr_dir, plots_dir, results_dir, _ = plot.get_paths()
+    case = curr_dir.split(os.sep)[-1]
+    titles = ['$\\sim 4k$ cells - permeability 1e4', '$\\sim 4k$ cells - permeability 1e-4']
+    conds = [1]  # List of conditions
+    places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
+    regions = [1]  # Single region for this case
 
-    places_and_methods = {
-        "USI": ["FEM\_LM"],
-        "mean": ["key"],
-    }
-
-    # TODO: Verify with Arancia
-    # regions = np.array([1, 10, 11])
-    # regions_fig = {1: f"{case}_region10pic.png", 10: f"{case}_region11pic.png", 11: f"{case}_region1pic.png"}
-
-    regions = np.array([1])
-    regions_fig = {1: f"{case}_region10pic.png"}
-
-    #------------------------------------------------------------------------------#
-
+    # Setup figures and axes for each condition and region
     for cond, title in zip(conds, titles):
-
-        fig = plot.plt.figure(cond+11, figsize=(16, 6))
-        fig.subplots_adjust(hspace=0, wspace=0)
-        if cond == 0:
-            ylim = (0, 0.475)
-        else:
-            ylim = (0, 0.4)
+        fig, axes_list = plot.setup_figure(cond, len(regions), ylim=(0, 0.4 if cond else 0.475))
 
         for region_pos, region in enumerate(regions):
-            ax = fig.add_subplot(1, regions.size, region_pos + 1, ylim=ylim)
+            ax = axes_list[region_pos]
+            show_legend = True  # Ensure the legend is shown in this case
+            plot_cond_over_time(places_and_methods, results_dir, cond, ax, title, region, region_pos, len(regions),
+                                ylim=(0, 0.4 if cond else 0.475), show_legend=show_legend)
 
-            for place in places_and_methods:
-                for method in places_and_methods[place]:
-                    folder = os.path.join(results_dir, place, method)
-                    data = os.path.join(folder, f"dot_cond_{cond}.csv").replace("\_", "_")
-                    label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+            # Add the legend directly to the figure (on the first region)
+            if region_pos == 0:  # or region_pos == 1 for middle
+                plot.plot_legend_in_middle(ax)
 
-                    if place.replace("\_", "_") != "mean":
-                        plot.plot_over_time(data, label, title, cond, region, region_pos, regions.size, ax,
-                                            linestyle=plot.linestyle[place][method],
-                                            color=plot.color[place][method],
-                                            has_legend=False, fmt="%1.2f")
-                    else:
-                        std_data = data.replace("mean", "std")
-                        plot.plot_mean_and_std_over_time(data, std_data, label, title, cond, region, region_pos, regions.size, ax,
-                                                        linestyle=plot.linestyle[place][method],
-                                                        color=plot.color[place][method],
-                                                        has_legend=False, fmt="%1.2f")
-
-        # save figures
-        plot.save(cond, f"{case}_cot_cond_{cond}", starting_from=3*cond)
-
-    ncol = 4
-    for cond in conds:
-        for place in places_and_methods:
-            for method in places_and_methods[place]:
-                label = "\\texttt{" + place + ("-" + method if place.replace("\_", "_") != "mean" else "") + "}"
-                plot.plot_legend(label, cond, plot.linestyle[place][method],
-                                 plot.color[place][method], ncol)
-
-        plot.save(cond, f"{case}_cot_cond_{cond}_legend")
-        plot.crop_pdf(f"{case}_cot_cond_{cond}_legend")
-
+        # Save figure without creating a separate legend file
+        plot.save(cond, f"{case}_cot_cond_{cond}", starting_from=3 * cond)
 
 if __name__ == "__main__":
     run_pot()
