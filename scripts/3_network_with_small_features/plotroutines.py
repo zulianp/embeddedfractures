@@ -57,7 +57,6 @@ def plot_legend_in_middle(fig, ax1, ax2):
     # Plot the combined legend centered below the subplots
     fig.legend(unique_handles, unique_labels, loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=4, fontsize=10)
 
-
 def setup_figure(id_offset, num_axes, ylim):
     fig = plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend
     fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
@@ -142,7 +141,7 @@ def save(simulation_id, filename, extension=".pdf"):
                     verticalalignment='bottom', transform=ax.transAxes)
 
     plt.savefig(os.path.join(plots_dir, filename+extension), bbox_inches='tight')
-    plt.gcf().clear()
+    # plt.gcf().clear()
 
 def crop_pdf(filename):
     filename = os.path.join(plots_dir, filename + ".pdf")
@@ -247,7 +246,6 @@ def plot_boundary_data(data, methods, data_ref, colors, linestyle, extension=".p
     plot_boundary_head(data[:, 4:], methods, data_ref[2], colors, linestyle, extension)
     plot_boundary_fluxes(data[:, :4], methods, data_ref[1], colors, linestyle, extension)
     plot_reference_fluxes(data[:, :4], methods, data_ref[1], colors, linestyle, extension)
-
 
 def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     N = da.shape[0]
