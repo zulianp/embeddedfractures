@@ -55,7 +55,7 @@ def plot_legend_in_middle(fig, ax1, ax2):
             unique_labels.append(label)
 
     # Plot the combined legend centered below the subplots
-    fig.legend(unique_handles, unique_labels, loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=4, fontsize=10)
+    fig.legend(unique_handles, unique_labels, loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=4, fontsize=14)
 
 def setup_figure(id_offset, num_axes, ylim):
     fig = plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend

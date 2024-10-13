@@ -41,7 +41,7 @@ case = curr_dir.split(os.sep)[-1]  # case we are dealing with
 
 def plot_legend_in_middle(ax):
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=4, fontsize=10)  # Legend below the plot
+    ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=4, fontsize=14)  # Legend below the plot
 
 def setup_figure(id_offset, num_axes, ylim):
     fig = plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend

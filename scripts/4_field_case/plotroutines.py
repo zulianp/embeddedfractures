@@ -42,9 +42,9 @@ def plot_legend_in_middle(ax):
 
     if isinstance(ax, (list, np.ndarray)):  # Check if it's an array of subplots
         mid_ax = ax[len(ax) // 2]  # Select the middle axis for the legend
-        mid_ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=4, fontsize=10)
+        mid_ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=4, fontsize=14)
     else:  # Single plot
-        ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, fontsize=10)  # Adjust for a sin
+        ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, fontsize=14)  # Adjust for a sin
 
 def setup_figure(id_offset, num_axes, ylim):
     fig = plt.figure(id_offset + 11, figsize=(16, 8))  # Increased figure height to accommodate the legend

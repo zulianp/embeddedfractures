@@ -6,9 +6,8 @@ import utils.csv as csv_tools
 from compute_mean_and_std_all import compute_mean_and_std
 import combine_pdfs as cpdf
 
-compute_mean_and_std_all = False
-create_pdfs = False
-combine_pdfs = True
+compute_mean_and_std_all = True
+create_pdfs = True
 copy_pdfs_to_overleaf = False
 
 methods_included = ["USI/FEM_LM",
@@ -28,14 +27,10 @@ def main():
     subdirectories = csv_tools.find_direct_subdirectories(base_dir)
     for subdirectory in subdirectories:
         case = subdirectory.split(os.sep)[-1] # e.g. 1_single_fracture
-        if case[0] in ["1"]:#["1", "2", "3", "4"]:
+        if case[0] in ["1", "2", "3", "4"]:
             if create_pdfs:
                 print(f"Changing directory to {subdirectory} and running run_all.py there")
                 os.system(f"cd {subdirectory} && python run_all.py")
-            if combine_pdfs:
-                plots_directory = os.path.join('plots', subdirectory).replace("scripts", "plots")
-                # os.system(f"python combine_pdfs.py {plots_directory}")
-                cpdf.combine_pdfs(plots_directory)
 
     if copy_pdfs_to_overleaf:
         base_dir = "plots"
