@@ -42,8 +42,8 @@ def run_pol():
     plot.plot_legend_in_middle(ax_p_1)
 
     # Save figures
-    plot.save(plot.id_p_0_matrix, f"{case}_pol_line_2")#, ax_title="\\textbf{subfig. b}")
-    plot.save(plot.id_p_1_matrix, f"{case}_pol_line_1")#, ax_title="\\textbf{subfig. a}")
+    plot.save(plot.id_p_0_matrix, f"{case}_pol_line_2", ax_title="\\textbf{subfig. b}")
+    plot.save(plot.id_p_1_matrix, f"{case}_pol_line_1", ax_title="\\textbf{subfig. a}")
 
 
 if __name__ == "__main__":
