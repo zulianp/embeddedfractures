@@ -16,8 +16,8 @@ def run_all():
     run_pot()
     print("Finished running pot")
 
-    files = [f"{case}_pol_cond_1",
-             "overlay_fig2"
+    files = [f"{case}_pol_cond_0",
+             "overlay_fig1"
              ]
     run_overlay(files, working_directory=curr_dir)
     print("Finished running overlay")

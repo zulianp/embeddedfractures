@@ -10,7 +10,8 @@ def run_overlay(files, working_directory):
         f_pdf = f"{f}.pdf"
         os.system(f"pdfcrop {f_pdf} {f}-overlay.pdf")
         os.system(f"mv {f}-overlay.pdf ../../plots/{case}/")
-        os.system(f"rm {f}.pdf")
+        os.system(f"rm {f_pdf}")
+        os.system(f"rm ../../plots/{case}/{f_pdf.split(os.path.sep)[-1]}")
 
         # Check if {f}.aux exists and remove it
         if os.path.exists(f"{f}.aux"):
@@ -19,4 +20,5 @@ def run_overlay(files, working_directory):
         # Check if {f}.log exists and remove it
         if os.path.exists(f"{f}.log"):
             os.system(f"rm {f}.log")
+
 

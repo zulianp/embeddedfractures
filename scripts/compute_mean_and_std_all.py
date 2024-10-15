@@ -30,7 +30,7 @@ def compute_mean_and_std(methods_included):
             "dot_refinement_*.csv"
         ],
         "2": [
-            "dol_cond_1_refinement_*.csv",
+            "dol_cond_0_refinement_*.csv",
             "dot_cond_*.csv"  # NOTE: Waiting for Arancia to fix the CSV files
         ],
         "3": [

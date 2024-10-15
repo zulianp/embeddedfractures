@@ -25,7 +25,7 @@ def run_pol():
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = ['$\\sim 500$ cells', '$\\sim 4k$ cells', '$\\sim 32k$ cells']
     refinement_index = [0, 1, 2]
-    conds = [1]  # Add other conditions if needed
+    conds = [0]  # Add other conditions if needed
     places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
 
     ylim_dict = {0: (0.5, 2.75), 1: (0.4, 5.75)}

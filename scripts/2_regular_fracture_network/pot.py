@@ -17,7 +17,7 @@ def run_pot():
     curr_dir, plots_dir, results_dir, _ = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]
     titles = ['$\\sim 4k$ cells - permeability 1e4', '$\\sim 4k$ cells - permeability 1e-4']
-    conds = [1]  # List of conditions
+    conds = [0]  # List of conditions
     places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
     regions = [1]  # Single region for this case
 
