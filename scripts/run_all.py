@@ -6,7 +6,7 @@ import utils.csv as csv_tools
 from compute_mean_and_std_all import compute_mean_and_std
 import combine_pdfs as cpdf
 
-compute_mean_and_std_all = True
+compute_mean_and_std_all = False
 create_pdfs = True
 copy_pdfs_to_overleaf = False
 

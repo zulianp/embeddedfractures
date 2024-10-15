@@ -141,7 +141,7 @@ def save(simulation_id, filename, extension=".pdf"):
                     verticalalignment='bottom', transform=ax.transAxes)
 
     plt.savefig(os.path.join(plots_dir, filename+extension), bbox_inches='tight')
-    # plt.gcf().clear()
+    plt.gcf().clear()
 
 def crop_pdf(filename):
     filename = os.path.join(plots_dir, filename + ".pdf")
@@ -153,57 +153,42 @@ def plot_over_time(file_name, legend, ref, ID, title, ax, linestyle='-', color='
     c = lambda s: float(s.decode().replace('D', 'e'))
     N = 9  # Assuming 9 columns of data
 
-    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
     if 'mean' in file_name:
-        # Generate the std filename by replacing 'mean' with 'std'
         std_filename = file_name.replace('mean', 'std')
-
-        # Read mean and standard deviation data
         mean_data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
         std_data = np.genfromtxt(std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N)))
 
-        # Ensure that the mean and std arrays have consistent shapes
         if mean_data.shape != std_data.shape:
             raise ValueError("Mean and standard deviation data do not have the same shape!")
 
-        # Extract time, mean, and std values
         time = mean_data[:, 0]
         mean_values = mean_data[:, ID + 1]
         std_values = std_data[:, ID + 1]
 
-        # Plot standard deviation band (mean ± std)
         ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
-
-        # Plot the mean data line
         ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
-
     else:
-        # Plot only the data if 'mean' is not in the file name
         data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
         ax.plot(data[:, 0], data[:, ID + 1], label=legend, linestyle=linestyle, color=color)
 
-    # Format the y-axis
     ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
 
-    # Modify tick parameters for simulations other than the first
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
 
-    # Set labels, grid, and title
-    ax.set_xlabel(styles.getTimeLabel('s'))
+    ax.set_xlabel(styles.getTimeLabel('s'))  # Only apply xlabel
+
+    # Apply ylabel only to the first subplot
     ax.set_ylabel(r"$\overline{c_2}$")
     ax.grid(True)
 
-    # Optionally set the title
     if kwargs.get("has_title", True):
         title_fig = title + " - fracture " + str(ID)
         ax.set_title(title_fig)
 
-    # Optionally display the legend
     if kwargs.get("has_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
 
-    # Apply optional x and y limits
     if kwargs.get("xlim", None):
         ax.set_xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
