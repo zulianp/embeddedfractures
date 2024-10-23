@@ -4,7 +4,7 @@ import plotroutines as plot
 def plot_percentiles(ref, plot_id, places_and_methods, ax):
     plot.plot_percentiles(ref, plot_id, places_and_methods, ax)
 
-def run_percentiles(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
+def run_percentiles(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
 

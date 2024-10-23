@@ -19,7 +19,7 @@ def plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_0, axes_p_
                                 plot.linestyle[place][method], plot.color[place][method],
                                 has_legend=show_legend)
 
-def run_pol(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
+def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]
     titles = ["$\\sim 30k$ cells", "$\\sim 150k$ cells"]

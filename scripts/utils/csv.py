@@ -16,24 +16,33 @@ def get_max_num_rows(csv_files: list):
             max_num_rows = num_rows
     return max_num_rows
 
-def find_min_max_integer_in_filenames(base_dir: str, pattern: str = 'dol_refinement_*.csv'):
-    max_int = None
-    min_int = None
+def find_common_min_max_integer_in_filenames(base_dir: str, methods_included: list, pattern: str = 'dol_refinement_*.csv'):
+    common_max_int = None
+    common_min_int = None
     regex_pattern = re.escape(pattern).replace('\\*', r'(\d+)')
 
-    num_matches = 0
-    for root, dirs, files in os.walk(base_dir):
-        for file in files:
-            match = re.match(regex_pattern, file)
-            if match:
-                num_matches += 1
-                num = int(match.group(1))
-                if max_int is None or num > max_int:
-                    max_int = num
-                if min_int is None or num < min_int:
-                    min_int = num
+    for method in methods_included:
+        method_dir = os.path.join(base_dir, method)
+        method_max_int = None
+        method_min_int = None
 
-    return min_int, max_int
+        for root, dirs, files in os.walk(method_dir):
+            for file in files:
+                match = re.match(regex_pattern, file)
+                if match:
+                    num = int(match.group(1))
+                    if method_max_int is None or num > method_max_int:
+                        method_max_int = num
+                    if method_min_int is None or num < method_min_int:
+                        method_min_int = num
+
+        # Update common_min_int and common_max_int based on the current method's min/max
+        if common_max_int is None or method_max_int < common_max_int:
+            common_max_int = method_max_int
+        if common_min_int is None or method_min_int > common_min_int:
+            common_min_int = method_min_int
+
+    return common_min_int, common_max_int
 
 def extract_institute_and_method(filename):
     parts = filename.split('/')
@@ -120,7 +129,7 @@ def create_interpolated_dfs(df_list):
 def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI/FEM_LM", methods_included: list[str] = ["USI/FEM_LM"]):
     min_int_in_filenames, max_int_in_filenames = (0, 0)
     if '*' in pattern_filename:
-        min_int_in_filenames, max_int_in_filenames = find_min_max_integer_in_filenames(base_dir=os.path.join(base_dir, "USI/FEM_LM"), pattern=pattern_filename)
+        min_int_in_filenames, max_int_in_filenames = find_common_min_max_integer_in_filenames(base_dir=base_dir, methods_included=methods_included, pattern=pattern_filename)
 
     for ref in range(min_int_in_filenames, max_int_in_filenames + 1):
         filename = pattern_filename.replace('*', str(ref)) if '*' in pattern_filename else pattern_filename

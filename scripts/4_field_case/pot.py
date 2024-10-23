@@ -13,7 +13,7 @@ def plot_data_over_time(places_and_methods, results_dir, ax, title, region, regi
                                 has_legend=show_legend, fmt="%1.2f")
 
 
-def run_pot(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
+def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     # Get directories
     curr_dir, plots_dir, results_dir, _ = plot.get_paths()
     results_dir = curr_dir.replace('scripts', 'results')

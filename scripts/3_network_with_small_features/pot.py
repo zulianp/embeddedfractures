@@ -13,7 +13,7 @@ def plot_data_over_time(places_and_methods, results_dir, ref, ax, ID, title):
                                 linestyle=plot.linestyle[place][method], color=plot.color[place][method],
                                 has_legend=False)
 
-def run_pot(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
+def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     curr_dir = os.path.dirname(os.path.realpath(__file__))  # current directory
     results_dir = curr_dir.replace('scripts', 'results')
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with

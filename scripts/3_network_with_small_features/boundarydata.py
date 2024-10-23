@@ -10,7 +10,7 @@ import numpy as np
 import csv
 import plotroutines as plot
 
-def run_boundary_data(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
+def run_boundary_data(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
     results_dir = curr_dir.replace('scripts', 'results')
     case = curr_dir.split(os.sep)[-1] # case we are dealing with

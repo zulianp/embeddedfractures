@@ -19,7 +19,7 @@ def plot_data_over_lines(places_and_methods, results_dir, ref, ax, title, cond, 
                         has_legend=show_legend, fmt=fmt)
 
 
-def run_pol(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
+def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     # Get directories
     curr_dir, plots_dir, results_dir, _ = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with

@@ -10,9 +10,13 @@ compute_mean_and_std_all = True
 create_pdfs = True
 copy_pdfs_to_overleaf = False
 
+# Methods included in mean and standard deviation computation. focus_dir = methods_included[0] is currently not included
+# in that computation. Once we are sure that USI/FEM_LM results are correct, we can include it.
 methods_included = [
                     # "USI/FEM_LM",
-                    "USTUTT/MPFA",
+                    # "USTUTT/MPFA",
+                    # "UNICE_UNIGE/HFV_Cont",
+                    "UNICAMP/Hybrid_Hdiv",
                     "UiB/TPFA",
                     "UiB/MPFA",
                     "UiB/MVEM",
@@ -20,8 +24,9 @@ methods_included = [
 ]
 
 focus_dir = methods_included[0]
-
-places_and_methods = {"USTUTT": ["MPFA"], "mean": ["key"]}
+focus_institute, focus_method = focus_dir.split("/")
+focus_method = focus_method.replace("_", "\\_")
+places_and_methods = {focus_institute: [focus_method], "mean": ["key"]}
 
 def main():
     # Compute mean and standard deviation for all cases

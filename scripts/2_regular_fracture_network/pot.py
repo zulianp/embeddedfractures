@@ -13,7 +13,7 @@ def plot_cond_over_time(places_and_methods, results_dir, cond, ax, title, region
                                 linestyle=plot.linestyle[place][method], color=plot.color[place][method],
                                 has_legend=show_legend, ylim=ylim)
 
-def run_pot(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
+def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     curr_dir, plots_dir, results_dir, _ = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]
     titles = ['$\\sim 4k$ cells - permeability 1e4', '$\\sim 4k$ cells - permeability 1e-4']

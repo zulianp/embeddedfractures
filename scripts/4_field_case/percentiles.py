@@ -3,7 +3,7 @@ import os
 import numpy as np
 import plotroutines as plot
 
-def run_percentiles(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
+def run_percentiles(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     curr_dir = os.path.dirname(os.path.realpath(__file__)) # current directory
     case = curr_dir.split(os.sep)[-1] # case we are dealing with
 
