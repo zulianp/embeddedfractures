@@ -20,12 +20,11 @@ def plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, 
                                 plot.linestyle[place][method], plot.color[place][method],
                                 has_legend=show_legend, ylim=(0-0.00000005, 0.0000014+0.00000005))
 
-def run_pot():
+def run_pot(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
     curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = np.array(['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells'])
     refinement_index = [0, 1, 2]
-    places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
 
     # Setup figures and axes
     fig_intc_matrix, axes_intc_matrix_list = plot.setup_figure(plot.id_intc_matrix, 3, ylim=(0-10, 175+10))

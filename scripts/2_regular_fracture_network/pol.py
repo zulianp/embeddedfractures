@@ -19,14 +19,13 @@ def plot_data_over_lines(places_and_methods, results_dir, ref, ax, title, cond, 
                         has_legend=show_legend, fmt=fmt)
 
 
-def run_pol():
+def run_pol(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
     # Get directories
     curr_dir, plots_dir, results_dir, _ = plot.get_paths()
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = ['$\\sim 500$ cells', '$\\sim 4k$ cells', '$\\sim 32k$ cells']
     refinement_index = [0, 1, 2]
     conds = [0]  # Add other conditions if needed
-    places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
 
     ylim_dict = {0: (0.5, 2.75), 1: (0.4, 5.75)}
     fmt_dict = {0: "%1.2f", 1: "%1.2e"}

@@ -17,13 +17,11 @@ def plot_data_over_lines(places_and_methods, results_dir, ax, title, line_idx, y
     ax.set_xlim(xlim)
 
 
-def run_pol():
+def run_pol(places_and_methods={"USTUTT": ["MPFA"], "mean": ["key"]}):
     # Get directories
     curr_dir, plots_dir, results_dir, _ = plot.get_paths()
     results_dir = curr_dir.replace('scripts', 'results')
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
-
-    places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
 
     # Axis titles and limits
     titles = ['Line 2', 'Line 1']

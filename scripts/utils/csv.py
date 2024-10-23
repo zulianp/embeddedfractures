@@ -120,13 +120,13 @@ def create_interpolated_dfs(df_list):
 def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI/FEM_LM", methods_included: list[str] = ["USI/FEM_LM"]):
     min_int_in_filenames, max_int_in_filenames = (0, 0)
     if '*' in pattern_filename:
-        min_int_in_filenames, max_int_in_filenames = find_min_max_integer_in_filenames(base_dir=os.path.join(base_dir, focus_dir), pattern=pattern_filename)
+        min_int_in_filenames, max_int_in_filenames = find_min_max_integer_in_filenames(base_dir=os.path.join(base_dir, "USI/FEM_LM"), pattern=pattern_filename)
 
     for ref in range(min_int_in_filenames, max_int_in_filenames + 1):
         filename = pattern_filename.replace('*', str(ref)) if '*' in pattern_filename else pattern_filename
         # Collect all the CSV files with the same name in any (recursive) subdirectory of base_dir
         # csv_files[0] corresponds to that in the focus_dir
-        csv_files = filter_csv_files(find_csv_filenames(base_dir=base_dir, filename=filename), methods_included)
+        csv_files = filter_csv_files(find_csv_filenames(base_dir=base_dir, filename=filename, focus_dir=focus_dir), methods_included)
 
         # Create combined DataFrame
         dfs = create_interpolated_dfs(df_list=[pd.read_csv(file, header=None) for file in csv_files])

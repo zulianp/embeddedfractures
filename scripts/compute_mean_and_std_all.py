@@ -7,16 +7,17 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 import scripts.utils.csv as csv_tools
 
-def process_patterns(subdirectory: str, patterns: list, case_id: str, methods_included: list[str]):
+def process_patterns(subdirectory: str, patterns: list, case_id: str, methods_included: list[str], focus_dir="USI/FEM_LM"):
     no_exceptions = True
 
     for pattern_filename in patterns:
         csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory,
                                                 pattern_filename=pattern_filename,
-                                                methods_included=methods_included)
+                                                methods_included=methods_included,
+                                                focus_dir=focus_dir)
         print(f"Processed {case_id}")
 
-def compute_mean_and_std(methods_included):
+def compute_mean_and_std(methods_included, focus_dir="USI/FEM_LM"):
     if type(methods_included) == str:
         methods_included = methods_included.split(',')  # Split the comma-separated string into a list
 
@@ -56,7 +57,11 @@ def compute_mean_and_std(methods_included):
         for key in case_patterns:
             if key in case:
                 patterns = case_patterns[key]
-                process_patterns(subdirectory, patterns, case, methods_included=methods_included)
+                process_patterns(subdirectory=subdirectory,
+                                 patterns=patterns,
+                                 case_id=case,
+                                 methods_included=methods_included,
+                                 focus_dir=focus_dir)
                 break
         else:
             raise ValueError(f"Invalid case name: {case}")
