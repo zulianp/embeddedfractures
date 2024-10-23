@@ -10,29 +10,23 @@ compute_mean_and_std_all = True
 create_pdfs = True
 copy_pdfs_to_overleaf = False
 
-# Methods included in mean and standard deviation computation. focus_dir = methods_included[0] is currently not included
-# in that computation. Once we are sure that USI/FEM_LM results are correct, we can include it.
-methods_included = [
-                    # "USI/FEM_LM",
-                    # "USTUTT/MPFA",
-                    # "UNICE_UNIGE/HFV_Cont",
-                    "UNICAMP/Hybrid_Hdiv",
-                    "UiB/TPFA",
-                    "UiB/MPFA",
-                    "UiB/MVEM",
-                    "UiB/RT0"
-]
+# TODO: Correct mean and std. For some reason it's different if I have a different starting method.
 
-focus_dir = methods_included[0]
+# Methods included in mean and standard deviation computation.
+methods_to_average = ["UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
+
+CURRENT = True
+focus_dir = "USI/FEM_LM" if CURRENT else "ETHZ_USI/FEM_LM"
 focus_institute, focus_method = focus_dir.split("/")
 focus_method = focus_method.replace("_", "\\_")
+
 places_and_methods = {focus_institute: [focus_method], "mean": ["key"]}
 
 def main():
     # Compute mean and standard deviation for all cases
     if compute_mean_and_std_all:
         print("Computing mean and standard deviations for all cases...")
-        compute_mean_and_std(methods_included, focus_dir=focus_dir)
+        compute_mean_and_std(methods_to_average)
 
     base_dir = os.path.dirname(os.path.realpath(__file__))
     subdirectories = csv_tools.find_direct_subdirectories(base_dir)

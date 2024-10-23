@@ -135,12 +135,12 @@ def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_di
         filename = pattern_filename.replace('*', str(ref)) if '*' in pattern_filename else pattern_filename
         # Collect all the CSV files with the same name in any (recursive) subdirectory of base_dir
         # csv_files[0] corresponds to that in the focus_dir
-        csv_files = filter_csv_files(find_csv_filenames(base_dir=base_dir, filename=filename, focus_dir=focus_dir), methods_included)
+        csv_files = filter_csv_files(find_csv_filenames(base_dir=base_dir, filename=filename, focus_dir=focus_dir), list(set(["USI/FEM_LM"] + methods_included)))
 
         # Create combined DataFrame
         dfs = create_interpolated_dfs(df_list=[pd.read_csv(file, header=None) for file in csv_files])
         # TODO: once ours is OK, include in mean and std computations
-        combined_df = pd.concat(dfs[1:], ignore_index=True).sort_values(by=dfs[0].columns[0]).reset_index(drop=True)
+        combined_df = pd.concat(dfs[1:], ignore_index=True).sort_values(by=dfs[1].columns[0]).reset_index(drop=True)
 
         # Compute the mean and standard deviation (assumes the first column is the reference)
         mean_df = combined_df.groupby(combined_df.columns[0]).mean().reset_index()

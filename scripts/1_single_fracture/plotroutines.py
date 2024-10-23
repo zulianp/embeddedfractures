@@ -173,11 +173,15 @@ def plot_over_time(file_name, label, ref, ID, title, ax, linestyle='-', color='C
         mean_values = mean_data[:, ID + 1]
         std_values = std_data[:, ID + 1]
 
+        if ID ==1 :
+            print(f"mean file_name: {file_name}, std file_name: {std_filename}")
+            print(f"Min(mean_values)={np.min(mean_values)}, Max(mean_values)={np.max(mean_values)}")
+            print(f"Min(std_values)={np.min(std_values)}, Max(std_values)={np.max(std_values)}")
+
         # Plot the mean with a shaded region for the standard deviation
         ax.fill_between(time, mean_values - std_values, mean_values + std_values, color=color, alpha=0.3)
         ax.plot(time, mean_values, label=label, linestyle=linestyle, color=color)
     else:
-        # Plot only the mean data
         data = np.genfromtxt(file_name, delimiter=",", converters=dict(zip(range(N), [c] * N)))
         time = data[:, 0] / (365 * 24 * 3600)  # Convert time to years
         ax.plot(time, data[:, ID + 1], label=label, linestyle=linestyle, color=color)

@@ -8,14 +8,12 @@ sys.path.insert(0, project_root)
 import scripts.utils.csv as csv_tools
 
 def process_patterns(subdirectory: str, patterns: list, case_id: str, methods_included: list[str], focus_dir="USI/FEM_LM"):
-    no_exceptions = True
-
     for pattern_filename in patterns:
         csv_tools.create_mean_and_std_csv_files(base_dir=subdirectory,
                                                 pattern_filename=pattern_filename,
                                                 methods_included=methods_included,
                                                 focus_dir=focus_dir)
-        print(f"Processed {case_id}")
+    print(f"Processed {case_id}")
 
 def compute_mean_and_std(methods_included, focus_dir="USI/FEM_LM"):
     if type(methods_included) == str:
@@ -32,7 +30,7 @@ def compute_mean_and_std(methods_included, focus_dir="USI/FEM_LM"):
         ],
         "2": [
             "dol_cond_0_refinement_*.csv",
-            "dot_cond_*.csv"  # NOTE: Waiting for Arancia to fix the CSV files
+            "dot_cond_*.csv" # NOTE: Waiting for Arancia to fix the CSV files
         ],
         "3": [
             "dol_line_0_refinement_*.csv",
@@ -60,12 +58,8 @@ def compute_mean_and_std(methods_included, focus_dir="USI/FEM_LM"):
                 process_patterns(subdirectory=subdirectory,
                                  patterns=patterns,
                                  case_id=case,
-                                 methods_included=methods_included,
-                                 focus_dir=focus_dir)
+                                 methods_included=methods_included)
                 break
-        else:
-            raise ValueError(f"Invalid case name: {case}")
-
 
 if __name__ == "__main__":
     # Create argument parser
