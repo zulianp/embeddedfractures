@@ -63,6 +63,12 @@ Hide(matrix_transporte, renderView2)
 # update the view to ensure updated data information
 renderView2.Update()
 
+# Properties modified on clip2.ClipType
+clip1.ClipType.Normal = [-1.0, 0.0, 0.0]
+
+# update the view to ensure updated data information
+renderView2.Update()
+
 # create a new 'Clip'
 clip2 = Clip(registrationName='Clip2', Input=clip1)
 
