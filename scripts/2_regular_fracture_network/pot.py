@@ -18,7 +18,7 @@ def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     case = curr_dir.split(os.sep)[-1]
     titles = ['$\\sim 4k$ cells - permeability 1e4', '$\\sim 4k$ cells - permeability 1e-4']
     conds = [0]  # List of conditions
-    regions = [1]  # Single region for this case
+    regions = [1]  # Single region for this case # regions: 1, 10, 11
 
     # Setup figures and axes for each condition and region
     for cond, title in zip(conds, titles):
