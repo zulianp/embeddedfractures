@@ -21,8 +21,8 @@ def run_all():
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     print(f"Running all scripts in sequence for case {case}...")
 
-    run_percentiles(places_and_methods)
-    print("Finished running percentiles")
+    # run_percentiles(places_and_methods)
+    # print("Finished running percentiles")
 
     run_pol(places_and_methods)
     print("Finished running pol")

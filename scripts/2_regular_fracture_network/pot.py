@@ -35,7 +35,7 @@ def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
                 plot.plot_legend_in_middle(ax)
 
         # Save figure without creating a separate legend file
-        plot.save(cond, f"{case}_cot_cond_{cond}", starting_from=3 * cond)
+        plot.save(cond, f"{case}_pot_cond_{cond}", starting_from=3 * cond)
 
 if __name__ == "__main__":
     run_pot()

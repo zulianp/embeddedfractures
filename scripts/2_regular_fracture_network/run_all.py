@@ -27,8 +27,9 @@ def run_all():
     run_pot(places_and_methods)
     print("Finished running pot")
 
-    files = [f"{case}_pol_cond_0",
-             "overlay_fig1"
+    files = [
+            f"{case}_pot_cond_0",
+            #  "overlay_fig1"
              ]
     run_overlay(files, working_directory=curr_dir)
     print("Finished running overlay")

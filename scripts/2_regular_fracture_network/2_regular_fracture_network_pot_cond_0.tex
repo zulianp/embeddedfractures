@@ -1,0 +1,14 @@
+\documentclass[12pt]{article}
+
+\usepackage{pdfpages}
+\usepackage{tikz}
+\begin{document}
+
+\pagestyle{empty}
+\includepdf[pages={1}, pagecommand={%
+    \begin{tikzpicture}[remember picture, overlay]
+        \node at (-0.5, -6.75) {\includegraphics[width=0.2\textwidth]{2_regular_fracture_network_region1pic}};
+        \node at (6, -6.75) {\includegraphics[width=0.2\textwidth]{2_regular_fracture_network_region10pic}};
+        \node at (12.5, -6.75) {\includegraphics[width=0.2\textwidth]{2_regular_fracture_network_region11pic}};
+    \end{tikzpicture}}]{../../plots/2_regular_fracture_network/2_regular_fracture_network_pot_cond_0}
+\end{document}
