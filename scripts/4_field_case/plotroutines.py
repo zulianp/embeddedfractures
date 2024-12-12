@@ -1,8 +1,13 @@
 # Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 from __future__ import print_function
 
+import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+
+os.environ['PATH'] += ':/Library/TeX/texbin'
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
 
 from scipy import interpolate
 from scipy.integrate import simps

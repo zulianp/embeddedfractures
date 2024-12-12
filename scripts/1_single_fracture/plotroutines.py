@@ -5,6 +5,10 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 
+os.environ['PATH'] += ':/Library/TeX/texbin'
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
+
 from scipy import interpolate
 from scipy.integrate import simps
 from operator import methodcaller

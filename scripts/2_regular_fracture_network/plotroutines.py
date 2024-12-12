@@ -1,8 +1,11 @@
 # Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
+import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-import matplotlib.image as mpimg
-import matplotlib.offsetbox as ob
+
+os.environ['PATH'] += ':/Library/TeX/texbin'
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
 
 from scipy import interpolate
 from scipy.integrate import simps
@@ -177,8 +180,17 @@ def plot_over_time(file_name, legend, title, cond, region, region_pos, num_regio
         if region_pos > 0:
             ax.yaxis.set_tick_params(length=0)
 
+        region_idx = region + 1
+        if "/USI/" in file_name:
+            if region == 1:
+                region_idx = 1
+            elif region == 10:
+                region_idx = 2
+            elif region == 11:
+                region_idx = 3
+
         # Plot the mean data
-        ax.plot(data[:, 0], data[:, region + 1], label=legend, linestyle=linestyle, color=color)
+        ax.plot(data[:, 0], data[:, region_idx], label=legend, linestyle=linestyle, color=color)
 
     # Set labels and grid
     ax.set_xlabel(styles.getTimeLabel())

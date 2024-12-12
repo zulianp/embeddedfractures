@@ -18,7 +18,7 @@ def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     case = curr_dir.split(os.sep)[-1]
     titles = ['$\\sim 4k$ cells - permeability 1e4', '$\\sim 4k$ cells - permeability 1e-4']
     conds = [0]  # List of conditions
-    regions = [1]  # Single region for this case # regions: 1, 10, 11
+    regions = [1, 10, 11]  # Single region for this case # regions: 1, 10, 11
 
     # Setup figures and axes for each condition and region
     for cond, title in zip(conds, titles):
@@ -26,12 +26,12 @@ def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
 
         for region_pos, region in enumerate(regions):
             ax = axes_list[region_pos]
-            show_legend = True  # Ensure the legend is shown in this case
+            show_legend = (region_pos == 1)  # Ensure the legend is shown in this case
             plot_cond_over_time(places_and_methods, results_dir, cond, ax, title, region, region_pos, len(regions),
                                 ylim=(0, 0.4 if cond else 0.475), show_legend=show_legend)
 
             # Add the legend directly to the figure (on the first region)
-            if region_pos == 0:  # or region_pos == 1 for middle
+            if region_pos == 1:  # or region_pos == 1 for middle
                 plot.plot_legend_in_middle(ax)
 
         # Save figure without creating a separate legend file
