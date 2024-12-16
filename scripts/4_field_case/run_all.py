@@ -4,14 +4,14 @@ import json
 from percentiles import run_percentiles
 from pol import run_pol
 from pot import run_pot
+from scripts.utils.general import get_paths, process_args
 from scripts.utils.overlay import run_overlay
-from plotroutines import get_paths
-curr_dir, plots_dir, results_dir, utils_dir = get_paths()
-sys.path.insert(0, utils_dir)
-import general
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+plots_dir, results_dir = get_paths(curr_dir)
 
 def run_all():
-    places_and_methods = general.process_args()
+    places_and_methods = process_args()
     case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     print(f"Running all scripts in sequence for case {case}...")
 

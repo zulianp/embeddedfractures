@@ -1,8 +1,11 @@
 import os
-import numpy as np
 import plotroutines as plot
+from scripts.utils.general import get_paths
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+plots_dir, results_dir = get_paths(curr_dir)
 
-def plot_cond_over_time(places_and_methods, results_dir, cond, ax, title, region, region_pos, num_regions, ylim, show_legend=False):
+def plot_cond_over_time(places_and_methods, cond, ax, title, region, region_pos, num_regions, ylim, show_legend=False):
     for place in places_and_methods:
         for method in places_and_methods[place]:
             folder = os.path.join(results_dir, place, method)
@@ -14,8 +17,6 @@ def plot_cond_over_time(places_and_methods, results_dir, cond, ax, title, region
                                 has_legend=show_legend, ylim=ylim)
 
 def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
-    curr_dir, plots_dir, results_dir, _ = plot.get_paths()
-    case = curr_dir.split(os.sep)[-1]
     titles = ['$\\sim 4k$ cells - permeability 1e4', '$\\sim 4k$ cells - permeability 1e-4']
     conds = [0]  # List of conditions
     regions = [1, 10, 11]  # Single region for this case # regions: 1, 10, 11
@@ -27,7 +28,7 @@ def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
         for region_pos, region in enumerate(regions):
             ax = axes_list[region_pos]
             show_legend = (region_pos == 1)  # Ensure the legend is shown in this case
-            plot_cond_over_time(places_and_methods, results_dir, cond, ax, title, region, region_pos, len(regions),
+            plot_cond_over_time(places_and_methods, cond, ax, title, region, region_pos, len(regions),
                                 ylim=(0, 0.4 if cond else 0.475), show_legend=show_legend)
 
             # Add the legend directly to the figure (on the first region)

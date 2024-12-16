@@ -1,5 +1,6 @@
 import sys
 import json
+import os
 
 def process_args():
     if len(sys.argv) > 1:
@@ -11,3 +12,8 @@ def process_args():
         places_and_methods = {"USI": ["FEM\_LM"], "mean": ["key"]}
         print(f"No places_and_methods passed. Setting default to {places_and_methods}")
     return places_and_methods
+
+def get_paths(curr_dir):
+    plots_dir = curr_dir.replace('scripts', 'plots')
+    results_dir = curr_dir.replace('scripts', 'results')
+    return plots_dir, results_dir

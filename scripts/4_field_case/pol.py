@@ -1,8 +1,11 @@
 import os
 import plotroutines as plot
+from scripts.utils.general import get_paths
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+plots_dir, results_dir = get_paths(curr_dir)
 
-
-def plot_data_over_lines(places_and_methods, results_dir, ax, title, line_idx, ylim, xlim):
+def plot_data_over_lines(places_and_methods, ax, title, line_idx, ylim, xlim):
     for place in places_and_methods:
         for method in places_and_methods[place]:
             folder = os.path.join(results_dir, place, method).replace("\_", "_")
@@ -18,22 +21,12 @@ def plot_data_over_lines(places_and_methods, results_dir, ax, title, line_idx, y
 
 
 def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
-    # Get directories
-    curr_dir, plots_dir, results_dir, _ = plot.get_paths()
-    results_dir = curr_dir.replace('scripts', 'results')
-    case = curr_dir.split(os.sep)[-1]  # case we are dealing with
-
-    # Axis titles and limits
-    titles = ['Line 2', 'Line 1']
-    ylims = [(-50, 720), (-20, 280)]
-    xlims = [(-100, 1800), (-100, 1800)]
-
     fig_p_0, ax_p_0 = plot.plt.figure(plot.id_p_0_matrix + 11), plot.plt.subplot(ylim=(-50, 720), xlim=(-100, 1800))
     fig_p_1, ax_p_1 = plot.plt.figure(plot.id_p_1_matrix + 11), plot.plt.subplot(ylim=(-20, 280), xlim=(-100, 1800))
 
     # Plot data for line 0 and line 1
-    plot_data_over_lines(places_and_methods, results_dir, ax_p_0, "Line 2", 0, (-50, 720), (-100, 1800))
-    plot_data_over_lines(places_and_methods, results_dir, ax_p_1, "Line 1", 1, (-20, 280), (-100, 1800))
+    plot_data_over_lines(places_and_methods, ax_p_0, "Line 2", 0, (-50, 720), (-100, 1800))
+    plot_data_over_lines(places_and_methods, ax_p_1, "Line 1", 1, (-20, 280), (-100, 1800))
 
     # Add legend in one of the plots (middle or specific plot)
     plot.plot_legend_in_middle(ax_p_0)

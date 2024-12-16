@@ -1,8 +1,12 @@
 import os
 import numpy as np
 import plotroutines as plot
+from scripts.utils.general import get_paths
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+plots_dir, results_dir = get_paths(curr_dir)
 
-def plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, axes_intc_fracture, axes_outflux, title, show_legend=False):
+def plot_data_over_time(places_and_methods, ref, axes_intc_matrix, axes_intc_fracture, axes_outflux, title, show_legend=False):
     for place in places_and_methods:
         for method in places_and_methods[place]:
             folder = os.path.join(results_dir, place, method)
@@ -21,8 +25,6 @@ def plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, 
                                 has_legend=show_legend, ylim=(0-0.00000005, 0.0000014+0.00000005))
 
 def run_pot(places_and_methods={"mean": ["key"]}):
-    curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
-    case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = np.array(['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells'])
     refinement_index = [0, 1, 2]
 
@@ -34,7 +36,7 @@ def run_pot(places_and_methods={"mean": ["key"]}):
     # Plot data
     for title, ref, idx, axes_intc_matrix, axes_intc_fracture, axes_outflux in zip(titles, refinement_index, range(3), axes_intc_matrix_list, axes_intc_fracture_list, axes_outflux_list):
         show_legend = (idx == 1)  # Show the legend only for the middle subplot (index 1, subfigure b)
-        plot_data_over_time(places_and_methods, results_dir, ref, axes_intc_matrix, axes_intc_fracture, axes_outflux, title, show_legend)
+        plot_data_over_time(places_and_methods, ref, axes_intc_matrix, axes_intc_fracture, axes_outflux, title, show_legend)
 
         # Only add the legend to the middle subplot (subfigure b)
         if idx == 1:

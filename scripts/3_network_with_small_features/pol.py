@@ -1,7 +1,11 @@
 import os
 import plotroutines as plot
+from scripts.utils.general import get_paths
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+plots_dir, results_dir = get_paths(curr_dir)
 
-def plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_0, axes_p_1, title, show_legend=False, show_title=True):
+def plot_data_over_lines(places_and_methods, ref, axes_p_0, axes_p_1, title, show_legend=False, show_title=True):
     for place in places_and_methods:
         for method in places_and_methods[place]:
             folder = os.path.join(results_dir, place, method).replace("\_", "_")
@@ -20,8 +24,6 @@ def plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_0, axes_p_
                                 has_legend=show_legend, has_title=show_title)
 
 def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
-    curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
-    case = curr_dir.split(os.sep)[-1]
     titles = ["$\\sim 30k$ cells", "$\\sim 150k$ cells"]
     refinement_index = [0, 1]
 
@@ -33,7 +35,7 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     show_title = True
     for title, ref, idx, axes_p_0, axes_p_1 in zip(titles, refinement_index, range(2), axes_p_0_list, axes_p_1_list):
         show_legend = (idx == 0)  # Show legend only for the first subplot
-        plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_0, axes_p_1, title, show_legend, show_title)
+        plot_data_over_lines(places_and_methods, ref, axes_p_0, axes_p_1, title, show_legend, show_title)
 
         # Add reference for USTUTT-MPFA
         ref_folder = os.path.join(results_dir, "USTUTT", "MPFA")

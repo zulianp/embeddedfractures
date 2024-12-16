@@ -1,8 +1,11 @@
 import os
 import plotroutines as plot
+from scripts.utils.general import get_paths
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+plots_dir, results_dir = get_paths(curr_dir)
 
-
-def plot_data_over_time(places_and_methods, results_dir, ax, title, region, region_pos, num_regions, show_legend=False):
+def plot_data_over_time(places_and_methods, ax, title, region, region_pos, num_regions, show_legend=False):
     for place in places_and_methods:
         for method in places_and_methods[place]:
             folder = os.path.join(results_dir, place, method)
@@ -12,13 +15,7 @@ def plot_data_over_time(places_and_methods, results_dir, ax, title, region, regi
                                 plot.linestyle[place][method], plot.color[place][method],
                                 has_legend=show_legend, fmt="%1.2f")
 
-
 def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
-    # Get directories
-    curr_dir, plots_dir, results_dir, _ = plot.get_paths()
-    results_dir = curr_dir.replace('scripts', 'results')
-    case = curr_dir.split(os.sep)[-1]  # case we are dealing with
-
     # Fracture regions and axis limits
     regions = [15, 45, 48]
     ylim = (0 - 0.01, 1 + 0.01)
@@ -33,7 +30,7 @@ def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
         title = f"fracture {region}"
         ax = fig.add_subplot(1, len(regions), region_pos + 1, ylim=ylim, xlim=xlim)
         show_legend = (region_pos == 1)  # Show the legend only for the middle subplot
-        plot_data_over_time(places_and_methods, results_dir, ax, title, region, region_pos, len(regions), show_legend)
+        plot_data_over_time(places_and_methods, ax, title, region, region_pos, len(regions), show_legend)
 
         # Add the legend to the middle subplot
         if region_pos == 1:

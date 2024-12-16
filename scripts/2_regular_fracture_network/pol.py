@@ -1,8 +1,11 @@
 import os
 import plotroutines as plot
+from scripts.utils.general import get_paths
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+plots_dir, results_dir = get_paths(curr_dir)
 
-
-def plot_data_over_lines(places_and_methods, results_dir, ref, ax, title, cond, show_legend=False, fmt="%1.2e"):
+def plot_data_over_lines(places_and_methods, ref, ax, title, cond, show_legend=False, fmt="%1.2e"):
     for place in places_and_methods:
         for method in places_and_methods[place]:
             folder = os.path.join(results_dir, place, method).replace("\_", "_")
@@ -20,9 +23,6 @@ def plot_data_over_lines(places_and_methods, results_dir, ref, ax, title, cond, 
 
 
 def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
-    # Get directories
-    curr_dir, plots_dir, results_dir, _ = plot.get_paths()
-    case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = ['$\\sim 500$ cells', '$\\sim 4k$ cells', '$\\sim 32k$ cells']
     refinement_index = [0, 1, 2]
     conds = [0]  # Add other conditions if needed
@@ -37,16 +37,15 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
             show_legend = (idx == 1)  # Show legend only for middle subplot
             fmt = fmt_dict.get(cond)
 
-            plot_data_over_lines(places_and_methods, results_dir, ref, ax, title, cond, show_legend, fmt)
+            plot_data_over_lines(places_and_methods, ref, ax, title, cond, show_legend, fmt)
 
             if idx == 1:
                 plot.plot_legend_in_middle(ax)  # Only add legend to middle subplot
 
         # Save the figure
         plot.save(ID=cond, filename=f"{case}_pol_cond_{cond}")
-
-    # Optionally add cropped legend
-    plot.crop_pdf(f"{case}_pol_cond_{cond}_legend")
+        # Optionally add cropped legend
+        plot.crop_pdf(f"{case}_pol_cond_{cond}_legend")
 
 
 if __name__ == "__main__":

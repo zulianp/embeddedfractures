@@ -1,7 +1,11 @@
 import os
 import plotroutines as plot
+from scripts.utils.general import get_paths
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+case = curr_dir.split(os.sep)[-1]  # case we are dealing with
+plots_dir, results_dir = get_paths(curr_dir)
 
-def plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_matrix, axes_c_matrix, axes_c_fracture, title, show_legend=False):
+def plot_data_over_lines(places_and_methods, ref, axes_p_matrix, axes_c_matrix, axes_c_fracture, title, show_legend=False):
     for place in places_and_methods:
         for method in places_and_methods[place]:
             folder = os.path.join(results_dir, place, method).replace("\_", "_")
@@ -22,8 +26,6 @@ def plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_matrix, ax
                                     has_legend=show_legend)
 
 def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
-    curr_dir, plots_dir, results_dir, utils_dir = plot.get_paths()
-    case = curr_dir.split(os.sep)[-1]  # case we are dealing with
     titles = ['$\\sim 1k$ cells', '$\\sim 10k$ cells', '$\\sim 100k$ cells']
     refinement_index = [0, 1, 2]
 
@@ -35,7 +37,7 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
     # Plot data
     for title, ref, idx, axes_p_matrix, axes_c_matrix, axes_c_fracture in zip(titles, refinement_index, range(3), axes_p_matrix_list, axes_c_matrix_list, axes_c_fracture_list):
         show_legend = (idx == 1)  # Show the legend only for the middle subplot (index 1, subfigure b)
-        plot_data_over_lines(places_and_methods, results_dir, ref, axes_p_matrix, axes_c_matrix, axes_c_fracture, title, show_legend)
+        plot_data_over_lines(places_and_methods, ref, axes_p_matrix, axes_c_matrix, axes_c_fracture, title, show_legend)
 
         # Add reference for USTUTT-MPFA
         ref_data = os.path.join(results_dir, "USTUTT/MPFA/dol_refinement_5.csv".replace("\_", "_"))
