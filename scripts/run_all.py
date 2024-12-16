@@ -25,6 +25,7 @@ places_and_methods = {focus_institute: [focus_method], "mean": ["key"]}
 def main():
     # Compute mean and standard deviation for all cases
     if compute_mean_and_std_all:
+        # Note: You may see some warnings in the interpolation code.
         print("Computing mean and standard deviations for all cases...")
         compute_mean_and_std(methods_to_average)
 
