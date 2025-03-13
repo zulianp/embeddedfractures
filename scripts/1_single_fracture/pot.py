@@ -11,7 +11,6 @@ def plot_data_over_time(places_and_methods, ref, axes_intc_matrix, axes_intc_fra
         for method in places_and_methods[place]:
             folder = os.path.join(results_dir, place, method)
             data = os.path.join(folder, f"dot_refinement_{ref}.csv").replace("\_", "_")
-
             label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
             plot.plot_over_time(data, label, ref, plot.id_intc_matrix, title, axes_intc_matrix,
