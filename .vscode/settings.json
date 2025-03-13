@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+      "**/*.pyc": {"when": "$(basename).py"}, 
+      "**/__pycache__": true,
+      "**src/fracture_plotter.egg-info/": true,
+    }
+    }

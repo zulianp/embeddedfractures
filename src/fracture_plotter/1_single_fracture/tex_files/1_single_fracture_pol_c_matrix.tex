@@ -1,0 +1,14 @@
+\documentclass[12pt]{article}
+
+\usepackage{pdfpages}
+\usepackage{tikz}
+\begin{document}
+
+\pagestyle{empty}
+\includepdf[pages={1}, pagecommand={%
+    \begin{tikzpicture}[remember picture, overlay]
+        \node at (2.575, -10.75) {\includegraphics[width=0.2\textwidth]{../figures/1_single_fracture_matrixheadplot.png}};
+        \node at (9, -10.75) {\includegraphics[width=0.2\textwidth]{../figures/1_single_fracture_matrixheadplot.png}};
+        \node at (15.4, -10.75) {\includegraphics[width=0.2\textwidth]{../figures/1_single_fracture_matrixheadplot.png}};
+    \end{tikzpicture}}]{../../../../plots/1_single_fracture/1_single_fracture_pol_c_matrix}
+\end{document}
