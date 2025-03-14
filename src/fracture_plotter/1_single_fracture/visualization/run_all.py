@@ -13,22 +13,23 @@ def run_all():
     paths = get_paths(__file__)
     pprint.pprint(paths)
 
-    # places_and_methods = process_args()
-    # print(f"Running all scripts in sequence for case {paths.case}...")
+    places_and_methods = process_args()
+    print(f"Running all scripts in sequence for case {paths.case}...")
 
-    # run_percentiles(places_and_methods)   # print("Finished running percentiles")
+    # run_percentiles(places_and_methods)
+    # print("Finished running percentiles")
 
-    # run_pol(places_and_methods)
-    # print("Finished running pol")
+    run_pol(places_and_methods)
+    print("Finished running pol")
 
-    # run_pot(places_and_methods)
-    # print("Finished running pot")
+    run_pot(places_and_methods)
+    print("Finished running pot")
 
     files = [
-        f"{paths.tex_dir}/{paths.case}_pol_c_fracture",
-        # f"{paths.tex_dir}/{paths.case}_pol_c_matrix",
-        # f"{paths.tex_dir}/{paths.case}_pol_p_matrix",
-        # f"{paths.tex_dir}/{paths.case}_pot_outflux",
+        os.path.join(paths.tex_dir, f"{paths.case}_pol_c_fracture"),
+        os.path.join(paths.tex_dir, f"{paths.case}_pol_c_matrix"),
+        os.path.join(paths.tex_dir, f"{paths.case}_pol_p_matrix"),
+        os.path.join(paths.tex_dir, f"{paths.case}_pot_outflux"),
     ]
 
     run_overlay(files, paths)

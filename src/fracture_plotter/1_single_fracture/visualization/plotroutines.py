@@ -337,8 +337,6 @@ class MathTextSciFormatter(mticker.Formatter):
 
 def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
     paths = get_paths(__file__)
-    print(f"Paths in plot_percentiles: {paths}")
-
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 6
 
