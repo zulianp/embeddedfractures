@@ -19,8 +19,5 @@ def run_overlay(files, paths):
             f"rm {os.path.join(paths.plots_dir, paths.case, f_pdf.split(os.path.sep)[-1])}"
         )
 
-        # Check if {f}.aux exists and remove it
         os.system(f"rm *.aux")
-
-        # Check if {f}.log exists and remove it
         os.system(f"rm *.log")
