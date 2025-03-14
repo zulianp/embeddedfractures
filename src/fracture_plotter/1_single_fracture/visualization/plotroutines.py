@@ -91,12 +91,18 @@ def plot_over_line(
             color=color,
         )
 
+    ###
     # Format y-axis using scientific notation
-    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
+    # ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
     # Remove y-axis ticks if ref is set
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
+    else:
+        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter.set_powerlimits((-2, 2))
+        ax.yaxis.set_major_formatter(formatter)
+        ax.yaxis.get_offset_text().set_visible(True)
 
     # Set x-axis label and grid
     ax.set_xlabel(styles.getArcLengthLabel())
@@ -198,6 +204,11 @@ def plot_over_time(
     # Remove y-axis ticks if ref is set
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
+    else:
+        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter.set_powerlimits((-2, 2))
+        ax.yaxis.set_major_formatter(formatter)
+        ax.yaxis.get_offset_text().set_visible(True)
 
     # Set x-axis label and grid
     ax.set_xlabel(styles.getTimeLabel("y"))
@@ -234,15 +245,6 @@ def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
-
-
-class MathTextSciFormatter(mticker.Formatter):
-    def __init__(self, fmt="%1.2f"):
-        self.fmt = fmt
-
-    def __call__(self, x, pos=None):
-        s = self.fmt % x
-        return "${}$".format(s)
 
 
 def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
