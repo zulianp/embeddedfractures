@@ -57,7 +57,7 @@ def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
             plot.plot_legend_in_middle(ax)
 
     # Save the figure with the integrated legend
-    plot.save(plot.id_pot, f"{paths.case}_pot")
+    plot.save(plot.id_pot, f"{paths.case}_pot", plots_dir=paths.plots_dir)
 
 
 if __name__ == "__main__":

@@ -36,17 +36,6 @@ def plot_legend_in_middle(fig, ax1, ax2):
     )
 
 
-def setup_figure(id_offset, num_axes, ylim):
-    fig = plt.figure(
-        id_offset + 11, figsize=(16, 8)
-    )  # Increased figure height to accommodate the legend
-    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
-    axes_list = [
-        fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)
-    ]
-    return fig, axes_list
-
-
 def plot_over_line(
     file_name,
     label,
@@ -129,33 +118,6 @@ def plot_over_line(
         ax.set_xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
         ax.set_ylim(kwargs.get("ylim"))
-
-
-def save(simulation_id, filename, extension=".pdf"):
-    paths = get_paths(__file__)
-
-    os.makedirs(paths.plots_dir, exist_ok=True)
-
-    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
-    fig = plt.figure(simulation_id + 11)
-
-    for idx, ax in enumerate(fig.get_axes()):
-        ax.label_outer()
-        if len(fig.get_axes()) > 1:
-            text = "\\textbf{subfig. " + chr(97 + idx) + "}"
-            ax.text(
-                0.5,
-                -0.2,
-                text,
-                horizontalalignment="center",
-                verticalalignment="bottom",
-                transform=ax.transAxes,
-            )
-
-    plt.savefig(
-        os.path.join(paths.plots_dir, filename + extension), bbox_inches="tight"
-    )
-    plt.gcf().clear()
 
 
 def crop_pdf(filename):
@@ -261,9 +223,14 @@ class MathTextSciFormatter(mticker.Formatter):
         return "${}$".format(s)
 
 
-def save_over_time(filename, extension=".pdf"):
+def save_over_time(filename, extension=".pdf", plots_dir=None):
     for ID in np.arange(8):
-        save(ID, filename + "_fracture_" + str(ID), extension=extension)
+        save(
+            ID,
+            filename + "_fracture_" + str(ID),
+            extension=extension,
+            plots_dir=plots_dir,
+        )
 
 
 def plot_boundary_data(data, methods, data_ref, colors, linestyle, extension=".pdf"):

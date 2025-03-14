@@ -34,17 +34,6 @@ def plot_legend_in_middle(ax):
         )  # Adjust for a sin
 
 
-def setup_figure(id_offset, num_axes, ylim):
-    fig = plt.figure(
-        id_offset + 11, figsize=(16, 8)
-    )  # Increased figure height to accommodate the legend
-    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
-    axes_list = [
-        fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)
-    ]
-    return fig, axes_list
-
-
 def plot_over_line(
     file_name, legend, ID, title, ax, linestyle="-", color="C0", **kwargs
 ):
@@ -124,41 +113,6 @@ def plot_over_line(
     elif ID == id_p_1_matrix:
         ax.set_xticks([0, 500, 1000, 1500])
         ax.set_yticks([0, 50, 100, 150, 200, 250])
-
-
-def save(simulation_id, filename, extension=".pdf", ax_title=None):
-    paths = get_paths(__file__)
-
-    os.makedirs(paths.plots_dir, exist_ok=True)
-
-    fig = plt.figure(simulation_id + 11)
-
-    for idx, ax in enumerate(fig.get_axes()):
-        ax.label_outer()
-        if len(fig.get_axes()) > 1:
-            text = "\\textbf{subfig. " + chr(97 + idx) + "}"
-            ax.text(
-                0.5,
-                -0.2,
-                text,
-                horizontalalignment="center",
-                verticalalignment="bottom",
-                transform=ax.transAxes,
-            )
-        elif ax_title is not None:
-            ax.text(
-                0.5,
-                -0.25,
-                ax_title,
-                horizontalalignment="center",
-                verticalalignment="bottom",
-                transform=ax.transAxes,
-            )
-
-    plt.savefig(
-        os.path.join(paths.plots_dir, filename + extension), bbox_inches="tight"
-    )
-    plt.gcf().clear()
 
 
 def crop_pdf(filename):

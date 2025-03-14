@@ -122,9 +122,21 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
             plot.plot_legend_in_middle(axes_c_fracture)
 
     # Save figures with integrated legends
-    plot.save(ID=plot.id_p_matrix, filename=f"{paths.case}_pol_p_matrix")
-    plot.save(ID=plot.id_c_matrix, filename=f"{paths.case}_pol_c_matrix")
-    plot.save(ID=plot.id_c_fracture, filename=f"{paths.case}_pol_c_fracture")
+    plot.save(
+        ID=plot.id_p_matrix,
+        filename=f"{paths.case}_pol_p_matrix",
+        plots_dir=paths.plots_dir,
+    )
+    plot.save(
+        ID=plot.id_c_matrix,
+        filename=f"{paths.case}_pol_c_matrix",
+        plots_dir=paths.plots_dir,
+    )
+    plot.save(
+        ID=plot.id_c_fracture,
+        filename=f"{paths.case}_pol_c_fracture",
+        plots_dir=paths.plots_dir,
+    )
 
 
 if __name__ == "__main__":

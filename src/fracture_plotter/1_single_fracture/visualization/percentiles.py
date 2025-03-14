@@ -33,15 +33,22 @@ def run_percentiles(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
 
     # Save figures
     plot.save(
-        plot.id_p_matrix, f"{paths.case}_pol_p_matrix_percentile_90_10", starting_from=3
+        plot.id_p_matrix,
+        f"{paths.case}_pol_p_matrix_percentile_90_10",
+        starting_from=3,
+        plots_dir=paths.plots_dir,
     )
     plot.save(
-        plot.id_c_matrix, f"{paths.case}_pol_c_matrix_percentile_90_10", starting_from=3
+        plot.id_c_matrix,
+        f"{paths.case}_pol_c_matrix_percentile_90_10",
+        starting_from=3,
+        plots_dir=paths.plots_dir,
     )
     plot.save(
         plot.id_c_fracture,
         f"{paths.case}_pol_c_fracture_percentile_90_10",
         starting_from=3,
+        plots_dir=paths.plots_dir,
     )
 
 

@@ -107,9 +107,13 @@ def run_pot(places_and_methods={"mean": ["key"]}):
             plot.plot_legend_in_middle(axes_outflux)
 
     # Save figures with integrated legends
-    plot.save(plot.id_intc_matrix, f"{paths.case}_pot_c_matrix")
-    plot.save(plot.id_intc_fracture, f"{paths.case}_pot_c_fracture")
-    plot.save(plot.id_outflux, f"{paths.case}_pot_outflux")
+    plot.save(
+        plot.id_intc_matrix, f"{paths.case}_pot_c_matrix", plots_dir=paths.plots_dir
+    )
+    plot.save(
+        plot.id_intc_fracture, f"{paths.case}_pot_c_fracture", plots_dir=paths.plots_dir
+    )
+    plot.save(plot.id_outflux, f"{paths.case}_pot_outflux", plots_dir=paths.plots_dir)
 
 
 if __name__ == "__main__":

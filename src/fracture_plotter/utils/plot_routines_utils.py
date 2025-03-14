@@ -43,6 +43,17 @@ class MathTextSciFormatter(mticker.Formatter):
         return "${}$".format(s)
 
 
+def setup_figure(id_offset, num_axes, ylim):
+    fig = plt.figure(
+        id_offset + 11, figsize=(16, 8)
+    )  # Increased figure height to accommodate the legend
+    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
+    axes_list = [
+        fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)
+    ]
+    return fig, axes_list
+
+
 def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
     # It looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID + 11)
@@ -55,6 +66,7 @@ def save(ID, filename, extension=".pdf", plots_dir=None, **kwargs):
         os.makedirs(plots_dir)
 
     fig = plt.figure(ID + 11)
+    ax_title = kwargs.get("ax_title", None)
 
     for idx, ax in enumerate(fig.get_axes()):
         ax.label_outer()
@@ -65,6 +77,16 @@ def save(ID, filename, extension=".pdf", plots_dir=None, **kwargs):
                 0.5,
                 -0.2,
                 text,
+                horizontalalignment="center",
+                verticalalignment="bottom",
+                transform=ax.transAxes,
+            )
+        elif ax_title is not None:
+            print("asd")
+            ax.text(
+                0.5,
+                -0.25,
+                ax_title,
                 horizontalalignment="center",
                 verticalalignment="bottom",
                 transform=ax.transAxes,

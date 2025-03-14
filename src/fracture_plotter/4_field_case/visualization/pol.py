@@ -53,10 +53,16 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
 
     # Save figures
     plot.save(
-        plot.id_p_0_matrix, f"{paths.case}_pol_line_2", ax_title="\\textbf{subfig. b}"
+        plot.id_p_0_matrix,
+        f"{paths.case}_pol_line_2",
+        ax_title="\\textbf{subfig. b}",
+        plots_dir=paths.plots_dir,
     )
     plot.save(
-        plot.id_p_1_matrix, f"{paths.case}_pol_line_1", ax_title="\\textbf{subfig. a}"
+        plot.id_p_1_matrix,
+        f"{paths.case}_pol_line_1",
+        ax_title="\\textbf{subfig. a}",
+        plots_dir=paths.plots_dir,
     )
 
 

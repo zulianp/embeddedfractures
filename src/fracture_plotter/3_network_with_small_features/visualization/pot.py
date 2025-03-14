@@ -48,7 +48,7 @@ def run_pot(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
         plot.plot_legend_in_middle(fig, axes[0], axes[1])
 
     # Save the time-based plots for all fractures
-    plot.save_over_time(f"{paths.case}_pot")
+    plot.save_over_time(f"{paths.case}_pot", plots_dir=paths.plots_dir)
 
 
 if __name__ == "__main__":

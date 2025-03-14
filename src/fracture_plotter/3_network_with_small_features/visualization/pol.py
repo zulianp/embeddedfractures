@@ -115,8 +115,12 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
             plot.plot_legend_in_middle(fig_p_1, axes_p_0, axes_p_1)
 
     # Save figures
-    plot.save(plot.id_p_0_matrix, f"{paths.case}_pol_p_line_0")
-    plot.save(plot.id_p_1_matrix, f"{paths.case}_pol_p_line_1")
+    plot.save(
+        plot.id_p_0_matrix, f"{paths.case}_pol_p_line_0", plots_dir=paths.plots_dir
+    )
+    plot.save(
+        plot.id_p_1_matrix, f"{paths.case}_pol_p_line_1", plots_dir=paths.plots_dir
+    )
 
 
 if __name__ == "__main__":

@@ -14,17 +14,6 @@ def plot_legend_in_middle(ax):
     )  # Legend below the plot
 
 
-def setup_figure(id_offset, num_axes, ylim):
-    fig = plt.figure(
-        id_offset + 11, figsize=(16, 8)
-    )  # Increased figure height to accommodate the legend
-    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
-    axes_list = [
-        fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)
-    ]
-    return fig, axes_list
-
-
 def plot_over_line(
     file_name,
     label,
@@ -106,32 +95,6 @@ def plot_over_line(
         ax.set_xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
         ax.set_ylim(kwargs.get("ylim"))
-
-
-def save(ID, filename, extension=".pdf", **kwargs):
-    paths = get_paths(__file__)
-
-    os.makedirs(paths.plots_dir, exist_ok=True)
-    fig = plt.figure(ID + 11)
-
-    for idx, ax in enumerate(fig.get_axes()):
-        ax.label_outer()
-        if len(fig.get_axes()) > 1:
-            index = 97 + idx + kwargs.get("starting_from", 0)
-            text = "\\textbf{subfig. " + chr(index) + "}"
-            ax.text(
-                0.5,
-                -0.2,
-                text,
-                horizontalalignment="center",
-                verticalalignment="bottom",
-                transform=ax.transAxes,
-            )
-
-    plt.savefig(
-        os.path.join(paths.plots_dir, filename + extension), bbox_inches="tight"
-    )
-    plt.gcf().clear()
 
 
 def crop_pdf(filename):
