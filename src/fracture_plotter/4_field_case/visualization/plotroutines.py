@@ -91,7 +91,10 @@ def plot_over_line(
         ax.plot(data[:, 0], data[:, 1], label=legend, linestyle=linestyle, color=color)
 
     # Format y-axis using scientific notation
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+    formatter = mticker.ScalarFormatter(useMathText=True)
+    formatter.set_powerlimits((-2, 2))
+    ax.yaxis.set_major_formatter(formatter)
+    ax.yaxis.get_offset_text().set_visible(True)
 
     # Set x-axis label and grid
     ax.set_xlabel(styles.getArcLengthLabel())
@@ -180,6 +183,11 @@ def plot_over_time(
     # Remove y-axis ticks if region_pos is set
     if region_pos > 0:
         ax.yaxis.set_tick_params(length=0)
+    else:
+        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter.set_powerlimits((-2, 2))
+        ax.yaxis.set_major_formatter(formatter)
+        ax.yaxis.get_offset_text().set_visible(True)
 
     # Set x-axis label and grid
     ax.set_xlabel(styles.getTimeLabel("s"))

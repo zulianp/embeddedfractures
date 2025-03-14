@@ -84,6 +84,11 @@ def plot_over_line(
     # Modify tick parameters for simulations other than the first
     if simulation_id > 0:
         ax.yaxis.set_tick_params(length=0)
+    else:
+        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter.set_powerlimits((-2, 2))
+        ax.yaxis.set_major_formatter(formatter)
+        ax.yaxis.get_offset_text().set_visible(True)
 
     # Set labels, grid, and title
     ax.set_xlabel(styles.getArcLengthLabel())
@@ -145,6 +150,11 @@ def plot_over_time(
         # Modify tick parameters if needed
         if region_pos > 0:
             ax.yaxis.set_tick_params(length=0)
+        else:
+            formatter = mticker.ScalarFormatter(useMathText=True)
+            formatter.set_powerlimits((-2, 2))
+            ax.yaxis.set_major_formatter(formatter)
+            ax.yaxis.get_offset_text().set_visible(True)
 
         # Plot the mean with a shaded region for the standard deviation
         time = mean_data[:, 0]

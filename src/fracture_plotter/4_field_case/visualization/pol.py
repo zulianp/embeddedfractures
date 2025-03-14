@@ -22,6 +22,7 @@ def plot_data_over_lines(places_and_methods, ax, title, line_idx, ylim, xlim):
                 plot.linestyle[place][method],
                 plot.color[place][method],
                 has_legend=False,
+                
             )
 
     # Set axis limits
