@@ -1,11 +1,9 @@
 import argparse
 import os
-import sys
 
 # Ensure the working directory is the project root
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, project_root)
-import utils.csv as csv_tools
+import fracture_plotter.utils.csv as csv_tools
+from fracture_plotter.utils.general import get_paths
 
 
 def process_patterns(
@@ -26,13 +24,15 @@ def process_patterns(
 
 
 def compute_mean_and_std(methods_included, focus_dir="USI/FEM_LM"):
+    paths = get_paths(__file__)
+
     if type(methods_included) == str:
         methods_included = methods_included.split(
             ","
         )  # Split the comma-separated string into a list
 
     # Base directory in which to process CSV files
-    base_dir = project_root + "/results"
+    base_dir = os.path.join(paths.project_root, "results")
 
     # Define a dictionary mapping case identifiers to pattern lists
     case_patterns = {
