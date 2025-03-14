@@ -3,20 +3,18 @@
 The project directory is organized as follows:
 - `plots`
 - `results`
-- `scripts`
+- `src/fracture_plotter` (this is the module)
 
-Each of the above folders contains four subfolders, corresponding to specific cases:
+Each of the above folders contains four subfolders in common, corresponding to the following cases:
 
 - `1_single_fracture/`
 - `2_regular_fracture_network/`
 - `3_network_with_small_features/`
 - `4_field_case/`
 
-The case subfolders across `plots`, `results`, and `scripts` are aligned with one another, meaning that they contain files corresponding to the same case.
+## Module Folder
 
-## `scripts` Folder
-
-The `scripts/` folder contains Python files essential for processing and analyzing the data. Notably:
+The `src/fracture_plotter/utils` folder contains Python files essential for processing and analyzing the data. Notably:
 
 - **`compute_mean_and_std_all.py`**: This script computes the mean and standard deviation for results stored in CSV files across different institutions, with a focus on the `USI/FEM_LM` results.
   
