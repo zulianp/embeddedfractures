@@ -1,4 +1,10 @@
 # Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
+from operator import methodcaller
+
+from scipy import interpolate
+from scipy.integrate import simps
+
+from fracture_plotter.utils.general import get_paths
 from fracture_plotter.utils.plot_routines_utils import *
 
 
@@ -213,29 +219,6 @@ def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
-
-
-class MathTextSciFormatter(mticker.Formatter):
-    def __init__(self, fmt="%1.2e"):
-        self.fmt = fmt
-
-    def __call__(self, x, pos=None):
-        s = self.fmt % x
-        if "f" in self.fmt:
-            return "${}$".format(s)
-        decimal_point = "."
-        positive_sign = "+"
-        tup = s.split("e")
-        significand = tup[0].rstrip(decimal_point)
-        sign = tup[1][0].replace(positive_sign, "")
-        exponent = tup[1][1:].lstrip("0")
-        if exponent:
-            exponent = "10^{%s%s}" % (sign, exponent)
-        if significand and exponent:
-            s = r"%s{\times}%s" % (significand, exponent)
-        else:
-            s = r"%s%s" % (significand, exponent)
-        return "${}$".format(s)
 
 
 def plot_percentiles(ref, cond, places_and_methods, ax, **kwargs):
