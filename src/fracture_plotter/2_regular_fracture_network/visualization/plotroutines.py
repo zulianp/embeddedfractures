@@ -1,32 +1,5 @@
 # Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
-import os
-
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
-
-os.environ["PATH"] += ":/Library/TeX/texbin"
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif")
-
-import os
-import sys
-from operator import methodcaller
-
-import numpy as np
-from scipy import interpolate
-from scipy.integrate import simps
-
-import fracture_plotter.utils.styles as styles
-from fracture_plotter.utils.general import get_paths
-
-# ------------------------------------------------------------------------------#
-
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif")
-plt.rc("font", size=15)
-
-linestyle = styles.linestyle
-color = styles.color
+from fracture_plotter.utils.plot_routines_utils import *
 
 
 def plot_legend_in_middle(ax):

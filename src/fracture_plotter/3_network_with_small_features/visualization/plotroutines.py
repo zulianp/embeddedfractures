@@ -1,31 +1,5 @@
 # Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
-from __future__ import print_function
-
-import os
-
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
-
-os.environ["PATH"] += ":/Library/TeX/texbin"
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif")
-
-import os
-import sys
-from operator import methodcaller
-
-import numpy as np
-from scipy import interpolate
-from scipy.integrate import simps
-
-import fracture_plotter.utils.styles as styles
-from fracture_plotter.utils.general import get_paths
-
-# ------------------------------------------------------------------------------#
-
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif")
-plt.rc("font", size=15)
+from fracture_plotter.utils.plot_routines_utils import *
 
 # ids of the different plots
 id_p_0_matrix = 0  # pressure along (0, 100, 100)-(100, 0, 0)
@@ -33,9 +7,6 @@ id_p_0_matrix_legend = 10  # pressure along (0, 100, 100)-(100, 0, 0)
 id_p_1_matrix = 1  # p along (0, 100, 100)-(100, 0, 0)
 id_p_1_matrix_legend = 11  # p along (0, 100, 100)-(100, 0, 0)
 id_pot_legend = 12  # p along (0, 100, 100)-(100, 0, 0)
-
-linestyle = styles.linestyle
-color = styles.color
 
 
 def plot_legend_in_middle(fig, ax1, ax2):

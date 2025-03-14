@@ -1,8 +1,32 @@
+from __future__ import print_function
+
 import os
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+
+os.environ["PATH"] += ":/Library/TeX/texbin"
+plt.rc("text", usetex=True)
+plt.rc("font", family="serif")
+
+import os
+import sys
+from operator import methodcaller
+
+import numpy as np
+from scipy import interpolate
+from scipy.integrate import simps
+
+import fracture_plotter.utils.styles as styles
+from fracture_plotter.utils.general import get_paths
+
+plt.rc("text", usetex=True)
+plt.rc("font", family="serif")
+plt.rc("font", size=15)
+
+linestyle = styles.linestyle
+color = styles.color
 
 places_and_methods = {
     "USI": ["FEM\_LM"],
@@ -10,24 +34,6 @@ places_and_methods = {
 }
 
 
-# class MathTextSciFormatter(mticker.Formatter):
-#     def __init__(self, fmt="%1.2e"):
-#         self.fmt = fmt
-#     def __call__(self, x, pos=None):
-#         s = self.fmt % x
-#         decimal_point = '.'
-#         positive_sign = '+'
-#         tup = s.split('e')
-#         significand = tup[0].rstrip(decimal_point)
-#         sign = tup[1][0].replace(positive_sign, '')
-#         exponent = tup[1][1:].lstrip('0')
-#         if exponent:
-#             exponent = '10^{%s%s}' % (sign, exponent)
-#         if significand and exponent:
-#             s =  r'%s{\times}%s' % (significand, exponent)
-#         else:
-#             s =  r'%s%s' % (significand, exponent)
-#         return "${}$".format(s)
 class MathTextSciFormatter(mticker.Formatter):
     def __init__(self, fmt="%1.2f"):
         self.fmt = fmt
@@ -38,7 +44,7 @@ class MathTextSciFormatter(mticker.Formatter):
 
 
 def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
-    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
+    # It looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
