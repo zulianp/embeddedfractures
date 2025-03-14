@@ -115,14 +115,6 @@ def plot_over_line(
         sys.exit(1)
 
 
-def crop_pdf(filename):
-    paths = get_paths(__file__)
-    filename = os.path.join(paths.plots_dir, filename + ".pdf")
-    if os.path.isfile(filename):
-        os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
-        os.system("pdfcrop " + filename + " " + filename)
-
-
 # ids of the different plots
 id_intc_matrix = 0  # integral of c*porosity in the lower matrix sub-domain
 id_intc_matrix_legend = 10  # integral of c*porosity in the lower matrix sub-domain

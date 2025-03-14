@@ -11,15 +11,10 @@ plt.rc("text", usetex=True)
 plt.rc("font", family="serif")
 
 import os
-import sys
-from operator import methodcaller
 
 import numpy as np
-from scipy import interpolate
-from scipy.integrate import simps
 
 import fracture_plotter.utils.styles as styles
-from fracture_plotter.utils.general import get_paths
 
 plt.rc("text", usetex=True)
 plt.rc("font", family="serif")

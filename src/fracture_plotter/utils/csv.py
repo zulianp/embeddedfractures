@@ -1,12 +1,15 @@
 import os
 import re
+
 import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 
+
 def get_num_rows(csv_file: str):
-    with open(csv_file, 'r') as f:
+    with open(csv_file, "r") as f:
         return sum(1 for line in f)
+
 
 def get_max_num_rows(csv_files: list):
     max_num_rows = -1
@@ -16,10 +19,13 @@ def get_max_num_rows(csv_files: list):
             max_num_rows = num_rows
     return max_num_rows
 
-def find_common_min_max_integer_in_filenames(base_dir: str, methods_included: list, pattern: str = 'dol_refinement_*.csv'):
+
+def find_common_min_max_integer_in_filenames(
+    base_dir: str, methods_included: list, pattern: str = "dol_refinement_*.csv"
+):
     common_max_int = None
     common_min_int = None
-    regex_pattern = re.escape(pattern).replace('\\*', r'(\d+)')
+    regex_pattern = re.escape(pattern).replace("\\*", r"(\d+)")
 
     for method in methods_included:
         method_dir = os.path.join(base_dir, method)
@@ -44,24 +50,33 @@ def find_common_min_max_integer_in_filenames(base_dir: str, methods_included: li
 
     return common_min_int, common_max_int
 
+
 def extract_institute_and_method(filename):
-    parts = filename.split('/')
-    institute_method = '/'.join(parts[-3:-1]) # Extract the second last and third last parts
+    parts = filename.split("/")
+    institute_method = "/".join(
+        parts[-3:-1]
+    )  # Extract the second last and third last parts
     return institute_method
+
 
 def filter_csv_files(csv_files, methods_included):
     filtered_csv_files = []
-    institutes_and_methods = [extract_institute_and_method(filename) for filename in csv_files]
+    institutes_and_methods = [
+        extract_institute_and_method(filename) for filename in csv_files
+    ]
     for i, csv_file in enumerate(csv_files):
         if institutes_and_methods[i] in methods_included:
             filtered_csv_files.append(csv_file)
     return filtered_csv_files
 
-def find_csv_filenames(base_dir: str, focus_dir: str = "USI/FEM_LM", filename: str = 'results.csv'):
+
+def find_csv_filenames(
+    base_dir: str, focus_dir: str = "USI/FEM_LM", filename: str = "results.csv"
+):
     csv_files = []
     focus_file = None
     focus_dir = os.path.join(base_dir, focus_dir)
-    
+
     for root, dirs, files in os.walk(base_dir):
         if filename in files:
             file_path = os.path.join(root, filename)
@@ -69,19 +84,21 @@ def find_csv_filenames(base_dir: str, focus_dir: str = "USI/FEM_LM", filename: s
                 focus_file = file_path  # Save the focus_dir file to add it first
             else:
                 # Exclude any previously computed mean and standard deviation files
-                if not('mean' in root or 'std' in root):
+                if not ("mean" in root or "std" in root):
                     csv_files.append(file_path)
-    
+
     # Place the focus_dir file at the beginning of the list, if it was found
     if focus_file:
         csv_files.insert(0, focus_file)
-    
+
     return csv_files
+
 
 def find_direct_subdirectories(base_dir: str):
     subdirectories = [f.path for f in os.scandir(base_dir) if f.is_dir()]
     subdirectories.sort()  # Sort the subdirectories alphabetically
     return subdirectories
+
 
 def create_interpolated_dfs(df_list):
     ref_df = df_list[0]
@@ -105,17 +122,19 @@ def create_interpolated_dfs(df_list):
 
         for i in range(other_y.shape[1]):
             # Create DataFrame for x and y
-            data_df = pd.DataFrame({'x': other_x_sorted, 'y': other_y_sorted[:, i]})
+            data_df = pd.DataFrame({"x": other_x_sorted, "y": other_y_sorted[:, i]})
 
             # Group by x and compute mean y-values to handle duplicates
-            data_df = data_df.groupby('x', as_index=False).mean()
+            data_df = data_df.groupby("x", as_index=False).mean()
 
             # Extract unique x-values and corresponding y-values
-            other_x_unique = data_df['x'].values
-            other_y_unique = data_df['y'].values
+            other_x_unique = data_df["x"].values
+            other_y_unique = data_df["y"].values
 
             # Create an interpolation function using cubic interpolation
-            f = interp1d(other_x_unique, other_y_unique, kind='linear', fill_value='extrapolate')
+            f = interp1d(
+                other_x_unique, other_y_unique, kind="linear", fill_value="extrapolate"
+            )
 
             # Interpolate to ref_x
             interpolated_y[:, i] = f(ref_x)
@@ -126,28 +145,71 @@ def create_interpolated_dfs(df_list):
 
     return interpolated_dfs
 
-def create_mean_and_std_csv_files(base_dir: str, pattern_filename: str, focus_dir: str = "USI/FEM_LM", methods_included: list[str] = ["USI/FEM_LM"]):
+
+def create_mean_and_std_csv_files(
+    base_dir: str,
+    pattern_filename: str,
+    focus_dir: str = "USI/FEM_LM",
+    methods_included: list[str] = ["USI/FEM_LM"],
+):
     min_int_in_filenames, max_int_in_filenames = (0, 0)
-    if '*' in pattern_filename:
-        min_int_in_filenames, max_int_in_filenames = find_common_min_max_integer_in_filenames(base_dir=base_dir, methods_included=methods_included, pattern=pattern_filename)
+    if "*" in pattern_filename:
+        min_int_in_filenames, max_int_in_filenames = (
+            find_common_min_max_integer_in_filenames(
+                base_dir=base_dir,
+                methods_included=methods_included,
+                pattern=pattern_filename,
+            )
+        )
 
     for ref in range(min_int_in_filenames, max_int_in_filenames + 1):
-        filename = pattern_filename.replace('*', str(ref)) if '*' in pattern_filename else pattern_filename
+        filename = (
+            pattern_filename.replace("*", str(ref))
+            if "*" in pattern_filename
+            else pattern_filename
+        )
         # Collect all the CSV files with the same name in any (recursive) subdirectory of base_dir
         # csv_files[0] corresponds to that in the focus_dir
-        csv_files = filter_csv_files(find_csv_filenames(base_dir=base_dir, filename=filename, focus_dir=focus_dir), list(set(["USI/FEM_LM"] + methods_included)))
+        csv_files = filter_csv_files(
+            find_csv_filenames(
+                base_dir=base_dir, filename=filename, focus_dir=focus_dir
+            ),
+            list(set(["USI/FEM_LM"] + methods_included)),
+        )
 
-        # Create combined DataFrame
-        dfs = create_interpolated_dfs(df_list=[pd.read_csv(file, header=None) for file in csv_files])
-        # TODO: once ours is OK, include in mean and std computations
-        combined_df = pd.concat(dfs[1:], ignore_index=True).sort_values(by=dfs[1].columns[0]).reset_index(drop=True)
+        if "results.csv" not in filename:
+            # Create combined DataFrame
+            dfs = create_interpolated_dfs(
+                df_list=[pd.read_csv(file, header=None) for file in csv_files]
+            )
 
-        # Compute the mean and standard deviation (assumes the first column is the reference)
-        mean_df = combined_df.groupby(combined_df.columns[0]).mean().reset_index()
-        std_df = combined_df.groupby(combined_df.columns[0]).std().reset_index()
+            # TODO: once ours is OK, include in mean and std computations
+            combined_df = (
+                pd.concat(dfs[1:], ignore_index=True)
+                .sort_values(by=dfs[1].columns[0])
+                .reset_index(drop=True)
+            )
+
+            # Compute the mean and standard deviation (assumes the first column is the reference)
+            mean_df = combined_df.groupby(combined_df.columns[0]).mean().reset_index()
+            std_df = combined_df.groupby(combined_df.columns[0]).std().reset_index()
+        else:
+            dfs = [pd.read_csv(file, header=None) for file in csv_files]
+
+            # TODO: once ours is OK, include in mean and std computations
+            mean_df = sum(dfs[1:]) / len(dfs[1:])
+
+            stacked = np.stack([df.values for df in dfs])
+            # Compute element-wise standard deviation (use ddof=1 for sample std)
+            std_values = np.std(stacked, axis=0, ddof=0)
+            std_df = pd.DataFrame(
+                std_values, columns=dfs[0].columns, index=dfs[0].index
+            )
 
         # Save mean and standard deviation to CSV files
-        for stat, dir_name in [('mean', 'mean/key'), ('std', 'std/key')]:
+        for stat, dir_name in [("mean", "mean/key"), ("std", "std/key")]:
             stat_dir = os.path.join(base_dir, dir_name)
             os.makedirs(stat_dir, exist_ok=True)
-            (mean_df if stat == 'mean' else std_df).to_csv(os.path.join(stat_dir, filename), index=False, header=False)
+            (mean_df if stat == "mean" else std_df).to_csv(
+                os.path.join(stat_dir, filename), index=False, header=False
+            )

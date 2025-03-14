@@ -1,4 +1,5 @@
 # Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
+from fracture_plotter.utils.general import get_paths
 from fracture_plotter.utils.plot_routines_utils import *
 
 # ids of the different plots
@@ -120,15 +121,6 @@ def plot_over_line(
         ax.set_ylim(kwargs.get("ylim"))
 
 
-def crop_pdf(filename):
-    paths = get_paths(__file__)
-
-    filename = os.path.join(paths.plots_dir, filename + ".pdf")
-    if os.path.isfile(filename):
-        os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
-        os.system("pdfcrop " + filename + " " + filename)
-
-
 def plot_over_time(
     file_name, legend, ref, ID, title, ax, linestyle="-", color="C0", **kwargs
 ):
@@ -233,30 +225,53 @@ def save_over_time(filename, extension=".pdf", plots_dir=None):
         )
 
 
-def plot_boundary_data(data, methods, data_ref, colors, linestyle, extension=".pdf"):
-    plot_boundary_head(data[:, 4:], methods, data_ref[2], colors, linestyle, extension)
+def plot_boundary_data(
+    fig, axs, data, methods, data_ref, colors, linestyle, extension=".pdf"
+):
+    """
+    Plots the boundary data on provided axes.
+
+    Parameters:
+      fig   : matplotlib Figure object.
+      axs   : dict with axes for each subplot, e.g.,
+              {"head": ax_head, "flux": ax_flux, "ref_flux": ax_ref_flux}
+      data  : Data array.
+      methods, colors, linestyle : Plot styling parameters.
+      data_ref : Reference data array.
+    """
+    plot_boundary_head(
+        ax=axs["head"],
+        da=data[:, 4:],
+        methods=methods,
+        head_ref=data_ref[2],
+        colors=colors,
+        linestyle=linestyle,
+    )
     plot_boundary_fluxes(
-        data[:, :4], methods, data_ref[1], colors, linestyle, extension
+        ax=axs["flux"],
+        da=data[:, :4],
+        methods=methods,
+        ratio_ref=data_ref[1],
+        colors=colors,
+        linestyle=linestyle,
     )
     plot_reference_fluxes(
-        data[:, :4], methods, data_ref[1], colors, linestyle, extension
+        ax=axs["ref_flux"],
+        da=data[:, :4],
+        methods=methods,
+        ratio_ref=data_ref[1],
+        colors=colors,
+        linestyle=linestyle,
     )
 
 
-def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
-    paths = get_paths(__file__)
-
+def plot_boundary_fluxes(ax, da, methods, ratio_ref, colors, linestyle):
     N = da.shape[0]
-    ind = np.arange(N)  # the x locations for the groups
-    width = 0.2  # the width of the bars
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
+    ind = np.arange(N)
+    width = 0.2
     x = np.array([0, N])
+    ax.plot(x, np.array([ratio_ref, ratio_ref]), ls="-", color="black")
 
-    c1 = "black"
-    ax.plot(x, np.array([ratio_ref, ratio_ref]), ls="-", color=c1)
     colors = [colors, colors]
     for i, c in enumerate(colors):
         ax.bar(ind + width * i, da[:, i + 2], width, color=c, edgecolor="white")
@@ -269,42 +284,26 @@ def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
 
     ax.legend(["Reference flux ratio $r_{out}$"])
     ax.set_ylabel("$r_{out}$")
-
     ax.set_ylim([0.4, 0.5])
     ax.set_xticks(ind + width)
-    ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
-    ax.set_xticklabels(ind_str)
-    os.makedirs(paths.plots_dir, exist_ok=True)
-
-    text = "\\textbf{subfig. b}"
+    ax.set_xticklabels(["\\textbf{" + str(idx) + "}" for idx in ind])
     ax.text(
         0.5,
         -0.2,
-        text,
+        "\\textbf{subfig. b}",
         horizontalalignment="center",
         verticalalignment="bottom",
         transform=ax.transAxes,
     )
 
-    plt.savefig(
-        os.path.join(paths.plots_dir, f"{paths.case}_boundary_head" + extension),
-        bbox_inches="tight",
-    )
 
-
-def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
-    paths = get_paths(__file__)
-
+def plot_reference_fluxes(ax, da, methods, ratio_ref, colors, linestyle):
     N = da.shape[0]
-    ind = np.arange(N)  # the x locations for the groups
-    width = 0.2  # the width of the bars
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
+    ind = np.arange(N)
+    width = 0.2
     x = np.array([0, N])
-    c0 = "black"
-    ax.plot(x, np.array([1 / 3, 1 / 3]), ls="-", color=c0)
+    ax.plot(x, np.array([1 / 3, 1 / 3]), ls="-", color="black")
+
     colors = [colors, colors]
     for i, c in enumerate(colors):
         ax.bar(ind + width * i, da[:, i], width, color=c, edgecolor="white")
@@ -317,46 +316,29 @@ def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
 
     ax.legend(["Prescribed flux $\\overline{u}_{out}$"])
     ax.set_ylabel("$\\overline{u}_{out}$")
-
     ax.set_ylim([0.1, 0.42])
     ax.set_xticks(ind + width)
-    ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
-    ax.set_xticklabels(ind_str)
-    os.makedirs(paths.plots_dir, exist_ok=True)
-
-    text = "\\textbf{subfig. a}"
+    ax.set_xticklabels(["\\textbf{" + str(idx) + "}" for idx in ind])
     ax.text(
         0.5,
         -0.2,
-        text,
+        "\\textbf{subfig. a}",
         horizontalalignment="center",
         verticalalignment="bottom",
         transform=ax.transAxes,
     )
 
-    plt.savefig(
-        os.path.join(paths.plots_dir, f"{paths.case}_reference_flux" + extension),
-        bbox_inches="tight",
-    )
 
-
-def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
-    paths = get_paths(__file__)
-
+def plot_boundary_head(ax, da, methods, head_ref, colors, linestyle):
     N = da.shape[0]
-    ind = np.arange(N)  # the x locations for the groups
-    width = 0.3  # the width of the bars
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    ind = np.arange(N)
+    width = 0.3
     x = np.array([0, N])
-    c0 = "black"
-    ax.plot(x, np.array([head_ref, head_ref]), ls="-", color=c0)
-    colors = [colors, colors]
+    ax.plot(x, np.array([head_ref, head_ref]), ls="-", color="black")
 
+    colors = [colors, colors]
     for i, c in enumerate(colors):
-        ax.bar(
-            ind + width * i, da[:, i], width, color=c, edgecolor="white"
-        )  # , hatch=linestyle)
+        ax.bar(ind + width * i, da[:, i], width, color=c, edgecolor="white")
 
     linestyle = [item for sublist in [linestyle, linestyle] for item in sublist]
     linestyle_map = {"-": "", "--": "-", ":": "--"}
@@ -368,24 +350,14 @@ def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
     ax.set_ylabel(styles.getHeadLabel(3))
     ax.set_ylim([0.16, 0.28])
     ax.set_xticks(ind + width)
-    ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
-    ax.set_xticklabels(ind_str)
-
-    os.makedirs(paths.plots_dir, exist_ok=True)
-
-    text = "\\textbf{subfig. c}"
+    ax.set_xticklabels(["\\textbf{" + str(idx) + "}" for idx in ind])
     ax.text(
         0.5,
         -0.2,
-        text,
+        "\\textbf{subfig. c}",
         horizontalalignment="center",
         verticalalignment="bottom",
         transform=ax.transAxes,
-    )
-
-    plt.savefig(
-        os.path.join(paths.plots_dir, f"{paths.case}_boundary_fluxes" + extension),
-        bbox_inches="tight",
     )
 
 

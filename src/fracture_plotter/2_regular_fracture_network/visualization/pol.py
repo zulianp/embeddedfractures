@@ -74,9 +74,11 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
                 plot.plot_legend_in_middle(ax)  # Only add legend to middle subplot
 
         # Save the figure
-        plot.save(ID=cond, filename=f"{paths.case}_pol_cond_{cond}", plots_dir=paths.plots_dir)
+        plot.save(
+            ID=cond, filename=f"{paths.case}_pol_cond_{cond}", plots_dir=paths.plots_dir
+        )
         # Optionally add cropped legend
-        plot.crop_pdf(f"{paths.case}_pol_cond_{cond}_legend")
+        plot.crop_pdf(f"{paths.case}_pol_cond_{cond}_legend", plots_dir=paths.plots_dir)
 
 
 if __name__ == "__main__":
