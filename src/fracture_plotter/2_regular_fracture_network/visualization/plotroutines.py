@@ -7,17 +7,9 @@ from fracture_plotter.utils.plot_routines_utils import *
 def plot_over_line(
     filename, label, ref, title, ax, linestyle="-", color="C0", fontsize=30, **kwargs
 ):
-    N = 2  # Assuming two columns of data (x, y)
-    load_args = {
-        "filename": filename,
-        "n_columns": N,
-        "converters": {i: decode_float for i in range(N)},
-    }
-    plot_args = {
-        "label": label,
-        "linestyle": linestyle,
-        "color": color,
-    }
+    N = 2
+    load_args = make_load_args(filename, N)
+    plot_args = make_plot_args(label, linestyle=linestyle, color=color)
 
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
@@ -60,25 +52,13 @@ def plot_over_time(
 ):
     # Get the number of columns
     N = min(22, len(np.genfromtxt(filename, delimiter=",", max_rows=1, skip_header=1)))
-
-    load_args = {
-        "filename": filename,
-        "n_columns": N,
-        "converters": {i: decode_float for i in range(N)},
-    }
-    plot_args = {
-        "label": label,
-        "linestyle": linestyle,
-        "color": color,
-    }
+    load_args = make_load_args(filename, N)
+    plot_args = make_plot_args(label, linestyle=linestyle, color=color)
 
     region_idx = region + 1
-    if "mean" in filename:
-        mean_data, std_data = load_mean_and_std_data(
-            **load_args,
-            skip_header=1,
-        )
 
+    if "mean" in filename:
+        mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
         plot_mean_and_std_data(
             ax=ax,
             x=mean_data[:, 0],
@@ -88,7 +68,6 @@ def plot_over_time(
         )
     else:
         data = load_data(**load_args, skip_header=0)
-
         if "/USI/" in filename:
             if region == 1:
                 region_idx = 1
@@ -97,12 +76,7 @@ def plot_over_time(
             elif region == 11:
                 region_idx = 3
 
-        # Plot the mean data
-        ax.plot(
-            data[:, 0],
-            data[:, region_idx],
-            **plot_args,
-        )
+        ax.plot(data[:, 0], data[:, region_idx], **plot_args)
 
     format_axis(
         ax,

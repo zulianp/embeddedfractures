@@ -28,6 +28,15 @@ places_and_methods = {
 }
 
 
+def make_load_args(filename, n_columns):
+    converters = {i: decode_float for i in range(n_columns)}
+    return {"filename": filename, "n_columns": n_columns, "converters": converters}
+
+
+def make_plot_args(label, linestyle="-", color="C0"):
+    return {"label": label, "linestyle": linestyle, "color": color}
+
+
 def format_axis(ax, ref, fontsize, **kwargs):
     ax.grid(True)
     ax.tick_params(axis="x", labelsize=fontsize)

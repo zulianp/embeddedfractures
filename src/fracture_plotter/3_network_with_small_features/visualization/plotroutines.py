@@ -24,25 +24,12 @@ def plot_over_line(
     fontsize=30,
     **kwargs,
 ):
-    N = 2  # Assuming two columns of data (x, y)
-    load_args = {
-        "filename": filename,
-        "n_columns": N,
-        "converters": {i: decode_float for i in range(N)},
-    }
-    plot_args = {  # noqa: F841
-        "label": label,
-        "linestyle": linestyle,
-        "color": color,
-    }
+    N = 2
+    load_args = make_load_args(filename, N)
+    plot_args = make_plot_args(label, linestyle=linestyle, color=color)
 
-    # Check if the filename contains 'mean' to determine if we're plotting mean and std
     if "mean" in filename:
-        mean_data, std_data = load_mean_and_std_data(
-            **load_args,
-            skip_header=1,
-        )
-
+        mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
         plot_mean_and_std_data(
             ax=ax,
             x=mean_data[:, 0],
@@ -51,7 +38,6 @@ def plot_over_line(
             **plot_args,
         )
     else:
-        # Plot only the mean data if 'mean' is not in the file name
         data = load_data(**load_args, skip_header=0)
         ax.plot(data[:, 0], data[:, 1], **plot_args)
 
@@ -80,23 +66,12 @@ def plot_over_time(
     fontsize=30,
     **kwargs,
 ):
-    N = 9  # Assuming 9 columns of data
-    load_args = {
-        "filename": filename,
-        "n_columns": N,
-        "converters": {i: decode_float for i in range(N)},
-    }
-    plot_args = {
-        "label": label,
-        "linestyle": linestyle,
-        "color": color,
-    }
+    N = 9
+    load_args = make_load_args(filename, N)
+    plot_args = make_plot_args(label, linestyle=linestyle, color=color)
 
     if "mean" in filename:
-        mean_data, std_data = load_mean_and_std_data(
-            **load_args,
-            skip_header=1,
-        )
+        mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
 
         plot_mean_and_std_data(
             ax=ax,
@@ -107,11 +82,7 @@ def plot_over_time(
         )
     else:
         data = load_data(**load_args, skip_header=0)
-        ax.plot(
-            data[:, 0],
-            data[:, ID + 1],
-            **plot_args,
-        )
+        ax.plot(data[:, 0], data[:, ID + 1], **plot_args)
 
     format_axis(
         ax,

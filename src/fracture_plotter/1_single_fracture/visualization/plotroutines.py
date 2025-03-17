@@ -27,16 +27,8 @@ def plot_over_line(
     **kwargs,
 ):
     N = 5
-    load_args = {
-        "filename": filename,
-        "n_columns": N,
-        "converters": {i: decode_float for i in range(N)},
-    }
-    plot_args = {
-        "label": label,
-        "linestyle": linestyle,
-        "color": color,
-    }
+    load_args = make_load_args(filename, N)
+    plot_args = make_plot_args(label, linestyle, color)
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
         plot_mean_and_std_data(
@@ -48,11 +40,7 @@ def plot_over_line(
         )
     else:
         data = load_data(**load_args, skip_header=0)
-        ax.plot(
-            data[:, 2 * ID],
-            data[:, 2 * ID + 1],
-            **plot_args,
-        )
+        ax.plot(data[:, 2 * ID], data[:, 2 * ID + 1], **plot_args)
 
     ylabel = {
         id_p_matrix: styles.getHeadLabel(3),
@@ -84,16 +72,8 @@ def plot_over_time(
     **kwargs,
 ):
     N = 4
-    load_args = {
-        "filename": filename,
-        "n_columns": N,
-        "converters": {i: decode_float for i in range(N)},
-    }
-    plot_args = {
-        "label": label,
-        "linestyle": linestyle,
-        "color": color,
-    }
+    load_args = make_load_args(filename, N)
+    plot_args = make_plot_args(label, linestyle, color)
 
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
@@ -106,11 +86,7 @@ def plot_over_time(
         )
     else:
         data = load_data(**load_args, skip_header=0)
-        ax.plot(
-            data[:, 0] / (365 * 24 * 3600),
-            data[:, ID + 1],
-            **plot_args,
-        )
+        ax.plot(data[:, 0] / (365 * 24 * 3600), data[:, ID + 1], **plot_args)
 
     ylabel = {
         id_intc_matrix: r"$\int_{\Omega_3} \phi_3 \, c_3$",
