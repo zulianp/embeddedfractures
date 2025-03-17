@@ -3,7 +3,11 @@ import os
 import plotroutines as plot
 
 
-def run_percentiles(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
+def run_percentiles(
+    places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
+    fontsize=30,
+    subfig_fontsize=12,
+):
     paths = plot.get_paths(__file__)
 
     # Setup figures and axes
@@ -25,10 +29,27 @@ def run_percentiles(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
         axes_c_matrix_list,
         axes_c_fracture_list,
     ):
-        plot.plot_percentiles(ref, plot.id_p_matrix, places_and_methods, axes_p_matrix)
-        plot.plot_percentiles(ref, plot.id_c_matrix, places_and_methods, axes_c_matrix)
         plot.plot_percentiles(
-            ref, plot.id_c_fracture, places_and_methods, axes_c_fracture
+            ref=ref,
+            ID=plot.id_p_matrix,
+            places_and_methods=places_and_methods,
+            ax=axes_p_matrix,
+            fontsize=fontsize,
+        )
+        plot.plot_percentiles(
+            ref=ref,
+            ID=plot.id_c_matrix,
+            places_and_methods=places_and_methods,
+            ax=axes_c_matrix,
+            fontsize=fontsize,
+        )
+
+        plot.plot_percentiles(
+            ref=ref,
+            ID=plot.id_c_fracture,
+            places_and_methods=places_and_methods,
+            ax=axes_c_fracture,
+            fontsize=fontsize,
         )
 
     # Save figures
@@ -37,18 +58,21 @@ def run_percentiles(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
         f"{paths.case}_pol_p_matrix_percentile_90_10",
         starting_from=3,
         plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
     )
     plot.save(
         plot.id_c_matrix,
         f"{paths.case}_pol_c_matrix_percentile_90_10",
         starting_from=3,
         plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
     )
     plot.save(
         plot.id_c_fracture,
         f"{paths.case}_pol_c_fracture_percentile_90_10",
         starting_from=3,
         plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
     )
 
 

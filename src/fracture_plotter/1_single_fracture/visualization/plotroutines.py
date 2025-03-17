@@ -17,7 +17,7 @@ id_c_fracture = 2  # c along (0, 100, 80)-(100, 0, 20)
 id_c_fracture_legend = 12  # c along (0, 100, 80)-(100, 0, 20)
 
 
-def plot_legend_in_middle(ax):
+def plot_legend_in_middle(ax, fontsize=30):
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(
         handles,
@@ -25,25 +25,34 @@ def plot_legend_in_middle(ax):
         loc="upper center",
         bbox_to_anchor=(0.5, -0.2),
         ncol=4,
-        fontsize=14,
+        fontsize=fontsize,
     )  # Legend below the plot
 
 
 def plot_over_line(
-    file_name, label, ref, ID, title, ax, linestyle="-", color="C0", **kwargs
+    filename,
+    label,
+    ref,
+    ID,
+    title,
+    ax,
+    linestyle="-",
+    color="C0",
+    fontsize=30,
+    **kwargs,
 ):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 5  # Assumes the number of columns is 5
 
-    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
-    if "mean" in file_name:
+    # Check if the filename contains 'mean' to determine if we're plotting mean and std
+    if "mean" in filename:
         # Generate the std filename by replacing 'mean' with 'std'
-        std_filename = file_name.replace("mean", "std")
+        std_filename = filename.replace("mean", "std")
 
         # Read mean and standard deviation data from files
         mean_data = np.genfromtxt(
-            file_name,
+            filename,
             delimiter=",",
             skip_header=1,
             converters=dict(zip(range(N), [c] * N)),
@@ -81,7 +90,7 @@ def plot_over_line(
     else:
         # Plot only the mean data
         data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         ax.plot(
             data[:, 2 * ID],
@@ -92,6 +101,7 @@ def plot_over_line(
         )
 
     # Remove y-axis ticks if ref is set
+    ax.tick_params(axis="x", labelsize=fontsize)  # Font size for x-axis tick labels
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
     else:
@@ -99,26 +109,27 @@ def plot_over_line(
         formatter.set_powerlimits((-2, 2))
         ax.yaxis.set_major_formatter(formatter)
         ax.yaxis.get_offset_text().set_visible(True)
+        ax.yaxis.set_tick_params(labelsize=fontsize)  # Font size for y-axis tick labels
 
     # Set x-axis label and grid
-    ax.set_xlabel(styles.getArcLengthLabel())
+    ax.set_xlabel(styles.getArcLengthLabel(), fontsize=fontsize)
     ax.grid(True)
 
     # Set plot title if needed
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
+    if kwargs.get("show_title", True):
+        ax.set_title(title, fontsize=fontsize)
 
     # Set legend if needed
-    if kwargs.get("has_legend", True):
+    if kwargs.get("show_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
 
     # Choose y-label depending on plot id
     if ID == id_p_matrix:
-        ax.set_ylabel(styles.getHeadLabel(3))
+        ax.set_ylabel(styles.getHeadLabel(3), fontsize=fontsize)
     elif ID == id_c_matrix:
-        ax.set_ylabel(styles.getConcentrationLabel(3))
+        ax.set_ylabel(styles.getConcentrationLabel(3), fontsize=fontsize)
     elif ID == id_c_fracture:
-        ax.set_ylabel(styles.getConcentrationLabel(2))
+        ax.set_ylabel(styles.getConcentrationLabel(2), fontsize=fontsize)
     else:
         print("Error: Invalid plot id provided.")
         sys.exit(1)
@@ -134,20 +145,29 @@ id_outflux_legend = 12  # integrated outflux across the outflow boundary
 
 
 def plot_over_time(
-    file_name, label, ref, ID, title, ax, linestyle="-", color="C0", **kwargs
+    filename,
+    label,
+    ref,
+    ID,
+    title,
+    ax,
+    linestyle="-",
+    color="C0",
+    fontsize=30,
+    **kwargs,
 ):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 4  # Assumes the number of columns is 4
 
-    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
-    if "mean" in file_name:
+    # Check if the filename contains 'mean' to determine if we're plotting mean and std
+    if "mean" in filename:
         # Generate the std filename by replacing 'mean' with 'std'
-        std_filename = file_name.replace("mean", "std")
+        std_filename = filename.replace("mean", "std")
 
         # Read mean and standard deviation data from files
         mean_data = np.genfromtxt(
-            file_name,
+            filename,
             delimiter=",",
             skip_header=1,
             converters=dict(zip(range(N), [c] * N)),
@@ -169,15 +189,6 @@ def plot_over_time(
         mean_values = mean_data[:, ID + 1]
         std_values = std_data[:, ID + 1]
 
-        if ID == 1:
-            print(f"mean file_name: {file_name}, std file_name: {std_filename}")
-            print(
-                f"Min(mean_values)={np.min(mean_values)}, Max(mean_values)={np.max(mean_values)}"
-            )
-            print(
-                f"Min(std_values)={np.min(std_values)}, Max(std_values)={np.max(std_values)}"
-            )
-
         # Plot the mean with a shaded region for the standard deviation
         ax.fill_between(
             time,
@@ -189,15 +200,17 @@ def plot_over_time(
         ax.plot(time, mean_values, label=label, linestyle=linestyle, color=color)
     else:
         data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         time = data[:, 0] / (365 * 24 * 3600)  # Convert time to years
         ax.plot(time, data[:, ID + 1], label=label, linestyle=linestyle, color=color)
 
-    # Format y-axis using scientific notation
-    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
-
     # Remove y-axis ticks if ref is set
+    ax.tick_params(axis="x", labelsize=fontsize)  # Font size for x-axis tick labels
+
+    # After plotting in each subplot
+    ax.grid(True)
+
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
     else:
@@ -205,17 +218,18 @@ def plot_over_time(
         formatter.set_powerlimits((-2, 2))
         ax.yaxis.set_major_formatter(formatter)
         ax.yaxis.get_offset_text().set_visible(True)
+        ax.yaxis.set_tick_params(labelsize=fontsize)  # Font size for y-axis tick labels
 
     # Set x-axis label and grid
-    ax.set_xlabel(styles.getTimeLabel("y"))
+    ax.set_xlabel(styles.getTimeLabel("y"), fontsize=fontsize)
     ax.grid(True)
 
     # Set plot title if needed
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
+    if kwargs.get("show_title", True):
+        ax.set_title(title, fontsize=fontsize)
 
     # Set legend if needed
-    if kwargs.get("has_legend", True):
+    if kwargs.get("show_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
 
     # Set x and y limits if provided
@@ -226,32 +240,37 @@ def plot_over_time(
 
     # Choose y-label depending on plot id
     if ID == id_intc_matrix:
-        ax.set_ylabel("$\int_{\Omega_3} \phi_3 \, c_3$")
+        ax.set_ylabel("$\int_{\Omega_3} \phi_3 \, c_3$", fontsize=fontsize)
     elif ID == id_intc_fracture:
-        ax.set_ylabel("$\int_{\Omega_2} \phi_2 \, c_2$")
+        ax.set_ylabel("$\int_{\Omega_2} \phi_2 \, c_2$", fontsize=fontsize)
     elif ID == id_outflux:
-        ax.set_ylabel("outflux")
+        ax.set_ylabel("outflux", fontsize=fontsize)
     else:
         print("Error: Invalid plot id provided.")
         sys.exit(1)
 
 
-def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
+def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
-    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
+    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol, fontsize=fontsize)
 
 
-def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
+def plot_percentiles(ref, ID, places_and_methods, ax, fontsize=30, **kwargs):
     paths = get_paths(__file__)
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 6
 
-    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
-
+    ax.tick_params(axis="x", labelsize=fontsize)  # Font size for x-axis tick labels
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
+    else:
+        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter.set_powerlimits((-2, 2))
+        ax.yaxis.set_major_formatter(formatter)
+        ax.yaxis.get_offset_text().set_visible(True)
+        ax.yaxis.set_tick_params(labelsize=fontsize)  # Font size for y-axis tick labels
 
     f = []
     minX = -np.inf
@@ -286,7 +305,7 @@ def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
 
     ax.fill_between(ls, lowerpercentile, upperpercentile, color="gray")
     ax.grid(True)
-    ax.set_xlabel(styles.getArcLengthLabel())
+    ax.set_xlabel(styles.getArcLengthLabel(), fontsize=fontsize)
     weightedarea = (simps(upperpercentile, ls) - simps(lowerpercentile, ls)) / simps(
         meanvalues, ls
     )
@@ -297,11 +316,11 @@ def plot_percentiles(ref, ID, places_and_methods, ax, **kwargs):
 
     # choose y-label depending on plot id
     if ID == id_p_matrix:
-        ax.set_ylabel(styles.getHeadLabel(3))
+        ax.set_ylabel(styles.getHeadLabel(3), fontsize=fontsize)
     elif ID == id_c_matrix:
-        ax.set_ylabel(styles.getConcentrationLabel(3))
+        ax.set_ylabel(styles.getConcentrationLabel(3), fontsize=fontsize)
     elif ID == id_c_fracture:
-        ax.set_ylabel(styles.getConcentrationLabel(2))
+        ax.set_ylabel(styles.getConcentrationLabel(2), fontsize=fontsize)
     else:
         print("Error. Invalid plot id provided.")
         sys.exit(1)

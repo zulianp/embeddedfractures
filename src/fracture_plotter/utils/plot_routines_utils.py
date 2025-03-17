@@ -38,14 +38,27 @@ class MathTextSciFormatter(mticker.Formatter):
         return "${}$".format(s)
 
 
+# def setup_figure(id_offset, num_axes, ylim):
+#     fig = plt.figure(
+#         id_offset + 11, figsize=(16, 8)
+#     )  # Increased figure height to accommodate the legend
+#     fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
+#     axes_list = [
+#         fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)
+#     ]
+#     return fig, axes_list
+
+
 def setup_figure(id_offset, num_axes, ylim):
-    fig = plt.figure(
-        id_offset + 11, figsize=(16, 8)
-    )  # Increased figure height to accommodate the legend
-    fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
-    axes_list = [
-        fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)
-    ]
+    fig, axes_list = plt.subplots(
+        1, num_axes, figsize=(16, 8), sharex=True, sharey=True, num=id_offset + 11
+    )
+    fig.subplots_adjust(hspace=0.4, wspace=0)
+
+    # Apply ylim to all subplots
+    for ax in axes_list:
+        ax.set_ylim(ylim)
+
     return fig, axes_list
 
 
@@ -56,7 +69,7 @@ def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
 
 
-def save(ID, filename, extension=".pdf", plots_dir=None, **kwargs):
+def save(ID, filename, extension=".pdf", plots_dir=None, fontsize=30, **kwargs):
     if not os.path.exists(plots_dir):
         os.makedirs(plots_dir)
 
@@ -75,6 +88,7 @@ def save(ID, filename, extension=".pdf", plots_dir=None, **kwargs):
                 horizontalalignment="center",
                 verticalalignment="bottom",
                 transform=ax.transAxes,
+                fontsize=fontsize,
             )
         elif ax_title is not None:
             print("asd")

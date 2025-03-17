@@ -13,6 +13,7 @@ def plot_data_over_lines(
     axes_c_fracture,
     title,
     show_legend=False,
+    fontsize=30,
 ):
     paths = get_paths(__file__)
 
@@ -24,43 +25,50 @@ def plot_data_over_lines(
 
             # Pass show_legend flag to the plot function
             plot.plot_over_line(
-                data,
-                label,
-                ref,
-                plot.id_p_matrix,
-                title,
-                axes_p_matrix,
-                plot.linestyle[place][method],
-                plot.color[place][method],
-                has_legend=show_legend,
+                filename=data,
+                label=label,
+                ref=ref,
+                ID=plot.id_p_matrix,
+                title=title,
+                ax=axes_p_matrix,
+                linestyle=plot.linestyle[place][method],
+                color=plot.color[place][method],
+                show_legend=show_legend,
+                fontsize=fontsize,
             )
 
             if place != "DTU":  # Only pressure for DTU
                 plot.plot_over_line(
-                    data,
-                    label,
-                    ref,
-                    plot.id_c_matrix,
-                    title,
-                    axes_c_matrix,
-                    plot.linestyle[place][method],
-                    plot.color[place][method],
-                    has_legend=show_legend,
+                    filename=data,
+                    label=label,
+                    ref=ref,
+                    ID=plot.id_c_matrix,
+                    title=title,
+                    ax=axes_c_matrix,
+                    linestyle=plot.linestyle[place][method],
+                    color=plot.color[place][method],
+                    show_legend=show_legend,
+                    fontsize=fontsize,
                 )
                 plot.plot_over_line(
-                    data,
-                    label,
-                    ref,
-                    plot.id_c_fracture,
-                    title,
-                    axes_c_fracture,
-                    plot.linestyle[place][method],
-                    plot.color[place][method],
-                    has_legend=show_legend,
+                    filename=data,
+                    label=label,
+                    ref=ref,
+                    ID=plot.id_c_fracture,
+                    title=title,
+                    ax=axes_c_fracture,
+                    linestyle=plot.linestyle[place][method],
+                    color=plot.color[place][method],
+                    show_legend=show_legend,
+                    fontsize=fontsize,
                 )
 
 
-def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
+def run_pol(
+    places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
+    fontsize=30,
+    subfig_fontsize=12,
+):
     paths = get_paths(__file__)
 
     titles = ["$\\sim 1k$ cells", "$\\sim 10k$ cells", "$\\sim 100k$ cells"]
@@ -90,13 +98,14 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
             idx == 1
         )  # Show the legend only for the middle subplot (index 1, subfigure b)
         plot_data_over_lines(
-            places_and_methods,
-            ref,
-            axes_p_matrix,
-            axes_c_matrix,
-            axes_c_fracture,
-            title,
-            show_legend,
+            places_and_methods=places_and_methods,
+            ref=ref,
+            axes_p_matrix=axes_p_matrix,
+            axes_c_matrix=axes_c_matrix,
+            axes_c_fracture=axes_c_fracture,
+            title=title,
+            show_legend=show_legend,
+            fontsize=fontsize,
         )
 
         # Add reference for USTUTT-MPFA
@@ -104,38 +113,42 @@ def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
             paths.results_dir, "USTUTT/MPFA/dol_refinement_5.csv".replace("\_", "_")
         )
         plot.plot_over_line(
-            ref_data,
-            "reference",
-            ref,
-            plot.id_p_matrix,
-            title,
-            axes_p_matrix,
-            plot.linestyle["USTUTT"]["reference"],
-            plot.color["USTUTT"]["reference"],
-            has_legend=show_legend,
+            filename=ref_data,
+            label="reference",
+            ref=ref,
+            ID=plot.id_p_matrix,
+            title=title,
+            ax=axes_p_matrix,
+            linestyle=plot.linestyle["USTUTT"]["reference"],
+            color=plot.color["USTUTT"]["reference"],
+            fontsize=fontsize,
+            show_legend=show_legend,
         )
 
         # Only add the legend to the middle subplot (subfigure b)
         if idx == 1:
-            plot.plot_legend_in_middle(axes_p_matrix)
-            plot.plot_legend_in_middle(axes_c_matrix)
-            plot.plot_legend_in_middle(axes_c_fracture)
+            plot.plot_legend_in_middle(ax=axes_p_matrix, fontsize=fontsize)
+            plot.plot_legend_in_middle(ax=axes_c_matrix, fontsize=fontsize)
+            plot.plot_legend_in_middle(ax=axes_c_fracture, fontsize=fontsize)
 
     # Save figures with integrated legends
     plot.save(
         ID=plot.id_p_matrix,
         filename=f"{paths.case}_pol_p_matrix",
         plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
     )
     plot.save(
         ID=plot.id_c_matrix,
         filename=f"{paths.case}_pol_c_matrix",
         plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
     )
     plot.save(
         ID=plot.id_c_fracture,
         filename=f"{paths.case}_pol_c_fracture",
         plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
     )
 
 

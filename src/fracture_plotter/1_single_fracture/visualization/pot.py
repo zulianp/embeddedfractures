@@ -14,6 +14,7 @@ def plot_data_over_time(
     axes_outflux,
     title,
     show_legend=False,
+    fontsize=30,
 ):
     paths = get_paths(__file__)
 
@@ -24,44 +25,47 @@ def plot_data_over_time(
             label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
 
             plot.plot_over_time(
-                data,
-                label,
-                ref,
-                plot.id_intc_matrix,
-                title,
-                axes_intc_matrix,
-                plot.linestyle[place][method],
-                plot.color[place][method],
-                has_legend=show_legend,
+                filename=data,
+                label=label,
+                ref=ref,
+                ID=plot.id_intc_matrix,
+                title=title,
+                ax=axes_intc_matrix,
+                linestyle=plot.linestyle[place][method],
+                color=plot.color[place][method],
+                fontsize=fontsize,
+                show_legend=show_legend,
                 ylim=(0 - 10, 175 + 10),
             )
             plot.plot_over_time(
-                data,
-                label,
-                ref,
-                plot.id_intc_fracture,
-                title,
-                axes_intc_fracture,
-                plot.linestyle[place][method],
-                plot.color[place][method],
-                has_legend=show_legend,
+                filename=data,
+                label=label,
+                ref=ref,
+                ID=plot.id_intc_fracture,
+                title=title,
+                ax=axes_intc_fracture,
+                linestyle=plot.linestyle[place][method],
+                color=plot.color[place][method],
+                fontsize=fontsize,
+                show_legend=show_legend,
                 ylim=(0, 0.45),
             )
             plot.plot_over_time(
-                data,
-                label,
-                ref,
-                plot.id_outflux,
-                title,
-                axes_outflux,
-                plot.linestyle[place][method],
-                plot.color[place][method],
-                has_legend=show_legend,
+                filename=data,
+                label=label,
+                ref=ref,
+                ID=plot.id_outflux,
+                title=title,
+                ax=axes_outflux,
+                linestyle=plot.linestyle[place][method],
+                color=plot.color[place][method],
+                fontsize=fontsize,
+                show_legend=show_legend,
                 ylim=(0 - 0.00000005, 0.0000014 + 0.00000005),
             )
 
 
-def run_pot(places_and_methods={"mean": ["key"]}):
+def run_pot(places_and_methods={"mean": ["key"]}, fontsize=30, subfig_fontsize=12):
     paths = get_paths(__file__)
 
     titles = np.array(["$\\sim 1k$ cells", "$\\sim 10k$ cells", "$\\sim 100k$ cells"])
@@ -91,13 +95,14 @@ def run_pot(places_and_methods={"mean": ["key"]}):
             idx == 1
         )  # Show the legend only for the middle subplot (index 1, subfigure b)
         plot_data_over_time(
-            places_and_methods,
-            ref,
-            axes_intc_matrix,
-            axes_intc_fracture,
-            axes_outflux,
-            title,
-            show_legend,
+            places_and_methods=places_and_methods,
+            ref=ref,
+            axes_intc_matrix=axes_intc_matrix,
+            axes_intc_fracture=axes_intc_fracture,
+            axes_outflux=axes_outflux,
+            title=title,
+            show_legend=show_legend,
+            fontsize=fontsize,
         )
 
         # Only add the legend to the middle subplot (subfigure b)
@@ -108,12 +113,23 @@ def run_pot(places_and_methods={"mean": ["key"]}):
 
     # Save figures with integrated legends
     plot.save(
-        plot.id_intc_matrix, f"{paths.case}_pot_c_matrix", plots_dir=paths.plots_dir
+        ID=plot.id_intc_matrix,
+        filename=f"{paths.case}_pot_c_matrix",
+        plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
     )
     plot.save(
-        plot.id_intc_fracture, f"{paths.case}_pot_c_fracture", plots_dir=paths.plots_dir
+        ID=plot.id_intc_fracture,
+        filename=f"{paths.case}_pot_c_fracture",
+        plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
     )
-    plot.save(plot.id_outflux, f"{paths.case}_pot_outflux", plots_dir=paths.plots_dir)
+    plot.save(
+        ID=plot.id_outflux,
+        filename=f"{paths.case}_pot_outflux",
+        plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
+    )
 
 
 if __name__ == "__main__":
