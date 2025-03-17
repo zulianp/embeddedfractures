@@ -54,7 +54,7 @@ def plot_over_line(
         mean_data, std_data = load_mean_and_std_data(
             filename=filename,
             n_columns=N,
-            converters={i: c for i in range(N)},
+            converters=dict(zip(range(N), [c] * N)),
             skip_header=1,
         )
 
@@ -121,7 +121,7 @@ def plot_over_time(
         mean_data, std_data = load_mean_and_std_data(
             filename=filename,
             n_columns=N,
-            converters={i: c for i in range(N)},
+            converters=dict(zip(range(N), [c] * N)),
             skip_header=1,
         )
         time = mean_data[:, 0] / (365 * 24 * 3600)

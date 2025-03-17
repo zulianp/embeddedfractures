@@ -28,22 +28,12 @@ def plot_over_line(
 
     # Check if the filename contains 'mean' to determine if we're plotting mean and std
     if "mean" in filename:
-        # Generate the std filename by replacing 'mean' with 'std'
-        std_filename = filename.replace("mean", "std")
-
-        # Read mean and standard deviation data from files
-        mean_data = np.genfromtxt(
-            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
+        mean_data, std_data = load_mean_and_std_data(
+            filename=filename,
+            converters=dict(zip(range(N), [c] * N)),
+            n_columns=N,
+            skip_header=1,
         )
-        std_data = np.genfromtxt(
-            std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
-        )
-
-        # Ensure that the mean and std arrays have consistent shapes
-        if mean_data.shape != std_data.shape:
-            raise ValueError(
-                "Mean and standard deviation data do not have the same shape!"
-            )
 
         # Plot standard deviation band (mean +/- std)
         ax.fill_between(
@@ -115,12 +105,11 @@ def plot_over_time(
         if N_temp < N:
             N = N_temp
 
-        # Read the mean and standard deviation data
-        mean_data = np.genfromtxt(
-            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
-        )
-        std_data = np.genfromtxt(
-            std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
+        mean_data, std_data = load_mean_and_std_data(
+            filename=filename,
+            n_columns=N,
+            converters=dict(zip(range(N), [c] * N)),
+            skip_header=1,
         )
 
         plt.rcParams.update({"figure.max_open_warning": 0})
