@@ -51,23 +51,13 @@ def plot_over_line(
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 5
     if "mean" in filename:
-        std_filename = filename.replace("mean", "std")
-        mean_data = np.genfromtxt(
-            filename,
-            delimiter=",",
+        mean_data, std_data = load_mean_and_std_data(
+            filename=filename,
+            n_columns=N,
+            converters={i: c for i in range(N)},
             skip_header=1,
-            converters=dict(zip(range(N), [c] * N)),
         )
-        std_data = np.genfromtxt(
-            std_filename,
-            delimiter=",",
-            skip_header=1,
-            converters=dict(zip(range(N), [c] * N)),
-        )
-        if mean_data.shape != std_data.shape:
-            raise ValueError(
-                "Mean and standard deviation data do not have the same shape!"
-            )
+
         ax.fill_between(
             mean_data[:, 2 * ID],
             mean_data[:, 2 * ID + 1] - std_data[:, 2 * ID + 1],
@@ -128,23 +118,12 @@ def plot_over_time(
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 4
     if "mean" in filename:
-        std_filename = filename.replace("mean", "std")
-        mean_data = np.genfromtxt(
-            filename,
-            delimiter=",",
+        mean_data, std_data = load_mean_and_std_data(
+            filename=filename,
+            n_columns=N,
+            converters={i: c for i in range(N)},
             skip_header=1,
-            converters=dict(zip(range(N), [c] * N)),
         )
-        std_data = np.genfromtxt(
-            std_filename,
-            delimiter=",",
-            skip_header=1,
-            converters=dict(zip(range(N), [c] * N)),
-        )
-        if mean_data.shape != std_data.shape:
-            raise ValueError(
-                "Mean and standard deviation data do not have the same shape!"
-            )
         time = mean_data[:, 0] / (365 * 24 * 3600)
         mean_values = mean_data[:, ID + 1]
         std_values = std_data[:, ID + 1]

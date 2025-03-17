@@ -54,7 +54,9 @@ def run_pol(
     refinement_indices = [0, 1, 2]
     cond, fmt = 0, {0: "%1.2f", 1: "%1.2e"}.get(0)
     ylim = {0: (0.5, 2.75), 1: (0.4, 5.75)}.get(cond)
-    fig, axes_list = plot.setup_figure(cond, 3, ylim)
+    fig, axes_list = plot.setup_figure(
+        id_offset=cond, num_axes=len(refinement_indices), ylim=ylim
+    )
 
     for idx, (title, ref, ax) in enumerate(zip(titles, refinement_indices, axes_list)):
         show_legend = idx == 1

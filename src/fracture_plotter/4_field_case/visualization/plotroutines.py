@@ -41,7 +41,15 @@ def plot_legend_in_middle(ax, fontsize=30):
 
 
 def plot_over_line(
-    filename, label, ID, title, ax, linestyle="-", color="C0", fontsize=30, **kwargs
+    filename, 
+    label, 
+    ID, 
+    title, 
+    ax, 
+    linestyle="-", 
+    color="C0", 
+    fontsize=30, 
+    **kwargs
 ):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace("D", "e"))

@@ -55,13 +55,15 @@ def run_pot(places_and_methods={"mean": ["key"]}, fontsize=30, subfig_fontsize=1
     refinement_index = [0, 1, 2]
 
     fig_intc_matrix, axes_intc_matrix_list = plot.setup_figure(
-        plot.id_intc_matrix, 3, ylim=(-10, 185)
+        id_offset=plot.id_intc_matrix, num_axes=len(refinement_index), ylim=(-10, 185)
     )
     fig_intc_fracture, axes_intc_fracture_list = plot.setup_figure(
-        plot.id_intc_fracture, 3, ylim=(0, 0.45)
+        id_offset=plot.id_intc_fracture, num_axes=len(refinement_index), ylim=(0, 0.45)
     )
     fig_outflux, axes_outflux_list = plot.setup_figure(
-        plot.id_outflux, 3, ylim=(-0.00000005, 0.00000145)
+        id_offset=plot.id_outflux,
+        num_axes=len(refinement_index),
+        ylim=(-0.00000005, 0.00000145),
     )
 
     for idx, (title, ref, ax_matrix, ax_fracture, ax_outflux) in enumerate(

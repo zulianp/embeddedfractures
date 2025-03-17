@@ -22,7 +22,10 @@ def run_percentiles(
     ]
 
     # Setup figures and axes for all IDs
-    axes_lists = [plot.setup_figure(ID, 3, ylim=ylim)[1] for ID, ylim, _ in config]
+    axes_lists = [
+        plot.setup_figure(id_offset=ID, num_axes=3, ylim=ylim)[1]
+        for ID, ylim, _ in config
+    ]
 
     # Plot percentiles for each refinement level in parallel axes
     for ref, axes in zip(["0", "1", "2"], zip(*axes_lists)):

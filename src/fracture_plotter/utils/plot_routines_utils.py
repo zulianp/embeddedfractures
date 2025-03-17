@@ -4,17 +4,16 @@ import os
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+
+# plot_utils.py
 import numpy as np
+from scipy import integrate, interpolate
+
+import fracture_plotter.utils.styles as styles
 
 os.environ["PATH"] += ":/Library/TeX/texbin"
 plt.rc("text", usetex=True)
 plt.rc("font", family="serif")
-
-import os
-
-import numpy as np
-
-import fracture_plotter.utils.styles as styles
 
 plt.rc("text", usetex=True)
 plt.rc("font", family="serif")
@@ -116,3 +115,37 @@ def crop_pdf(filename, plots_dir):
     if os.path.isfile(filename):
         os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
         os.system("pdfcrop " + filename + " " + filename)
+
+
+################## SUGGESTED COMMON FUNCTIONALITY ##################
+
+
+def load_data(filename, n_columns, converters=None, skip_header=1):
+    """Load data from a CSV file with optional converters."""
+    if converters is None:
+        converters = {
+            i: lambda s: float(s.decode().replace("D", "e")) for i in range(n_columns)
+        }
+    return np.genfromtxt(
+        filename, delimiter=",", skip_header=skip_header, converters=converters
+    )
+
+
+def load_mean_and_std_data(filename, n_columns, converters, skip_header=1):
+    """Load mean and standard deviation data from CSV files."""
+    mean_data = load_data(
+        filename=filename,
+        n_columns=n_columns,
+        converters=converters,
+        skip_header=skip_header,
+    )
+    std_data = load_data(
+        filename=filename.replace("mean", "std"),
+        n_columns=n_columns,
+        converters=converters,
+        skip_header=skip_header,
+    )
+    if mean_data.shape != std_data.shape:
+        raise ValueError("Mean and standard deviation data do not have the same shape!")
+
+    return mean_data, std_data

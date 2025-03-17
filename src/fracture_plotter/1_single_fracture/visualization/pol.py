@@ -50,13 +50,17 @@ def run_pol(
     refinement_index = [0, 1, 2]
 
     fig_p_matrix, axes_p_matrix_list = plot.setup_figure(
-        plot.id_p_matrix, 3, ylim=(0.9, 4.1)
+        id_offset=plot.id_p_matrix, num_axes=len(refinement_index), ylim=(0.9, 4.1)
     )
     fig_c_matrix, axes_c_matrix_list = plot.setup_figure(
-        plot.id_c_matrix, 3, ylim=(-0.0005, 0.0105)
+        id_offset=plot.id_c_matrix,
+        num_axes=len(refinement_index),
+        ylim=(-0.0005, 0.0105),
     )
     fig_c_fracture, axes_c_fracture_list = plot.setup_figure(
-        plot.id_c_fracture, 3, ylim=(0.0075, 0.0101)
+        id_offset=plot.id_c_fracture,
+        num_axes=len(refinement_index),
+        ylim=(0.0075, 0.0101),
     )
 
     for idx, (title, ref, ax_p, ax_c, ax_cf) in enumerate(

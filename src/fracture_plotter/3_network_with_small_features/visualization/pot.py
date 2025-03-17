@@ -33,10 +33,12 @@ def run_pot(
 ):
     paths = get_paths(__file__)
     titles = ["$\\sim 30k$ cells", "$\\sim 150k$ cells"]
-    refinements = ["0", "1"]
+    refinement_index = [0, 1]
     for ID in range(8):
-        fig, axes = plot.setup_figure(ID, 2, ylim=(-0.01, 1.01))
-        for title, ref, ax in zip(titles, refinements, axes):
+        fig, axes = plot.setup_figure(
+            id_offset=ID, num_axes=len(refinement_index), ylim=(-0.01, 1.01)
+        )
+        for title, ref, ax in zip(titles, refinement_index, axes):
             plot_data_over_time(
                 places_and_methods=places_and_methods,
                 ref=ref,

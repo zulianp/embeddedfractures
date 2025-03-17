@@ -48,11 +48,15 @@ def run_pol(
 ):
     paths = get_paths(__file__)
     titles = ["$\\sim 30k$ cells", "$\\sim 150k$ cells"]
-    refinements = [0, 1]
-    fig0, axes0 = plot.setup_figure(plot.id_p_0_matrix, 2, ylim=(0.025, 0.08))
-    fig1, axes1 = plot.setup_figure(plot.id_p_1_matrix, 2, ylim=(0.02, 0.075))
+    refinement_index = [0, 1]
+    fig0, axes0 = plot.setup_figure(
+        id_offset=plot.id_p_0_matrix, num_axes=len(refinement_index), ylim=(0.025, 0.08)
+    )
+    fig1, axes1 = plot.setup_figure(
+        id_offset=plot.id_p_1_matrix, num_axes=len(refinement_index), ylim=(0.02, 0.075)
+    )
 
-    for idx, (title, ref) in enumerate(zip(titles, refinements)):
+    for idx, (title, ref) in enumerate(zip(titles, refinement_index)):
         show_legend = idx == 0
         ax0, ax1 = axes0[idx], axes1[idx]
         plot_data_over_lines(

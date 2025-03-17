@@ -56,7 +56,7 @@ def run_pot(
     # Setup figures and axes for each condition and region
     for cond, title in zip(conds, titles):
         fig, axes_list = plot.setup_figure(
-            cond, len(regions), ylim=(0, 0.4 if cond else 0.475)
+            id_offset=cond, num_axes=len(regions), ylim=(0, 0.4 if cond else 0.475)
         )
 
         for region_pos, region in enumerate(regions):
