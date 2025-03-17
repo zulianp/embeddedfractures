@@ -1,20 +1,27 @@
-# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 import sys
-from operator import methodcaller
 
+import numpy as np
 from scipy import interpolate
 from scipy.integrate import simps
 
 from fracture_plotter.utils.general import get_paths
 from fracture_plotter.utils.plot_routines_utils import *
 
-# ids of the different plots
+# Plot IDs for line plots
 id_p_matrix = 0  # pressure along (0, 100, 100)-(100, 0, 0)
-id_p_matrix_legend = 10  # pressure along (0, 100, 100)-(100, 0, 0)
+id_p_matrix_legend = 10
 id_c_matrix = 1  # c along (0, 100, 100)-(100, 0, 0)
-id_c_matrix_legend = 11  # c along (0, 100, 100)-(100, 0, 0)
+id_c_matrix_legend = 11
 id_c_fracture = 2  # c along (0, 100, 80)-(100, 0, 20)
-id_c_fracture_legend = 12  # c along (0, 100, 80)-(100, 0, 20)
+id_c_fracture_legend = 12
+
+# Plot IDs for time plots
+id_intc_matrix = 0  # integral of c*porosity in the lower matrix sub-domain
+id_intc_matrix_legend = 10
+id_intc_fracture = 1  # integral of c*porosity in the fracture
+id_intc_fracture_legend = 11
+id_outflux = 2  # integrated outflux across the outflow boundary
+id_outflux_legend = 12
 
 
 def plot_legend_in_middle(ax, fontsize=30):
@@ -26,7 +33,7 @@ def plot_legend_in_middle(ax, fontsize=30):
         bbox_to_anchor=(0.5, -0.2),
         ncol=4,
         fontsize=fontsize,
-    )  # Legend below the plot
+    )
 
 
 def plot_over_line(
@@ -41,16 +48,10 @@ def plot_over_line(
     fontsize=30,
     **kwargs,
 ):
-    # Define the converter for the input data
     c = lambda s: float(s.decode().replace("D", "e"))
-    N = 5  # Assumes the number of columns is 5
-
-    # Check if the filename contains 'mean' to determine if we're plotting mean and std
+    N = 5
     if "mean" in filename:
-        # Generate the std filename by replacing 'mean' with 'std'
         std_filename = filename.replace("mean", "std")
-
-        # Read mean and standard deviation data from files
         mean_data = np.genfromtxt(
             filename,
             delimiter=",",
@@ -63,23 +64,17 @@ def plot_over_line(
             skip_header=1,
             converters=dict(zip(range(N), [c] * N)),
         )
-
-        # Ensure that the mean and std arrays have consistent shapes
         if mean_data.shape != std_data.shape:
             raise ValueError(
                 "Mean and standard deviation data do not have the same shape!"
             )
-
-        # Plot standard deviation band (mean +/- std)
         ax.fill_between(
             mean_data[:, 2 * ID],
             mean_data[:, 2 * ID + 1] - std_data[:, 2 * ID + 1],
             mean_data[:, 2 * ID + 1] + std_data[:, 2 * ID + 1],
             color=color,
             alpha=0.5,
-        )  # Adjust transparency for visibility
-
-        # Plot the mean data line
+        )
         ax.plot(
             mean_data[:, 2 * ID],
             mean_data[:, 2 * ID + 1],
@@ -88,7 +83,6 @@ def plot_over_line(
             color=color,
         )
     else:
-        # Plot only the mean data
         data = np.genfromtxt(
             filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
@@ -100,48 +94,23 @@ def plot_over_line(
             color=color,
         )
 
-    # Remove y-axis ticks if ref is set
-    ax.tick_params(axis="x", labelsize=fontsize)  # Font size for x-axis tick labels
-    if int(ref) > 0:
-        ax.yaxis.set_tick_params(length=0)
-    else:
-        formatter = mticker.ScalarFormatter(useMathText=True)
-        formatter.set_powerlimits((-2, 2))
-        ax.yaxis.set_major_formatter(formatter)
-        ax.yaxis.get_offset_text().set_visible(True)
-        ax.yaxis.set_tick_params(labelsize=fontsize)  # Font size for y-axis tick labels
-
-    # Set x-axis label and grid
+    format_axis(ax, ref, fontsize)
     ax.set_xlabel(styles.getArcLengthLabel(), fontsize=fontsize)
     ax.grid(True)
-
-    # Set plot title if needed
     if kwargs.get("show_title", True):
         ax.set_title(title, fontsize=fontsize)
-
-    # Set legend if needed
     if kwargs.get("show_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
-
-    # Choose y-label depending on plot id
-    if ID == id_p_matrix:
-        ax.set_ylabel(styles.getHeadLabel(3), fontsize=fontsize)
-    elif ID == id_c_matrix:
-        ax.set_ylabel(styles.getConcentrationLabel(3), fontsize=fontsize)
-    elif ID == id_c_fracture:
-        ax.set_ylabel(styles.getConcentrationLabel(2), fontsize=fontsize)
+    ylabel_map = {
+        id_p_matrix: styles.getHeadLabel(3),
+        id_c_matrix: styles.getConcentrationLabel(3),
+        id_c_fracture: styles.getConcentrationLabel(2),
+    }
+    if ID in ylabel_map:
+        ax.set_ylabel(ylabel_map[ID], fontsize=fontsize)
     else:
         print("Error: Invalid plot id provided.")
         sys.exit(1)
-
-
-# ids of the different plots
-id_intc_matrix = 0  # integral of c*porosity in the lower matrix sub-domain
-id_intc_matrix_legend = 10  # integral of c*porosity in the lower matrix sub-domain
-id_intc_fracture = 1  # indegral of c*porosity in the fracture
-id_intc_fracture_legend = 11  # indegral of c*porosity in the fracture
-id_outflux = 2  # integrated outflux across the outflow boundary
-id_outflux_legend = 12  # integrated outflux across the outflow boundary
 
 
 def plot_over_time(
@@ -156,16 +125,10 @@ def plot_over_time(
     fontsize=30,
     **kwargs,
 ):
-    # Define the converter for the input data
     c = lambda s: float(s.decode().replace("D", "e"))
-    N = 4  # Assumes the number of columns is 4
-
-    # Check if the filename contains 'mean' to determine if we're plotting mean and std
+    N = 4
     if "mean" in filename:
-        # Generate the std filename by replacing 'mean' with 'std'
         std_filename = filename.replace("mean", "std")
-
-        # Read mean and standard deviation data from files
         mean_data = np.genfromtxt(
             filename,
             delimiter=",",
@@ -178,18 +141,13 @@ def plot_over_time(
             skip_header=1,
             converters=dict(zip(range(N), [c] * N)),
         )
-
-        # Ensure that the mean and std arrays have consistent shapes
         if mean_data.shape != std_data.shape:
             raise ValueError(
                 "Mean and standard deviation data do not have the same shape!"
             )
-
-        time = mean_data[:, 0] / (365 * 24 * 3600)  # Convert time to years
+        time = mean_data[:, 0] / (365 * 24 * 3600)
         mean_values = mean_data[:, ID + 1]
         std_values = std_data[:, ID + 1]
-
-        # Plot the mean with a shaded region for the standard deviation
         ax.fill_between(
             time,
             mean_values - std_values,
@@ -202,57 +160,36 @@ def plot_over_time(
         data = np.genfromtxt(
             filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
-        time = data[:, 0] / (365 * 24 * 3600)  # Convert time to years
+        time = data[:, 0] / (365 * 24 * 3600)
         ax.plot(time, data[:, ID + 1], label=label, linestyle=linestyle, color=color)
 
-    # Remove y-axis ticks if ref is set
-    ax.tick_params(axis="x", labelsize=fontsize)  # Font size for x-axis tick labels
-
-    # After plotting in each subplot
-    ax.grid(True)
-
-    if int(ref) > 0:
-        ax.yaxis.set_tick_params(length=0)
-    else:
-        formatter = mticker.ScalarFormatter(useMathText=True)
-        formatter.set_powerlimits((-2, 2))
-        ax.yaxis.set_major_formatter(formatter)
-        ax.yaxis.get_offset_text().set_visible(True)
-        ax.yaxis.set_tick_params(labelsize=fontsize)  # Font size for y-axis tick labels
-
-    # Set x-axis label and grid
+    format_axis(ax, ref, fontsize)
     ax.set_xlabel(styles.getTimeLabel("y"), fontsize=fontsize)
     ax.grid(True)
-
-    # Set plot title if needed
     if kwargs.get("show_title", True):
         ax.set_title(title, fontsize=fontsize)
-
-    # Set legend if needed
     if kwargs.get("show_legend", True):
         ax.legend(bbox_to_anchor=(1.0, 1.0))
-
-    # Set x and y limits if provided
-    if kwargs.get("xlim", None):
+    if kwargs.get("xlim") is not None:
         ax.set_xlim(kwargs.get("xlim"))
-    if kwargs.get("ylim", None):
+    if kwargs.get("ylim") is not None:
         ax.set_ylim(kwargs.get("ylim"))
-
-    # Choose y-label depending on plot id
-    if ID == id_intc_matrix:
-        ax.set_ylabel("$\int_{\Omega_3} \phi_3 \, c_3$", fontsize=fontsize)
-    elif ID == id_intc_fracture:
-        ax.set_ylabel("$\int_{\Omega_2} \phi_2 \, c_2$", fontsize=fontsize)
-    elif ID == id_outflux:
-        ax.set_ylabel("outflux", fontsize=fontsize)
+    ylabel_map = {
+        id_intc_matrix: r"$\int_{\Omega_3} \phi_3 \, c_3$",
+        id_intc_fracture: r"$\int_{\Omega_2} \phi_2 \, c_2$",
+        id_outflux: "outflux",
+    }
+    if ID in ylabel_map:
+        ax.set_ylabel(ylabel_map[ID], fontsize=fontsize)
     else:
         print("Error: Invalid plot id provided.")
         sys.exit(1)
 
 
 def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
-    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
-    plt.figure(ID + 11)
+    import matplotlib.pyplot as plt
+
+    plt.figure(ID + 11)  # Workaround for figure ID issues
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol, fontsize=fontsize)
 
@@ -262,24 +199,12 @@ def plot_percentiles(ref, ID, places_and_methods, ax, fontsize=30, **kwargs):
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 6
 
-    ax.tick_params(axis="x", labelsize=fontsize)  # Font size for x-axis tick labels
-    if int(ref) > 0:
-        ax.yaxis.set_tick_params(length=0)
-    else:
-        formatter = mticker.ScalarFormatter(useMathText=True)
-        formatter.set_powerlimits((-2, 2))
-        ax.yaxis.set_major_formatter(formatter)
-        ax.yaxis.get_offset_text().set_visible(True)
-        ax.yaxis.set_tick_params(labelsize=fontsize)  # Font size for y-axis tick labels
+    format_axis(ax, ref, fontsize)
 
-    f = []
-    minX = -np.inf
-    maxX = np.inf
-
+    funcs, minX, maxX = [], -np.inf, np.inf
     for place in places_and_methods:
         if place == "DTU" and ID != id_p_matrix:
             continue
-
         for method in places_and_methods[place]:
             folder = os.path.join(paths.results_dir, place, method)
             datafile = os.path.join(folder, f"dol_refinement_{ref}.csv").replace(
@@ -288,20 +213,16 @@ def plot_percentiles(ref, ID, places_and_methods, ax, fontsize=30, **kwargs):
             data = np.genfromtxt(
                 datafile, delimiter=",", converters=dict(zip(range(N), [c] * N))
             )
-            # only take the interesting columns and eleminate nan rows
             data = data[:, 2 * ID : 2 * ID + 2]
             data = data[~np.isnan(data).any(axis=1)]
-
-            f.append(interpolate.interp1d(data[:, 0], data[:, 1]))
+            funcs.append(interpolate.interp1d(data[:, 0], data[:, 1]))
             minX = max(minX, data[0, 0])
             maxX = min(maxX, data[-1, 0])
-
     ls = np.linspace(minX, maxX, num=1000)
-    interpolateddata = list(map(methodcaller("__call__", ls), f))
-    meanvalues = np.mean(interpolateddata, axis=0)
-    variance = np.var(interpolateddata, axis=0)
-    upperpercentile = np.percentile(interpolateddata, 90, axis=0)
-    lowerpercentile = np.percentile(interpolateddata, 10, axis=0)
+    interpolated = [f(ls) for f in funcs]
+    meanvalues = np.mean(interpolated, axis=0)
+    upperpercentile = np.percentile(interpolated, 90, axis=0)
+    lowerpercentile = np.percentile(interpolated, 10, axis=0)
 
     ax.fill_between(ls, lowerpercentile, upperpercentile, color="gray")
     ax.grid(True)
@@ -309,20 +230,19 @@ def plot_percentiles(ref, ID, places_and_methods, ax, fontsize=30, **kwargs):
     weightedarea = (simps(upperpercentile, ls) - simps(lowerpercentile, ls)) / simps(
         meanvalues, ls
     )
-    title = "weighted area " + MathTextSciFormatter("%1.2e")(weightedarea)
-    ax.title.set_text(title)
-    if kwargs.get("ylim", None):
-        plt.ylim(kwargs.get("ylim"))
+    ax.set_title("weighted area " + MathTextSciFormatter("%1.2e")(weightedarea))
+    if kwargs.get("ylim") is not None:
+        ax.set_ylim(kwargs.get("ylim"))
 
-    # choose y-label depending on plot id
-    if ID == id_p_matrix:
-        ax.set_ylabel(styles.getHeadLabel(3), fontsize=fontsize)
-    elif ID == id_c_matrix:
-        ax.set_ylabel(styles.getConcentrationLabel(3), fontsize=fontsize)
-    elif ID == id_c_fracture:
-        ax.set_ylabel(styles.getConcentrationLabel(2), fontsize=fontsize)
+    ylabel_map = {
+        id_p_matrix: styles.getHeadLabel(3),
+        id_c_matrix: styles.getConcentrationLabel(3),
+        id_c_fracture: styles.getConcentrationLabel(2),
+    }
+    if ID in ylabel_map:
+        ax.set_ylabel(ylabel_map[ID], fontsize=fontsize)
     else:
         print("Error. Invalid plot id provided.")
         sys.exit(1)
 
-    return (ls, lowerpercentile, upperpercentile)
+    return ls, lowerpercentile, upperpercentile

@@ -29,6 +29,19 @@ places_and_methods = {
 }
 
 
+def format_axis(ax, ref, fontsize):
+    ax.tick_params(axis="x", labelsize=fontsize)
+    if int(ref) > 0:
+        ax.yaxis.set_tick_params(length=0)
+    else:
+        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter.set_powerlimits((-2, 2))
+        ax.yaxis.set_major_formatter(formatter)
+        ax.yaxis.get_offset_text().set_fontsize(fontsize)
+        ax.yaxis.get_offset_text().set_visible(True)
+        ax.yaxis.set_tick_params(labelsize=fontsize)
+
+
 class MathTextSciFormatter(mticker.Formatter):
     def __init__(self, fmt="%1.2f"):
         self.fmt = fmt
@@ -36,17 +49,6 @@ class MathTextSciFormatter(mticker.Formatter):
     def __call__(self, x, pos=None):
         s = self.fmt % x
         return "${}$".format(s)
-
-
-# def setup_figure(id_offset, num_axes, ylim):
-#     fig = plt.figure(
-#         id_offset + 11, figsize=(16, 8)
-#     )  # Increased figure height to accommodate the legend
-#     fig.subplots_adjust(hspace=0.4, wspace=0)  # Increase space between plots vertically
-#     axes_list = [
-#         fig.add_subplot(1, num_axes, idx + 1, ylim=ylim) for idx in range(num_axes)
-#     ]
-#     return fig, axes_list
 
 
 def setup_figure(id_offset, num_axes, ylim):
