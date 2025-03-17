@@ -6,79 +6,84 @@ from fracture_plotter.utils.general import get_paths
 
 
 def plot_data_over_lines(
-    places_and_methods, ref, ax, title, cond, show_legend=False, fmt="%1.2e"
+    places_and_methods, ref, ax, title, cond, show_legend=False, fontsize=30
 ):
     paths = get_paths(__file__)
-
-    for place in places_and_methods:
-        for method in places_and_methods[place]:
+    for place, methods in places_and_methods.items():
+        for method in methods:
             folder = os.path.join(paths.results_dir, place, method).replace("\_", "_")
             data = os.path.join(
                 folder, f"dol_cond_{cond}_refinement_{ref}.csv"
             ).replace("\_", "_")
-            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
-            plot.plot_over_line(
-                data,
-                label,
-                ref,
-                title,
-                cond,
-                ax,
-                plot.linestyle[place][method],
-                plot.color[place][method],
-                has_legend=show_legend,
-                fmt=fmt,
+            label = (
+                f"{place}-{method}"
+                if place.replace("\_", "_") != "mean"
+                else place.replace("\_", "_")
             )
-
-    # Add reference (4th refinement of USTUTT-MPFA)
+            plot.plot_over_line(
+                filename=data,
+                label=label,
+                ref=ref,
+                title=title,
+                ax=ax,
+                linestyle=plot.linestyle[place][method],
+                color=plot.color[place][method],
+                show_legend=show_legend,
+                fontsize=fontsize,
+            )
     ref_data = os.path.join(
         paths.results_dir,
         f"USTUTT/MPFA/dol_cond_{cond}_refinement_4.csv".replace("\_", "_"),
     )
     plot.plot_over_line(
-        ref_data,
-        "reference",
-        ref,
-        title,
-        cond,
-        ax,
-        plot.linestyle["USTUTT"]["reference"],
-        plot.color["USTUTT"]["reference"],
-        has_legend=show_legend,
-        fmt=fmt,
+        filename=ref_data,
+        label="reference",
+        ref=ref,
+        title=title,
+        ax=ax,
+        linestyle=plot.linestyle["USTUTT"]["reference"],
+        color=plot.color["USTUTT"]["reference"],
+        show_legend=show_legend,
+        fontsize=fontsize,
     )
 
 
-def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
+def run_pol(
+    places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
+    fontsize=30,
+    subfig_fontsize=24,
+):
     paths = get_paths(__file__)
-
     titles = ["$\\sim 500$ cells", "$\\sim 4k$ cells", "$\\sim 32k$ cells"]
-    refinement_index = [0, 1, 2]
-    conds = [0]  # Add other conditions if needed
+    refinement_indices = [0, 1, 2]
+    cond, fmt = 0, {0: "%1.2f", 1: "%1.2e"}.get(0)
+    ylim = {0: (0.5, 2.75), 1: (0.4, 5.75)}.get(cond)
+    fig, axes_list = plot.setup_figure(cond, 3, ylim)
 
-    ylim_dict = {0: (0.5, 2.75), 1: (0.4, 5.75)}
-    fmt_dict = {0: "%1.2f", 1: "%1.2e"}
-
-    for cond in conds:
-        fig, axes_list = plot.setup_figure(cond, 3, ylim_dict.get(cond))
-
-        for title, ref, idx, ax in zip(titles, refinement_index, range(3), axes_list):
-            show_legend = idx == 1  # Show legend only for middle subplot
-            fmt = fmt_dict.get(cond)
-
-            plot_data_over_lines(
-                places_and_methods, ref, ax, title, cond, show_legend, fmt
-            )
-
-            if idx == 1:
-                plot.plot_legend_in_middle(ax)  # Only add legend to middle subplot
-
-        # Save the figure
-        plot.save(
-            ID=cond, filename=f"{paths.case}_pol_cond_{cond}", plots_dir=paths.plots_dir
+    for idx, (title, ref, ax) in enumerate(zip(titles, refinement_indices, axes_list)):
+        show_legend = idx == 1
+        plot_data_over_lines(
+            places_and_methods=places_and_methods,
+            ref=ref,
+            ax=ax,
+            title=title,
+            cond=cond,
+            show_legend=show_legend,
+            fontsize=fontsize,
         )
-        # Optionally add cropped legend
-        plot.crop_pdf(f"{paths.case}_pol_cond_{cond}_legend", plots_dir=paths.plots_dir)
+        if idx == 1:
+            plot.plot_legend_in_middle(ax=ax, fontsize=fontsize)
+
+    plot.save(
+        ID=cond,
+        filename=f"{paths.case}_pol_cond_{cond}",
+        plots_dir=paths.plots_dir,
+        fontsize=subfig_fontsize,
+    )
+    plot.crop_pdf(
+        f"{paths.case}_pol_cond_{cond}_legend",
+        plots_dir=paths.plots_dir,
+    )
 
 
 if __name__ == "__main__":
