@@ -57,6 +57,11 @@ def format_axis(ax, ref, fontsize, **kwargs):
     if "ylim" in kwargs:
         ax.set_ylim(kwargs["ylim"])
 
+    if "xticks" in kwargs:
+        ax.set_xticks(kwargs["xticks"])
+    if "yticks" in kwargs:
+        ax.set_yticks(kwargs["yticks"])
+
 
 class MathTextSciFormatter(mticker.Formatter):
     def __init__(self, fmt="%1.2f"):
