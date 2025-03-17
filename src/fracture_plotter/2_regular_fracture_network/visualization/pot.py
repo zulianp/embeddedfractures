@@ -22,7 +22,7 @@ def plot_cond_over_time(
         for method in places_and_methods[place]:
             folder = os.path.join(paths.results_dir, place, method)
             data_file = os.path.join(folder, f"dot_cond_{cond}.csv").replace("\\_", "_")
-            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+            label = place if place == "mean" else f"{place}-{method}"
 
             plot.plot_over_time(
                 filename=data_file,
@@ -76,7 +76,7 @@ def run_pot(
 
             # Add the legend directly to the figure (on the first region)
             if region_pos == 1:  # or region_pos == 1 for middle
-                plot.plot_legend_in_middle(ax)
+                plot.plot_legend_in_middle(ax, fontsize=fontsize)
 
         # Save figure without creating a separate legend file
         plot.save(

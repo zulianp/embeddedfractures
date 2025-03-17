@@ -20,7 +20,7 @@ def plot_data_over_lines(
         for method in methods:
             folder = os.path.join(paths.results_dir, place, method).replace("\_", "_")
             data = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
-            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
+            label = place if place == "mean" else f"{place}-{method}"
             common = {
                 "filename": data,
                 "label": label,

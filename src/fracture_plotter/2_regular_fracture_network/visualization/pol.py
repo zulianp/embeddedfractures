@@ -15,11 +15,7 @@ def plot_data_over_lines(
             data = os.path.join(
                 folder, f"dol_cond_{cond}_refinement_{ref}.csv"
             ).replace("\_", "_")
-            label = (
-                f"{place}-{method}"
-                if place.replace("\_", "_") != "mean"
-                else place.replace("\_", "_")
-            )
+            label = place if place == "mean" else f"{place}-{method}"
             plot.plot_over_line(
                 filename=data,
                 label=label,

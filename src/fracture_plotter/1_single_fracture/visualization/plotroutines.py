@@ -246,4 +246,3 @@ def plot_percentiles(ref, ID, places_and_methods, ax, fontsize=30, **kwargs):
         sys.exit(1)
 
     return ls, lowerpercentile, upperpercentile
-

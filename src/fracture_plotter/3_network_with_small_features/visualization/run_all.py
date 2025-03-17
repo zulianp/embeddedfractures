@@ -12,17 +12,28 @@ from fracture_plotter.utils.overlay import run_overlay
 def run_all():
     paths = get_paths(__file__)
 
+    fontsize = 30
+    subfig_fontsize = 25
+
     places_and_methods = process_args()
     print(f"Running all scripts in sequence for case {paths.case}...")
 
-    run_pol(places_and_methods)
+    run_pol(
+        places_and_methods=places_and_methods,
+        fontsize=fontsize,
+        subfig_fontsize=subfig_fontsize,
+    )
     print("Finished running pol")
 
     # TODO: Fix this if needed
     # run_boundary_data(places_and_methods)
     # print("Finished running boundary data")
 
-    run_pot(places_and_methods)
+    run_pot(
+        places_and_methods=places_and_methods,
+        fontsize=fontsize,
+        subfig_fontsize=subfig_fontsize,
+    )
     print("Finished running pot")
 
     files = [

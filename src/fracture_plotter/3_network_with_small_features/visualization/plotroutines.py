@@ -15,7 +15,7 @@ id_p_1_matrix_legend = 11  # p along (0, 100, 100)-(100, 0, 0)
 id_pot_legend = 12  # p along (0, 100, 100)-(100, 0, 0)
 
 
-def plot_legend_in_middle(fig, ax1, ax2):
+def plot_legend_in_middle(fig, ax1, ax2, fontsize=30):
     # Combine handles and labels from both axes
     handles1, labels1 = ax1.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
@@ -38,32 +38,32 @@ def plot_legend_in_middle(fig, ax1, ax2):
         loc="upper center",
         bbox_to_anchor=(0.5, -0.1),
         ncol=4,
-        fontsize=14,
+        fontsize=fontsize,
     )
 
 
 def plot_over_line(
-    file_name,
+    filename,
     label,
-    simulation_id,
+    ref,
     title,
-    cond,
     ax,
     linestyle="-",
     color="C0",
+    fontsize=30,
     **kwargs,
 ):
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 2  # Assuming two columns of data (x, y)
 
-    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
-    if "mean" in file_name:
+    # Check if the filename contains 'mean' to determine if we're plotting mean and std
+    if "mean" in filename:
         # Generate the std filename by replacing 'mean' with 'std'
-        std_filename = file_name.replace("mean", "std")
+        std_filename = filename.replace("mean", "std")
 
         # Read mean and standard deviation data from files
         mean_data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         std_data = np.genfromtxt(
             std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
@@ -96,33 +96,23 @@ def plot_over_line(
     else:
         # Plot only the mean data if 'mean' is not in the file name
         data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         ax.plot(data[:, 0], data[:, 1], label=label, linestyle=linestyle, color=color)
 
-    # Format the y-axis
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
-
-    # Modify tick parameters for simulations other than the first
-    if simulation_id > 0:
-        ax.yaxis.set_tick_params(length=0)
-    else:
-        formatter = mticker.ScalarFormatter(useMathText=True)
-        formatter.set_powerlimits((-2, 2))
-        ax.yaxis.set_major_formatter(formatter)
-        ax.yaxis.get_offset_text().set_visible(True)
+    format_axis(ax, ref, fontsize)
 
     # Set labels, grid, and title
-    ax.set_xlabel(styles.getArcLengthLabel())
-    ax.set_ylabel(styles.getHeadLabel(3))
+    ax.set_xlabel(styles.getArcLengthLabel(), fontsize=fontsize)
+    ax.set_ylabel(styles.getHeadLabel(3), fontsize=fontsize)
     ax.grid(True)
 
     # Set optional title and legend
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
+    if kwargs.get("show_title", True):
+        ax.set_title(title, fontsize=fontsize)
 
-    if kwargs.get("has_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0))
+    if kwargs.get("show_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0), fontsize=fontsize)
 
     # Apply optional x and y limits
     if kwargs.get("xlim", None):
@@ -132,15 +122,24 @@ def plot_over_line(
 
 
 def plot_over_time(
-    file_name, legend, ref, ID, title, ax, linestyle="-", color="C0", **kwargs
+    filename,
+    label,
+    ref,
+    ID,
+    title,
+    ax,
+    linestyle="-",
+    color="C0",
+    fontsize=30,
+    **kwargs,
 ):
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 9  # Assuming 9 columns of data
 
-    if "mean" in file_name:
-        std_filename = file_name.replace("mean", "std")
+    if "mean" in filename:
+        std_filename = filename.replace("mean", "std")
         mean_data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         std_data = np.genfromtxt(
             std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
@@ -162,37 +161,29 @@ def plot_over_time(
             color=color,
             alpha=0.3,
         )
-        ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
+        ax.plot(time, mean_values, label=label, linestyle=linestyle, color=color)
     else:
         data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         ax.plot(
-            data[:, 0], data[:, ID + 1], label=legend, linestyle=linestyle, color=color
+            data[:, 0], data[:, ID + 1], label=label, linestyle=linestyle, color=color
         )
 
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
+    format_axis(ax, ref, fontsize)
 
-    if int(ref) > 0:
-        ax.yaxis.set_tick_params(length=0)
-    else:
-        formatter = mticker.ScalarFormatter(useMathText=True)
-        formatter.set_powerlimits((-2, 2))
-        ax.yaxis.set_major_formatter(formatter)
-        ax.yaxis.get_offset_text().set_visible(True)
-
-    ax.set_xlabel(styles.getTimeLabel("s"))  # Only apply xlabel
+    ax.set_xlabel(styles.getTimeLabel("s"), fontsize=fontsize)  # Only apply xlabel
 
     # Apply ylabel only to the first subplot
     ax.set_ylabel(r"$\overline{c_2}$")
     ax.grid(True)
 
-    if kwargs.get("has_title", True):
+    if kwargs.get("show_title", True):
         title_fig = title + " - fracture " + str(ID)
-        ax.set_title(title_fig)
+        ax.set_title(title_fig, fontsize=fontsize)
 
-    if kwargs.get("has_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0))
+    if kwargs.get("show_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0), fontsize=fontsize)
 
     if kwargs.get("xlim", None):
         ax.set_xlim(kwargs.get("xlim"))
@@ -200,20 +191,21 @@ def plot_over_time(
         ax.set_ylim(kwargs.get("ylim"))
 
 
-def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
+def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
-    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
+    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol, fontsize=fontsize)
 
 
-def save_over_time(filename, extension=".pdf", plots_dir=None):
+def save_over_time(filename, extension=".pdf", plots_dir=None, fontsize=25):
     for ID in np.arange(8):
         save(
-            ID,
-            filename + "_fracture_" + str(ID),
+            ID=ID,
+            filename=filename + "_fracture_" + str(ID),
             extension=extension,
             plots_dir=plots_dir,
+            fontsize=fontsize,
         )
 
 
@@ -228,6 +220,8 @@ def plot_boundary_data(data, methods, data_ref, colors, linestyle, extension=".p
 
 
 def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
+    paths = get_paths(__file__)
+
     N = da.shape[0]
     ind = np.arange(N)  # the x locations for the groups
     width = 0.2  # the width of the bars
@@ -256,7 +250,7 @@ def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     ax.set_xticks(ind + width)
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
-    os.makedirs(plots_dir, exist_ok=True)
+    os.makedirs(paths.plots_dir, exist_ok=True)
 
     text = "\\textbf{subfig. b}"
     ax.text(
@@ -269,12 +263,14 @@ def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     )
 
     plt.savefig(
-        os.path.join(plots_dir, f"{case}_boundary_head" + extension),
+        os.path.join(paths.plots_dir, f"{paths.case}_boundary_head" + extension),
         bbox_inches="tight",
     )
 
 
-def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
+def plot_reference_fluxes(da, colors, linestyle, extension):
+    paths = get_paths(__file__)
+
     N = da.shape[0]
     ind = np.arange(N)  # the x locations for the groups
     width = 0.2  # the width of the bars
@@ -302,7 +298,7 @@ def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     ax.set_xticks(ind + width)
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
-    os.makedirs(plots_dir, exist_ok=True)
+    os.makedirs(paths.plots_dir, exist_ok=True)
 
     text = "\\textbf{subfig. a}"
     ax.text(
@@ -315,12 +311,14 @@ def plot_reference_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
     )
 
     plt.savefig(
-        os.path.join(plots_dir, f"{case}_reference_flux" + extension),
+        os.path.join(paths.plots_dir, f"{paths.case}_reference_flux" + extension),
         bbox_inches="tight",
     )
 
 
 def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
+    paths = get_paths(__file__)
+
     N = da.shape[0]
     ind = np.arange(N)  # the x locations for the groups
     width = 0.3  # the width of the bars
@@ -349,7 +347,7 @@ def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
     ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
     ax.set_xticklabels(ind_str)
 
-    os.makedirs(plots_dir, exist_ok=True)
+    os.makedirs(paths.plots_dir, exist_ok=True)
 
     text = "\\textbf{subfig. c}"
     ax.text(
@@ -362,7 +360,7 @@ def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
     )
 
     plt.savefig(
-        os.path.join(plots_dir, f"{case}_boundary_fluxes" + extension),
+        os.path.join(paths.plots_dir, f"{paths.case}_boundary_fluxes" + extension),
         bbox_inches="tight",
     )
 
@@ -371,8 +369,6 @@ def plot_percentiles(ref, line_id, places_and_methods, ax, **kwargs):
 
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 2
-
-    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
     f = []
     minX = -np.inf
