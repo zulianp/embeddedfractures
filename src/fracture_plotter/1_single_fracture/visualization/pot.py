@@ -88,7 +88,7 @@ def run_pot(places_and_methods={"mean": ["key"]}, fontsize=30, subfig_fontsize=1
         )
         if show_legend:
             for ax in (ax_matrix, ax_fracture, ax_outflux):
-                plot.plot_legend_in_middle(ax)
+                plot.plot_legend_in_middle(ax=ax, fontsize=fontsize)
 
     for ID, suffix in (
         (plot.id_intc_matrix, "pot_c_matrix"),

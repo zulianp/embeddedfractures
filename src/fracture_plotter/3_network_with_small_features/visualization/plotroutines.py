@@ -15,33 +15,6 @@ id_p_1_matrix_legend = 11  # p along (0, 100, 100)-(100, 0, 0)
 id_pot_legend = 12  # p along (0, 100, 100)-(100, 0, 0)
 
 
-def plot_legend_in_middle(fig, ax1, ax2, fontsize=30):
-    # Combine handles and labels from both axes
-    handles1, labels1 = ax1.get_legend_handles_labels()
-    handles2, labels2 = ax2.get_legend_handles_labels()
-
-    # Create a unique set of handles and labels (in case both axes share labels)
-    handles = handles1 + handles2
-    labels = labels1 + labels2
-
-    # Remove duplicates from the legend
-    unique_handles, unique_labels = [], []
-    for handle, label in zip(handles, labels):
-        if label not in unique_labels:
-            unique_handles.append(handle)
-            unique_labels.append(label)
-
-    # Plot the combined legend centered below the subplots
-    fig.legend(
-        unique_handles,
-        unique_labels,
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.1),
-        ncol=4,
-        fontsize=fontsize,
-    )
-
-
 def plot_over_line(
     filename,
     label,
@@ -173,13 +146,6 @@ def plot_over_time(
         ax.set_xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
         ax.set_ylim(kwargs.get("ylim"))
-
-
-def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
-    # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
-    plt.figure(ID + 11)
-    plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
-    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol, fontsize=fontsize)
 
 
 def save_over_time(filename, extension=".pdf", plots_dir=None, fontsize=25):

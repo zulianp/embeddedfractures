@@ -16,30 +16,6 @@ id_pot = 2
 id_pot_legend = 12  # p along (0, 100, 100)-(100, 0, 0)
 
 
-def plot_legend_in_middle(ax, fontsize=30):
-    handles, labels = ax.get_legend_handles_labels()
-
-    if isinstance(ax, (list, np.ndarray)):  # Check if it's an array of subplots
-        mid_ax = ax[len(ax) // 2]  # Select the middle axis for the legend
-        mid_ax.legend(
-            handles,
-            labels,
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.2),
-            ncol=4,
-            fontsize=fontsize,
-        )
-    else:  # Single plot
-        ax.legend(
-            handles,
-            labels,
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.3),
-            ncol=2,
-            fontsize=fontsize,
-        )  # Adjust for a sin
-
-
 def plot_over_line(
     filename, label, ID, title, ax, linestyle="-", color="C0", fontsize=30, **kwargs
 ):

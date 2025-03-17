@@ -76,7 +76,7 @@ def run_pot(
 
             # Add the legend directly to the figure (on the first region)
             if region_pos == 1:  # or region_pos == 1 for middle
-                plot.plot_legend_in_middle(ax, fontsize=fontsize)
+                plot.plot_legend_in_middle(ax=ax, fontsize=fontsize)
 
         # Save figure without creating a separate legend file
         plot.save(
