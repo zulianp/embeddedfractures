@@ -91,10 +91,6 @@ def plot_over_line(
             color=color,
         )
 
-    ###
-    # Format y-axis using scientific notation
-    # ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
-
     # Remove y-axis ticks if ref is set
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)

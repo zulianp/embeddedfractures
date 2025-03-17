@@ -1,6 +1,6 @@
 import os
 
-# from percentiles import run_percentiles
+from percentiles import run_percentiles
 from pol import run_pol
 from pot import run_pot
 
@@ -14,8 +14,8 @@ def run_all():
     places_and_methods = process_args()
     print(f"Running all scripts in sequence for case {paths.case}...")
 
-    # run_percentiles(places_and_methods)
-    # print("Finished running percentiles")
+    run_percentiles(places_and_methods)
+    print("Finished running percentiles")
 
     run_pol(places_and_methods)
     print("Finished running pol")
