@@ -51,24 +51,28 @@ class MathTextSciFormatter(mticker.Formatter):
         return "${}$".format(s)
 
 
-def setup_figure(id_offset, num_axes, ylim):
+def setup_figure(id_offset, num_axes, xlim=None, ylim=None):
     fig, axes_list = plt.subplots(
         1, num_axes, figsize=(16, 8), sharex=True, sharey=True, num=id_offset + 11
     )
     fig.subplots_adjust(hspace=0.4, wspace=0)
 
-    # Apply ylim to all subplots
-    for ax in axes_list:
-        ax.set_ylim(ylim)
+    if xlim is not None:
+        for ax in axes_list:
+            ax.set_xlim(xlim)
+
+    if ylim is not None:
+        for ax in axes_list:
+            ax.set_ylim(ylim)
 
     return fig, axes_list
 
 
-def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
+def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
     # It looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
-    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
+    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol, fontsize=fontsize)
 
 
 def save(ID, filename, extension=".pdf", plots_dir=None, fontsize=30, **kwargs):

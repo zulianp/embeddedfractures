@@ -16,7 +16,7 @@ id_pot = 2
 id_pot_legend = 12  # p along (0, 100, 100)-(100, 0, 0)
 
 
-def plot_legend_in_middle(ax):
+def plot_legend_in_middle(ax, fontsize=30):
     handles, labels = ax.get_legend_handles_labels()
 
     if isinstance(ax, (list, np.ndarray)):  # Check if it's an array of subplots
@@ -27,7 +27,7 @@ def plot_legend_in_middle(ax):
             loc="upper center",
             bbox_to_anchor=(0.5, -0.2),
             ncol=4,
-            fontsize=14,
+            fontsize=fontsize,
         )
     else:  # Single plot
         ax.legend(
@@ -36,25 +36,25 @@ def plot_legend_in_middle(ax):
             loc="upper center",
             bbox_to_anchor=(0.5, -0.3),
             ncol=2,
-            fontsize=14,
+            fontsize=fontsize,
         )  # Adjust for a sin
 
 
 def plot_over_line(
-    file_name, legend, ID, title, ax, linestyle="-", color="C0", **kwargs
+    filename, label, ID, title, ax, linestyle="-", color="C0", fontsize=30, **kwargs
 ):
     # Define the converter for the input data
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 2  # Assumes the number of columns is 2 for regular data
 
-    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
-    if "mean" in file_name:
+    # Check if the filename contains 'mean' to determine if we're plotting mean and std
+    if "mean" in filename:
         # Generate the std filename by replacing 'mean' with 'std'
-        std_filename = file_name.replace("mean", "std")
+        std_filename = filename.replace("mean", "std")
 
         # Read mean and standard deviation data from files
         mean_data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         std_data = np.genfromtxt(
             std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
@@ -79,35 +79,36 @@ def plot_over_line(
         ax.plot(
             mean_data[:, 0],
             mean_data[:, 1],
-            label=legend,
+            label=label,
             linestyle=linestyle,
             color=color,
         )
     else:
         # Plot only the mean data
         data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
-        ax.plot(data[:, 0], data[:, 1], label=legend, linestyle=linestyle, color=color)
+        ax.plot(data[:, 0], data[:, 1], label=label, linestyle=linestyle, color=color)
 
     # Format y-axis using scientific notation
     formatter = mticker.ScalarFormatter(useMathText=True)
     formatter.set_powerlimits((-2, 2))
     ax.yaxis.set_major_formatter(formatter)
     ax.yaxis.get_offset_text().set_visible(True)
+    ax.yaxis.get_offset_text().set_fontsize(fontsize)
 
     # Set x-axis label and grid
-    ax.set_xlabel(styles.getArcLengthLabel())
+    ax.set_xlabel(styles.getArcLengthLabel(), fontsize=fontsize)
+    ax.set_ylabel(styles.getHeadLabel(3), fontsize=fontsize)
     ax.grid(True)
-    ax.set_ylabel(styles.getHeadLabel(3))
 
     # Set plot title if needed
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
+    if kwargs.get("show_title", True):
+        ax.set_title(title, fontsize=fontsize)
 
     # Set legend if needed
-    if kwargs.get("has_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0))
+    if kwargs.get("show_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0), fontsize=fontsize)
 
     # Set xlim and ylim if provided
     if kwargs.get("xlim", None):
@@ -125,29 +126,28 @@ def plot_over_line(
 
 
 def plot_over_time(
-    file_name,
-    legend,
+    filename,
+    label,
     title,
-    ID,
     region,
     region_pos,
-    num_regions,
     ax,
     linestyle="-",
     color="C0",
+    fontsize=30,
     **kwargs,
 ):
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 53  # Number of columns in the file
 
-    # Check if the file_name contains 'mean' to determine if we're plotting mean and std
-    if "mean" in file_name:
+    # Check if the filename contains 'mean' to determine if we're plotting mean and std
+    if "mean" in filename:
         # Generate the std filename by replacing 'mean' with 'std'
-        std_filename = file_name.replace("mean", "std")
+        std_filename = filename.replace("mean", "std")
 
         # Read mean and standard deviation data from files
         mean_data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         std_data = np.genfromtxt(
             std_filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
@@ -166,41 +166,33 @@ def plot_over_time(
             color=color,
             alpha=0.3,
         )
-        ax.plot(time, mean_values, label=legend, linestyle=linestyle, color=color)
+        ax.plot(time, mean_values, label=label, linestyle=linestyle, color=color)
     else:
         # Plot the regular data
         data = np.genfromtxt(
-            file_name, delimiter=",", converters=dict(zip(range(N), [c] * N))
+            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
         )
         time = data[:, 0]
         values = data[:, region + 1]
-        ax.plot(time, values, label=legend, linestyle=linestyle, color=color)
+        ax.plot(time, values, label=label, linestyle=linestyle, color=color)
 
     # Format y-axis using scientific notation
-    ax.yaxis.set_major_formatter(MathTextSciFormatter(kwargs.get("fmt", "%1.2e")))
     plt.rcParams.update({"figure.max_open_warning": 0})
 
-    # Remove y-axis ticks if region_pos is set
-    if region_pos > 0:
-        ax.yaxis.set_tick_params(length=0)
-    else:
-        formatter = mticker.ScalarFormatter(useMathText=True)
-        formatter.set_powerlimits((-2, 2))
-        ax.yaxis.set_major_formatter(formatter)
-        ax.yaxis.get_offset_text().set_visible(True)
+    format_axis(ax, region_pos, fontsize)
 
     # Set x-axis label and grid
-    ax.set_xlabel(styles.getTimeLabel("s"))
-    ax.set_ylabel(styles.getAveragedConcentrationLabel(2))
+    ax.set_xlabel(styles.getTimeLabel("s"), fontsize=fontsize)
+    ax.set_ylabel(styles.getAveragedConcentrationLabel(2), fontsize=fontsize)
     ax.grid(True)
 
     # Set plot title if needed
-    if kwargs.get("has_title", True):
-        ax.set_title(title)
+    if kwargs.get("show_title", True):
+        ax.set_title(title, fontsize=fontsize)
 
     # Set legend if needed
-    if kwargs.get("has_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0))
+    if kwargs.get("show_legend", True):
+        ax.legend(bbox_to_anchor=(1.0, 1.0), fontsize=fontsize)
 
     # Set xlim and ylim if provided
     if kwargs.get("xlim", None):
@@ -212,36 +204,18 @@ def plot_over_time(
     ax.set_xticks([0, 500, 1000, 1500])
 
 
-def save_over_time(filename, extension=".pdf"):
-    paths = get_paths(__file__)
-
-    os.makedirs(paths.plots_dir, exist_ok=True)
-
-    for ID in np.arange(52):
-        plt.figure(ID)
-        plt.savefig(
-            os.path.join(
-                paths.plots_dir, filename + "_fracture_" + str(ID) + extension
-            ),
-            bbox_inches="tight",
-        )
-        plt.gcf().clear()
-
-
-def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1):
+def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
     # it looks like that figure_ID = 1 gives problems, so we add a random number = 11
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
-    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol)
+    plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol, fontsize=fontsize)
 
 
-def plot_percentiles(ref, places_and_methods, ax, **kwargs):
+def plot_percentiles(ref, places_and_methods, ax, fontsize=30, **kwargs):
     paths = get_paths(__file__)
 
     c = lambda s: float(s.decode().replace("D", "e"))
     N = 2
-
-    ax.yaxis.set_major_formatter(MathTextSciFormatter("%1.2e"))
 
     f = []
     minX = -np.inf
@@ -271,7 +245,7 @@ def plot_percentiles(ref, places_and_methods, ax, **kwargs):
 
     ax.fill_between(ls, lowerpercentile, upperpercentile, color="gray")
     ax.grid(True)
-    ax.set_xlabel(styles.getArcLengthLabel())
+    ax.set_xlabel(styles.getArcLengthLabel(), fontsize=fontsize)
     weightedarea = (simps(upperpercentile, ls) - simps(lowerpercentile, ls)) / simps(
         meanvalues, ls
     )
@@ -289,6 +263,6 @@ def plot_percentiles(ref, places_and_methods, ax, **kwargs):
         ax.set_yticks([0, 50, 100, 150, 200, 250])
 
     # choose y-label depending on plot id
-    ax.set_ylabel(styles.getHeadLabel(3))
+    ax.set_ylabel(styles.getHeadLabel(3), fontsize=fontsize)
 
     return (ls, lowerpercentile, upperpercentile)
