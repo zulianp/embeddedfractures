@@ -14,10 +14,6 @@ id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2
 id_intc_matrix, id_intc_fracture, id_outflux = 0, 1, 2
 
 
-def decode_float(s):
-    return float(s.decode().replace("D", "e"))
-
-
 def plot_over_line(
     filename,
     label,

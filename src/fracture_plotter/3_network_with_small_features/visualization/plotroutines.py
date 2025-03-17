@@ -7,11 +7,9 @@ from scipy.integrate import simps
 from fracture_plotter.utils.general import get_paths
 from fracture_plotter.utils.plot_routines_utils import *
 
-# ids of the different plots
-id_p_0_matrix = 0  # pressure along (0, 100, 100)-(100, 0, 0)
-id_p_0_matrix_legend = 10  # pressure along (0, 100, 100)-(100, 0, 0)
-id_p_1_matrix = 1  # p along (0, 100, 100)-(100, 0, 0)
-id_p_1_matrix_legend = 11  # p along (0, 100, 100)-(100, 0, 0)
+# Plot IDs
+id_p_0_matrix, id_p_0_matrix_legend = 0, 10
+id_p_1_matrix, id_p_1_matrix_legend = 1, 11  # p along (0, 100, 100)-(100, 0, 0)
 id_pot_legend = 12  # p along (0, 100, 100)-(100, 0, 0)
 
 
@@ -26,62 +24,48 @@ def plot_over_line(
     fontsize=30,
     **kwargs,
 ):
-    c = lambda s: float(s.decode().replace("D", "e"))
     N = 2  # Assuming two columns of data (x, y)
+    load_args = {
+        "filename": filename,
+        "n_columns": N,
+        "converters": {i: decode_float for i in range(N)},
+    }
+    plot_args = {  # noqa: F841
+        "label": label,
+        "linestyle": linestyle,
+        "color": color,
+    }
 
     # Check if the filename contains 'mean' to determine if we're plotting mean and std
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(
-            filename=filename,
-            n_columns=N,
-            converters=dict(zip(range(N), [c] * N)),
+            **load_args,
             skip_header=1,
         )
 
-        # Plot standard deviation band (mean +/- std)
-        ax.fill_between(
-            mean_data[:, 0],
-            mean_data[:, 1] - std_data[:, 1],
-            mean_data[:, 1] + std_data[:, 1],
-            color=color,
-            alpha=0.3,
-        )  # Adjust transparency for visibility
-
-        # Plot the mean data line
-        ax.plot(
-            mean_data[:, 0],
-            mean_data[:, 1],
-            label=label,
-            linestyle=linestyle,
-            color=color,
+        plot_mean_and_std_data(
+            ax=ax,
+            x=mean_data[:, 0],
+            mean_values=mean_data[:, 1],
+            std_values=std_data[:, 1],
+            **plot_args,
         )
-
     else:
         # Plot only the mean data if 'mean' is not in the file name
-        data = np.genfromtxt(
-            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
-        )
-        ax.plot(data[:, 0], data[:, 1], label=label, linestyle=linestyle, color=color)
+        data = load_data(**load_args, skip_header=0)
+        ax.plot(data[:, 0], data[:, 1], **plot_args)
 
-    format_axis(ax, ref, fontsize)
-
-    # Set labels, grid, and title
-    ax.set_xlabel(styles.getArcLengthLabel(), fontsize=fontsize)
-    ax.set_ylabel(styles.getHeadLabel(3), fontsize=fontsize)
-    ax.grid(True)
-
-    # Set optional title and legend
-    if kwargs.get("show_title", True):
-        ax.set_title(title, fontsize=fontsize)
-
-    if kwargs.get("show_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0), fontsize=fontsize)
-
-    # Apply optional x and y limits
-    if kwargs.get("xlim", None):
-        ax.set_xlim(kwargs.get("xlim"))
-    if kwargs.get("ylim", None):
-        ax.set_ylim(kwargs.get("ylim"))
+    format_axis(
+        ax,
+        ref,
+        fontsize,
+        xlabel=styles.getArcLengthLabel(),
+        ylabel=styles.getHeadLabel(3),
+        title=title if kwargs.get("show_title", False) else None,
+        show_legend=kwargs.get("show_legend", False),
+        xlim=kwargs.get("xlim", None),
+        ylim=kwargs.get("ylim", None),
+    )
 
 
 def plot_over_time(
@@ -96,56 +80,50 @@ def plot_over_time(
     fontsize=30,
     **kwargs,
 ):
-    c = lambda s: float(s.decode().replace("D", "e"))
     N = 9  # Assuming 9 columns of data
+    load_args = {
+        "filename": filename,
+        "n_columns": N,
+        "converters": {i: decode_float for i in range(N)},
+    }
+    plot_args = {
+        "label": label,
+        "linestyle": linestyle,
+        "color": color,
+    }
 
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(
-            filename=filename,
-            n_columns=N,
-            converters=dict(zip(range(N), [c] * N)),
+            **load_args,
             skip_header=1,
         )
 
-        time = mean_data[:, 0]
-        mean_values = mean_data[:, ID + 1]
-        std_values = std_data[:, ID + 1]
-
-        ax.fill_between(
-            time,
-            mean_values - std_values,
-            mean_values + std_values,
-            color=color,
-            alpha=0.3,
+        plot_mean_and_std_data(
+            ax=ax,
+            x=mean_data[:, 0],
+            mean_values=mean_data[:, ID + 1],
+            std_values=std_data[:, ID + 1],
+            **plot_args,
         )
-        ax.plot(time, mean_values, label=label, linestyle=linestyle, color=color)
     else:
-        data = np.genfromtxt(
-            filename, delimiter=",", converters=dict(zip(range(N), [c] * N))
-        )
+        data = load_data(**load_args, skip_header=0)
         ax.plot(
-            data[:, 0], data[:, ID + 1], label=label, linestyle=linestyle, color=color
+            data[:, 0],
+            data[:, ID + 1],
+            **plot_args,
         )
 
-    format_axis(ax, ref, fontsize)
-
-    ax.set_xlabel(styles.getTimeLabel("s"), fontsize=fontsize)  # Only apply xlabel
-
-    # Apply ylabel only to the first subplot
-    ax.set_ylabel(r"$\overline{c_2}$")
-    ax.grid(True)
-
-    if kwargs.get("show_title", True):
-        title_fig = title + " - fracture " + str(ID)
-        ax.set_title(title_fig, fontsize=fontsize)
-
-    if kwargs.get("show_legend", True):
-        ax.legend(bbox_to_anchor=(1.0, 1.0), fontsize=fontsize)
-
-    if kwargs.get("xlim", None):
-        ax.set_xlim(kwargs.get("xlim"))
-    if kwargs.get("ylim", None):
-        ax.set_ylim(kwargs.get("ylim"))
+    format_axis(
+        ax,
+        ref,
+        fontsize,
+        xlabel=styles.getTimeLabel("s"),
+        ylabel=r"$\overline{c_2}$",
+        title=title if kwargs.get("show_title", False) else None,
+        show_legend=kwargs.get("show_legend", False),
+        xlim=kwargs.get("xlim", None),
+        ylim=kwargs.get("ylim", None),
+    )
 
 
 def save_over_time(filename, extension=".pdf", plots_dir=None, fontsize=25):

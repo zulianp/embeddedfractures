@@ -4,10 +4,6 @@
 from fracture_plotter.utils.plot_routines_utils import *
 
 
-def decode_float(s):
-    return float(s.decode().replace("D", "e"))
-
-
 def plot_over_line(
     filename, label, ref, title, ax, linestyle="-", color="C0", fontsize=30, **kwargs
 ):
@@ -79,9 +75,7 @@ def plot_over_time(
     region_idx = region + 1
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(
-            filename=filename,
-            n_columns=N,
-            converters=dict(zip(range(N), [decode_float] * N)),
+            **load_args,
             skip_header=1,
         )
 

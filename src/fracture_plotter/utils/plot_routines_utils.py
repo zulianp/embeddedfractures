@@ -134,6 +134,10 @@ def crop_pdf(filename, plots_dir):
 
 
 ################## SUGGESTED COMMON FUNCTIONALITY ##################
+def decode_float(s):
+    return float(s.decode().replace("D", "e"))
+
+
 def load_data(filename, n_columns, converters=None, skip_header=0):
     """Load data from a CSV file with optional converters."""
     if converters is None:

@@ -84,8 +84,8 @@ def run_pol(
             )
 
         if idx == 1:
-            plot.plot_legend_in_middle(fig0, ax0, ax1)
-            plot.plot_legend_in_middle(fig1, ax0, ax1)
+            plot.plot_legend_in_middle(fig=fig0, ax1=ax0, ax2=ax1)
+            plot.plot_legend_in_middle(fig=fig1, ax1=ax0, ax2=ax1)
 
     plot.save(
         ID=plot.id_p_0_matrix,
