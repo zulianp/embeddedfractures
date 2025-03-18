@@ -18,6 +18,9 @@ plt.rc("font", family="serif")
 linestyle = styles.linestyle
 color = styles.color
 
+fontsize = 30
+subfig_fontsize = 25
+
 # Plot IDs (case 1)
 id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2
 id_intc_matrix, id_intc_fracture, id_outflux = 0, 1, 2
@@ -287,9 +290,9 @@ def plot_over_line(
         y_idx=1,
     )
 
-    if case == 1:
+    if case == "single_fracture":
         if ref is None or ID is None:
-            raise ValueError("Case 1 requires both ref and ID.")
+            raise ValueError("Case single_fracture requires both ref and ID.")
         params.update(
             ref=ref,
             num_columns=5,
@@ -301,13 +304,13 @@ def plot_over_line(
                 id_c_fracture: styles.getConcentrationLabel(2),
             }.get(ID),
         )
-    elif case in (2, 3):
+    elif case in ("regular_fracture", "small_features"):
         if ref is None:
-            raise ValueError("Case 2 and 3 require ref.")
+            raise ValueError("Case regular_fracture and small_features require ref.")
         params.update(ref=ref, ylabel=styles.getHeadLabel(3))
-    elif case == 4:
+    elif case == "field_case":
         if ID is None:
-            raise ValueError("Case 4 requires ID.")
+            raise ValueError("Case field_case requires ID.")
         params["ylabel"] = styles.getHeadLabel(3)
         if ID == id_p_0_matrix:
             params.update(
@@ -356,9 +359,9 @@ def plot_over_time(
         xlabel=styles.getTimeLabel("s"),
     )
 
-    if case == 1:
+    if case == "single_fracture":
         if ref is None or ID is None:
-            raise ValueError("Case 1 requires both ref and ID.")
+            raise ValueError("Case single_fracture requires both ref and ID.")
         params.update(
             ref=ref,
             num_columns=4,
@@ -372,9 +375,11 @@ def plot_over_time(
             }.get(ID),
             x_transform=1 / (365 * 24 * 3600),
         )
-    elif case == 2:
+    elif case == "regular_fracture":
         if region is None or region_pos is None:
-            raise ValueError("Case 2 requires both region and region_pos.")
+            raise ValueError(
+                "Case regular_fracture requires both region and region_pos."
+            )
         num_cols = min(
             22, len(np.genfromtxt(filename, delimiter=",", max_rows=1, skip_header=1))
         )
@@ -395,9 +400,9 @@ def plot_over_time(
             y_idx=y_idx,
             ylabel=styles.getConcentrationLabel(3),
         )
-    elif case == 3:
+    elif case == "small_features":
         if ref is None or ID is None:
-            raise ValueError("Case 3 requires both ref and ID.")
+            raise ValueError("Case small_features requires both ref and ID.")
         params.update(
             ref=ref,
             num_columns=9,
@@ -405,9 +410,9 @@ def plot_over_time(
             y_idx=ID + 1,
             ylabel=r"$\overline{c_2}$",
         )
-    elif case == 4:
+    elif case == "field_case":
         if region is None or region_pos is None:
-            raise ValueError("Case 4 requires both region and region_pos.")
+            raise ValueError("Case field_case requires both region and region_pos.")
         params.update(
             num_columns=53,
             region=region,
@@ -445,9 +450,9 @@ def plot_percentiles(
         ylabel=styles.getHeadLabel(3),
     )
 
-    if case == 1:
+    if case == "single_fracture":
         if ref is None or ID is None:
-            raise ValueError("Case 1 requires both ref and ID.")
+            raise ValueError("Case single_fracture requires both ref and ID.")
         ylabel = {
             id_p_matrix: styles.getHeadLabel(3),
             id_c_matrix: styles.getConcentrationLabel(3),
@@ -460,17 +465,17 @@ def plot_percentiles(
             col_indices=slice(2 * ID, 2 * ID + 2),
             filename=f"dol_refinement_{ref}.csv",
         )
-    elif case == 2:
+    elif case == "regular_fracture":
         if cond is None or ref is None:
-            raise ValueError("Case 2 requires cond.")
+            raise ValueError("Case regular_fracture requires cond.")
         params.update(filename=f"dol_cond_{cond}_refinement_{ref}.csv")
-    elif case == 3:
+    elif case == "small_features":
         if ref is None or line_id is None:
-            raise ValueError("Case 3 requires both ref and line_id.")
+            raise ValueError("Case small_features requires both ref and line_id.")
         params.update(filename=f"dol_line_{line_id}_refinement_{ref}.csv")
-    elif case == 4:
+    elif case == "field_case":
         if ref is None:
-            raise ValueError("Case 4 requires ref.")
+            raise ValueError("Case field_case requires ref.")
         y_ticks = (
             [0, 100, 200, 300, 400, 500, 600, 700]
             if ref == "0"
@@ -482,7 +487,7 @@ def plot_percentiles(
 
     funcs, minX, maxX = [], -np.inf, np.inf
     for place, methods in places_and_methods.items():
-        if case == 1 and place == "DTU" and ID != id_p_matrix:
+        if case == "single_fracture" and place == "DTU" and ID != id_p_matrix:
             continue
         for method in methods:
             datafile = os.path.join(
@@ -519,7 +524,7 @@ def plot_percentiles(
     return ls, lower, upper
 
 
-### Case 3 only ###
+### Case small_features only ###
 def save_over_time(filename, extension=".pdf", plots_dir=None, fontsize=25):
     for ID in np.arange(8):
         save(

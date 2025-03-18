@@ -1,8 +1,6 @@
-import importlib
 import json
 import os
 
-seen = set()
 import fracture_plotter.utils.csv as csv_tools
 from fracture_plotter.utils.compute_mean_and_std_all import compute_mean_and_std
 from fracture_plotter.utils.general import get_paths

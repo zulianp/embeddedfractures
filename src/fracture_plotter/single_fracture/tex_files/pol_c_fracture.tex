@@ -1,0 +1,14 @@
+\documentclass[12pt]{article}
+
+\usepackage{pdfpages}
+\usepackage{tikz}
+\begin{document}
+
+\pagestyle{empty}
+\includepdf[pages={1}, pagecommand={%
+    \begin{tikzpicture}[remember picture, overlay]
+        \node at (-0.5, -10.75) {\includegraphics[width=0.2\textwidth]{\figuresPath fracplot.png}};
+        \node at (5.9, -10.75) {\includegraphics[width=0.2\textwidth]{\figuresPath fracplot.png}};
+        \node at (12.3, -10.75) {\includegraphics[width=0.2\textwidth]{\figuresPath fracplot.png}};
+    \end{tikzpicture}}]{\plotsPath pol_c_fracture.pdf}
+\end{document}
