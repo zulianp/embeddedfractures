@@ -1,8 +1,8 @@
 import os
 
-import plotroutines as plot
-
+import fracture_plotter.utils.plot_routines_utils as plot
 from fracture_plotter.utils.general import get_paths
+from fracture_plotter.utils.plot_routines_utils import *
 
 
 def plot_cond_over_time(

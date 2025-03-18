@@ -4,12 +4,10 @@ import os
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-
-# plot_utils.py
 import numpy as np
-from scipy import integrate, interpolate
 
 import fracture_plotter.utils.styles as styles
+from fracture_plotter.utils.general import get_paths
 
 os.environ["PATH"] += ":/Library/TeX/texbin"
 plt.rc("text", usetex=True)
@@ -26,11 +24,11 @@ color = styles.color
 id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2
 id_intc_matrix, id_intc_fracture, id_outflux = 0, 1, 2
 
-# Plot IDs (case 3 + 4)
+# Plot IDs (cases 3 & 4)
 id_p_0_matrix, id_p_0_matrix_legend = 0, 10
 id_p_1_matrix, id_p_1_matrix_legend = 1, 11  # p along (0, 100, 100)-(100, 0, 0)
 
-# Plot IDs (case 3 + 4)
+# Plot IDs (cases 3 & 4)
 id_pot, id_pot_legend = 2, 12
 
 
@@ -490,3 +488,171 @@ def plot_legend_in_middle(**kwargs):
                 ncol=4,
                 fontsize=fontsize,
             )
+
+
+### Case 3 only ###
+def save_over_time(filename, extension=".pdf", plots_dir=None, fontsize=25):
+    for ID in np.arange(8):
+        save(
+            ID=ID,
+            filename=filename + "_fracture_" + str(ID),
+            extension=extension,
+            plots_dir=plots_dir,
+            fontsize=fontsize,
+        )
+
+
+def plot_boundary_data(data, methods, data_ref, colors, linestyle, extension=".pdf"):
+    plot_boundary_head(data[:, 4:], methods, data_ref[2], colors, linestyle, extension)
+    plot_boundary_fluxes(
+        data[:, :4], methods, data_ref[1], colors, linestyle, extension
+    )
+    plot_reference_fluxes(
+        data[:, :4], methods, data_ref[1], colors, linestyle, extension
+    )
+
+
+def plot_boundary_fluxes(da, methods, ratio_ref, colors, linestyle, extension):
+    paths = get_paths(__file__)
+
+    N = da.shape[0]
+    ind = np.arange(N)  # the x locations for the groups
+    width = 0.2  # the width of the bars
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    x = np.array([0, N])
+
+    c1 = "black"
+    ax.plot(x, np.array([ratio_ref, ratio_ref]), ls="-", color=c1)
+    colors = [colors, colors]
+    for i, c in enumerate(colors):
+        ax.bar(ind + width * i, da[:, i + 2], width, color=c, edgecolor="white")
+
+    linestyle = [item for sublist in [linestyle, linestyle] for item in sublist]
+    linestyle_map = {"-": "", "--": "-", ":": "--"}
+    linestyle = [linestyle_map[item] for item in linestyle]
+    for bar, hatch in zip(ax.patches, linestyle):
+        bar.set_hatch(hatch)
+
+    ax.legend(["Reference flux ratio $r_{out}$"])
+    ax.set_ylabel("$r_{out}$")
+
+    ax.set_ylim([0.4, 0.5])
+    ax.set_xticks(ind + width)
+    ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
+    ax.set_xticklabels(ind_str)
+    os.makedirs(paths.plots_dir, exist_ok=True)
+
+    text = "\\textbf{subfig. b}"
+    ax.text(
+        0.5,
+        -0.2,
+        text,
+        horizontalalignment="center",
+        verticalalignment="bottom",
+        transform=ax.transAxes,
+    )
+
+    plt.savefig(
+        os.path.join(paths.plots_dir, f"{paths.case}_boundary_head" + extension),
+        bbox_inches="tight",
+    )
+
+
+def plot_reference_fluxes(da, colors, linestyle, extension):
+    paths = get_paths(__file__)
+
+    N = da.shape[0]
+    ind = np.arange(N)  # the x locations for the groups
+    width = 0.2  # the width of the bars
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    x = np.array([0, N])
+    c0 = "black"
+    ax.plot(x, np.array([1 / 3, 1 / 3]), ls="-", color=c0)
+    colors = [colors, colors]
+    for i, c in enumerate(colors):
+        ax.bar(ind + width * i, da[:, i], width, color=c, edgecolor="white")
+
+    linestyle = [item for sublist in [linestyle, linestyle] for item in sublist]
+    linestyle_map = {"-": "", "--": "-", ":": "--"}
+    linestyle = [linestyle_map[item] for item in linestyle]
+    for bar, hatch in zip(ax.patches, linestyle):
+        bar.set_hatch(hatch)
+
+    ax.legend(["Prescribed flux $\\overline{u}_{out}$"])
+    ax.set_ylabel("$\\overline{u}_{out}$")
+
+    ax.set_ylim([0.1, 0.42])
+    ax.set_xticks(ind + width)
+    ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
+    ax.set_xticklabels(ind_str)
+    os.makedirs(paths.plots_dir, exist_ok=True)
+
+    text = "\\textbf{subfig. a}"
+    ax.text(
+        0.5,
+        -0.2,
+        text,
+        horizontalalignment="center",
+        verticalalignment="bottom",
+        transform=ax.transAxes,
+    )
+
+    plt.savefig(
+        os.path.join(paths.plots_dir, f"{paths.case}_reference_flux" + extension),
+        bbox_inches="tight",
+    )
+
+
+def plot_boundary_head(da, methods, head_ref, colors, linestyle, extension):
+    paths = get_paths(__file__)
+
+    N = da.shape[0]
+    ind = np.arange(N)  # the x locations for the groups
+    width = 0.3  # the width of the bars
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    x = np.array([0, N])
+    c0 = "black"
+    ax.plot(x, np.array([head_ref, head_ref]), ls="-", color=c0)
+    colors = [colors, colors]
+
+    for i, c in enumerate(colors):
+        ax.bar(
+            ind + width * i, da[:, i], width, color=c, edgecolor="white"
+        )  # , hatch=linestyle)
+
+    linestyle = [item for sublist in [linestyle, linestyle] for item in sublist]
+    linestyle_map = {"-": "", "--": "-", ":": "--"}
+    linestyle = [linestyle_map[item] for item in linestyle]
+    for bar, hatch in zip(ax.patches, linestyle):
+        bar.set_hatch(hatch)
+
+    ax.legend(["Reference " + styles.getHeadLabel(3)])
+    ax.set_ylabel(styles.getHeadLabel(3))
+    ax.set_ylim([0.16, 0.28])
+    ax.set_xticks(ind + width)
+    ind_str = ["\\textbf{" + str(idx) + "}" for idx in ind]
+    ax.set_xticklabels(ind_str)
+
+    os.makedirs(paths.plots_dir, exist_ok=True)
+
+    text = "\\textbf{subfig. c}"
+    ax.text(
+        0.5,
+        -0.2,
+        text,
+        horizontalalignment="center",
+        verticalalignment="bottom",
+        transform=ax.transAxes,
+    )
+
+    plt.savefig(
+        os.path.join(paths.plots_dir, f"{paths.case}_boundary_fluxes" + extension),
+        bbox_inches="tight",
+    )
