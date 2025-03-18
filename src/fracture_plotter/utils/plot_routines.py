@@ -18,8 +18,8 @@ plt.rc("font", family="serif")
 linestyle = styles.linestyle
 color = styles.color
 
-fontsize = 30
-subfig_fontsize = 25
+fontsize = 20
+subfig_fontsize = 12
 
 # Plot IDs (case 1)
 id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2

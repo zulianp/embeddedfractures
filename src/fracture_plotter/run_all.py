@@ -1,62 +1,107 @@
-import json
+import importlib
 import os
+import shutil
+from pathlib import Path
 
 import fracture_plotter.utils.csv as csv_tools
 from fracture_plotter.utils.compute_mean_and_std_all import compute_mean_and_std
-from fracture_plotter.utils.general import get_paths
+from fracture_plotter.utils.general import (
+    get_focus_institute_and_method,
+    get_paths,
+    process_args,
+)
+from fracture_plotter.utils.overlay import run_overlay
+from fracture_plotter.utils.plot_routines import fontsize, subfig_fontsize
 
-compute_mean_and_std_all = True
+# Settings
+comp_mean_std = True
+methods_mean_std = ["UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
+focus_inst, focus_meth = get_focus_institute_and_method(current=True)
 create_pdfs = True
-copy_pdfs_to_overleaf = False
-
-# Methods included in mean and standard deviation computation.
-methods_to_average = ["UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
-
-CURRENT = True  # True for USI/FEM_LM, False for ETHZ_USI/FEM_LM
-focus_dir = "USI/FEM_LM" if CURRENT else "ETHZ_USI/FEM_LM"
-focus_institute, focus_method = focus_dir.split("/")
-focus_method = focus_method.replace("_", "\\_")
-
-places_and_methods = {focus_institute: [focus_method], "mean": ["key"]}
+places_and_methods = {focus_inst: [focus_meth], "mean": ["key"]}
 case_list = ["single_fracture", "regular_fracture", "small_features", "field_case"]
+copy_pdfs_to_overleaf = True
+
+# Configuration for each case: list of functions with their submodules and overlay files.
+case_config = {
+    "single_fracture": {
+        "functions": [
+            {"func": "run_percentiles", "module": "percentiles"},
+            {"func": "run_pol", "module": "pol"},
+            {"func": "run_pot", "module": "pot"},
+        ],
+        "overlay_files": [
+            "pol_c_fracture",
+            "pol_c_matrix",
+            "pol_p_matrix",
+            "pot_outflux",
+        ],
+    },
+    "regular_fracture": {
+        "functions": [
+            {"func": "run_pol", "module": "pol"},
+            {"func": "run_pot", "module": "pot"},
+        ],
+        "overlay_files": ["pot_cond_0"],
+    },
+    "small_features": {
+        "functions": [
+            {"func": "run_pol", "module": "pol"},
+            {"func": "run_pot", "module": "pot"},
+        ],
+        "overlay_files": ["pol_p_line_0", "pot_fracture_3"],
+    },
+    "field_case": {
+        "functions": [
+            {"func": "run_pol", "module": "pol"},
+            {"func": "run_pot", "module": "pot"},
+        ],
+        "overlay_files": ["pol_line_0", "pol_line_1", "pot"],
+    },
+}
+
+
+def run_all_case(paths, case):
+    config = case_config[case]
+    funcs = {}
+    for entry in config["functions"]:
+        # Dynamically import from the correct submodule.
+        module = importlib.import_module(
+            f"fracture_plotter.{case}.visualization.{entry['module']}"
+        )
+        funcs[entry["func"]] = getattr(module, entry["func"])
+
+    # Execute functions in order.
+    for entry in config["functions"]:
+        funcs[entry["func"]](places_and_methods, fontsize, subfig_fontsize)
+
+    files = [os.path.join(paths.tex_dir, name) for name in config["overlay_files"]]
+    run_overlay(paths, files)
 
 
 def main():
     paths = get_paths(__file__)
+    if comp_mean_std:
+        compute_mean_and_std(methods_mean_std)
 
-    # Compute mean and standard deviation for all cases, i.e. 1 (single fracture), 2 (regular fracture network), etc.
-    if compute_mean_and_std_all:
-        # Note: You may see some warnings in the interpolation code.
-        print("Computing mean and standard deviations for all cases...")
-        compute_mean_and_std(methods_to_average)
-
-    subdirectories = csv_tools.find_direct_subdirectories(paths.module_dir)
-    places_and_methods_str = json.dumps(
-        places_and_methods
-    )  # Convert the dictionary to a JSON string
-    for subdirectory in subdirectories:
-        case = subdirectory.split(os.sep)[-1]  # e.g. single_fracture
-        if case in case_list:
-            if create_pdfs:
-                print(
-                    f"Changing directory to {subdirectory} and running run_all.py there"
-                )
-                os.system(
-                    f"cd {os.path.join(subdirectory, 'visualization')} && python3 run_all.py '{places_and_methods_str}'"
-                )
+    if create_pdfs:
+        subdir_list = csv_tools.find_direct_subdirectories(paths.module_dir)
+        for subdir in subdir_list:
+            case = os.path.basename(subdir)
+            if case in case_list and create_pdfs:
+                file_handle = os.path.join(subdir, "visualization", "pol.py")
+                case_paths = get_paths(file_handle)
+                run_all_case(case_paths, case)
 
     if copy_pdfs_to_overleaf:
-        subdirectories = csv_tools.find_direct_subdirectories(paths.plots_dir)
-        for subdirectory in subdirectories:
-            # List the files in subdirectory that contain the substring "combined"
-            files = os.listdir(subdirectory)
-
-            # Copy all files to ../overleaf_embedded_fractures/figures/pdf/
-            for file in files:
-                if file.endswith(".pdf"):
-                    src = os.path.join(subdirectory, file)
-                    dst = os.path.join("../overleaf_embedded_fractures/plots/", file)
-                    os.system(f"cp {src} {dst}")
+        src_dir = Path(paths.module_dir).parent.parent / "plots"
+        github_dir = Path(paths.module_dir).parent.parent.parent
+        dst_dir = os.path.join(Path(github_dir), "overleaf_embedded_fractures/plots")
+        for subdir in os.listdir(src_dir):
+            if subdir in case_list:
+                src = os.path.join(src_dir, subdir)
+                dst = os.path.join(dst_dir, subdir)
+                shutil.copytree(src, dst, dirs_exist_ok=True)
 
 
 if __name__ == "__main__":
