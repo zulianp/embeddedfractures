@@ -202,6 +202,59 @@ def plot_mean_and_std_data(ax, x, mean_values, std_values, **kwargs):
         ax.set_ylim(ylim)
 
 
+def make_extra_args(kwargs):
+    extra_args = {}
+
+    xlim = kwargs.get("xlim", None)
+    ylim = kwargs.get("ylim", None)
+    xticks = kwargs.get("xticks", None)
+    yticks = kwargs.get("yticks", None)
+
+    if xlim is not None:
+        extra_args["xlim"] = xlim
+    if ylim is not None:
+        extra_args["ylim"] = ylim
+    if xticks is not None:
+        extra_args["xticks"] = xticks
+    if yticks is not None:
+        extra_args["yticks"] = yticks
+
+    return extra_args
+
+
+def plot_over_line_helper(
+    filename, ax, data_idx, num_columns, label, linestyle, color, **kwargs
+):
+    load_args = make_load_args(filename, num_columns)
+    plot_args = make_plot_args(label, linestyle=linestyle, color=color)
+
+    if "mean" in filename:
+        mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
+        plot_mean_and_std_data(
+            ax=ax,
+            x=mean_data[:, data_idx],
+            mean_values=mean_data[:, data_idx + 1],
+            std_values=std_data[:, data_idx + 1],
+            **plot_args,
+        )
+    else:
+        data = load_data(**load_args, skip_header=0)
+        ax.plot(data[:, data_idx], data[:, data_idx + 1], **plot_args)
+
+    extra_format_args = make_extra_args(kwargs)
+
+    format_axis(
+        ax=ax,
+        ref=kwargs.get("ref", 0),
+        fontsize=kwargs.get("fontsize", 30),
+        xlabel=kwargs.get("xlabel", None),
+        ylabel=kwargs.get("ylabel", None),
+        title=kwargs.get("title", None),
+        show_legend=kwargs.get("show_legend", False),
+        **extra_format_args,
+    )
+
+
 def plot_legend_in_middle(**kwargs):
     # One axis case
     ax = kwargs.get("ax", None)

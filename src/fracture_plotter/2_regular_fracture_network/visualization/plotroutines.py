@@ -7,34 +7,24 @@ from fracture_plotter.utils.plot_routines_utils import *
 def plot_over_line(
     filename, label, ref, title, ax, linestyle="-", color="C0", fontsize=30, **kwargs
 ):
-    N = 2
-    load_args = make_load_args(filename, N)
-    plot_args = make_plot_args(label, linestyle=linestyle, color=color)
+    num_columns, data_idx = 2, 0
 
-    if "mean" in filename:
-        mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
-        plot_mean_and_std_data(
-            ax=ax,
-            x=mean_data[:, 0],
-            mean_values=mean_data[:, 1],
-            std_values=std_data[:, 1],
-            **plot_args,
-        )
-
-    else:
-        data = load_data(**load_args, skip_header=0)
-        ax.plot(data[:, 0], data[:, 1], **plot_args)
-
-    format_axis(
-        ax,
-        ref,
-        fontsize,
+    plot_over_line_helper(
+        filename=filename,
+        ax=ax,
+        data_idx=data_idx,
+        num_columns=num_columns,
+        label=label,
+        linestyle=linestyle,
+        color=color,
+        ref=ref,
+        fontsize=fontsize,
         xlabel=styles.getArcLengthLabel(),
         ylabel=styles.getHeadLabel(3),
-        title=title if kwargs.get("show_title", False) else None,
-        show_legend=kwargs.get("show_legend", False),
+        title=title,
         xlim=kwargs.get("xlim", None),
         ylim=kwargs.get("ylim", None),
+        **kwargs,
     )
 
 
