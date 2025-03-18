@@ -184,3 +184,5 @@ test.py
 /results/4_field_case/std
 
 *.zip
+/.idea
+*.aux

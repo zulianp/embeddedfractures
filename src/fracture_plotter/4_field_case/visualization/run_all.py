@@ -13,21 +13,24 @@ from fracture_plotter.utils.overlay import run_overlay
 def run_all():
     paths = get_paths(__file__)
 
+    fontsize = 30
+    subfig_fontsize = 25
+
     places_and_methods = process_args()
     print(f"Running all scripts in sequence for case {paths.case}...")
 
-    # run_percentiles(places_and_methods)
+    # run_percentiles(places_and_methods, fontsize=fontsize, subfig_fontsize=s ubfig_fontsize)
     # print("Finished running percentiles")
 
-    run_pol(places_and_methods)
+    run_pol(places_and_methods, fontsize=fontsize, subfig_fontsize=subfig_fontsize)
     print("Finished running pol")
 
-    run_pot(places_and_methods)
+    run_pot(places_and_methods, fontsize=fontsize, subfig_fontsize=subfig_fontsize)
     print("Finished running pot")
 
     files = [
+        os.path.join(paths.tex_dir, f"{paths.case}_pol_line_0"),
         os.path.join(paths.tex_dir, f"{paths.case}_pol_line_1"),
-        os.path.join(paths.tex_dir, f"{paths.case}_pol_line_2"),
         os.path.join(paths.tex_dir, f"{paths.case}_pot"),
     ]
 

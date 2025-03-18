@@ -1,7 +1,6 @@
 import os
 
-import plotroutines as plot
-
+import fracture_plotter.utils.plot_routines as plot
 from fracture_plotter.utils.general import get_paths
 
 
@@ -13,118 +12,110 @@ def plot_data_over_lines(
     axes_c_fracture,
     title,
     show_legend=False,
+    fontsize=30,
 ):
     paths = get_paths(__file__)
-
-    for place in places_and_methods:
-        for method in places_and_methods[place]:
+    for place, methods in places_and_methods.items():
+        for method in methods:
             folder = os.path.join(paths.results_dir, place, method).replace("\_", "_")
             data = os.path.join(folder, f"dol_refinement_{ref}.csv").replace("\_", "_")
-            label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
-
-            # Pass show_legend flag to the plot function
+            label = place if place == "mean" else f"{place}-{method}"
+            common = {
+                "filename": data,
+                "label": label,
+                "ref": ref,
+                "title": title,
+                "linestyle": plot.linestyle[place][method],
+                "color": plot.color[place][method],
+                "show_legend": show_legend,
+                "fontsize": fontsize,
+            }
             plot.plot_over_line(
-                data,
-                label,
-                ref,
-                plot.id_p_matrix,
-                title,
-                axes_p_matrix,
-                plot.linestyle[place][method],
-                plot.color[place][method],
-                has_legend=show_legend,
+                case=paths.case_num, ID=plot.id_p_matrix, ax=axes_p_matrix, **common
             )
-
-            if place != "DTU":  # Only pressure for DTU
-                plot.plot_over_line(
-                    data,
-                    label,
-                    ref,
-                    plot.id_c_matrix,
-                    title,
-                    axes_c_matrix,
-                    plot.linestyle[place][method],
-                    plot.color[place][method],
-                    has_legend=show_legend,
-                )
-                plot.plot_over_line(
-                    data,
-                    label,
-                    ref,
-                    plot.id_c_fracture,
-                    title,
-                    axes_c_fracture,
-                    plot.linestyle[place][method],
-                    plot.color[place][method],
-                    has_legend=show_legend,
-                )
+            if place != "DTU":
+                for ID, ax in (
+                    (plot.id_c_matrix, axes_c_matrix),
+                    (plot.id_c_fracture, axes_c_fracture),
+                ):
+                    plot.plot_over_line(case=paths.case_num, ID=ID, ax=ax, **common)
 
 
-def run_pol(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):
+def run_pol(
+    places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
+    fontsize=30,
+    subfig_fontsize=12,
+):
     paths = get_paths(__file__)
-
     titles = ["$\\sim 1k$ cells", "$\\sim 10k$ cells", "$\\sim 100k$ cells"]
     refinement_index = [0, 1, 2]
 
-    # Setup figures and axes
     fig_p_matrix, axes_p_matrix_list = plot.setup_figure(
-        plot.id_p_matrix, 3, ylim=(1 - 0.1, 4 + 0.1)
+        id_offset=plot.id_p_matrix, num_axes=len(refinement_index), ylim=(0.9, 4.1)
     )
     fig_c_matrix, axes_c_matrix_list = plot.setup_figure(
-        plot.id_c_matrix, 3, ylim=(0 - 0.0005, 0.01 + 0.0005)
+        id_offset=plot.id_c_matrix,
+        num_axes=len(refinement_index),
+        ylim=(-0.0005, 0.0105),
     )
     fig_c_fracture, axes_c_fracture_list = plot.setup_figure(
-        plot.id_c_fracture, 3, ylim=(0.0075, 0.0101)
+        id_offset=plot.id_c_fracture,
+        num_axes=len(refinement_index),
+        ylim=(0.0075, 0.0101),
     )
 
-    # Plot data
-    for title, ref, idx, axes_p_matrix, axes_c_matrix, axes_c_fracture in zip(
-        titles,
-        refinement_index,
-        range(3),
-        axes_p_matrix_list,
-        axes_c_matrix_list,
-        axes_c_fracture_list,
+    for idx, (title, ref, ax_p, ax_c, ax_cf) in enumerate(
+        zip(
+            titles,
+            refinement_index,
+            axes_p_matrix_list,
+            axes_c_matrix_list,
+            axes_c_fracture_list,
+        )
     ):
-        show_legend = (
-            idx == 1
-        )  # Show the legend only for the middle subplot (index 1, subfigure b)
+        show_legend = idx == 1
         plot_data_over_lines(
-            places_and_methods,
-            ref,
-            axes_p_matrix,
-            axes_c_matrix,
-            axes_c_fracture,
-            title,
-            show_legend,
+            places_and_methods=places_and_methods,
+            ref=ref,
+            axes_p_matrix=ax_p,
+            axes_c_matrix=ax_c,
+            axes_c_fracture=ax_cf,
+            title=title,
+            show_legend=show_legend,
+            fontsize=fontsize,
         )
 
-        # Add reference for USTUTT-MPFA
         ref_data = os.path.join(
             paths.results_dir, "USTUTT/MPFA/dol_refinement_5.csv".replace("\_", "_")
         )
+        ref_common = {
+            "filename": ref_data,
+            "label": "reference",
+            "ref": ref,
+            "title": title,
+            "linestyle": plot.linestyle["USTUTT"]["reference"],
+            "color": plot.color["USTUTT"]["reference"],
+            "fontsize": fontsize,
+            "show_legend": show_legend,
+        }
         plot.plot_over_line(
-            ref_data,
-            "reference",
-            ref,
-            plot.id_p_matrix,
-            title,
-            axes_p_matrix,
-            plot.linestyle["USTUTT"]["reference"],
-            plot.color["USTUTT"]["reference"],
-            has_legend=show_legend,
+            case=paths.case_num, ID=plot.id_p_matrix, ax=ax_p, **ref_common
         )
+        if show_legend:
+            for ax in (ax_p, ax_c, ax_cf):
+                plot.plot_legend_in_middle(ax=ax, fontsize=fontsize)
 
-        # Only add the legend to the middle subplot (subfigure b)
-        if idx == 1:
-            plot.plot_legend_in_middle(axes_p_matrix)
-            plot.plot_legend_in_middle(axes_c_matrix)
-            plot.plot_legend_in_middle(axes_c_fracture)
-
-    # Save figures with integrated legends
-    plot.save(ID=plot.id_p_matrix, filename=f"{paths.case}_pol_p_matrix")
-    plot.save(ID=plot.id_c_matrix, filename=f"{paths.case}_pol_c_matrix")
-    plot.save(ID=plot.id_c_fracture, filename=f"{paths.case}_pol_c_fracture")
+    for ID, suffix in (
+        (plot.id_p_matrix, "pol_p_matrix"),
+        (plot.id_c_matrix, "pol_c_matrix"),
+        (plot.id_c_fracture, "pol_c_fracture"),
+    ):
+        plot.save(
+            ID=ID,
+            filename=f"{paths.case}_{suffix}",
+            plots_dir=paths.plots_dir,
+            fontsize=subfig_fontsize,
+        )
 
 
 if __name__ == "__main__":
