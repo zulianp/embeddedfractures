@@ -1,7 +1,5 @@
 # Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
-import os
-
-import plotroutines as plot
+import fracture_plotter.utils.plot_routines as plot
 
 
 def run_percentiles(

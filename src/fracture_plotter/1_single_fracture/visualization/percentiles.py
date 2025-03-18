@@ -1,4 +1,4 @@
-import plotroutines as plot
+import fracture_plotter.utils.plot_routines as plot
 
 
 def run_percentiles(
@@ -31,6 +31,8 @@ def run_percentiles(
     for ref, axes in zip(["0", "1", "2"], zip(*axes_lists)):
         for (ID, _, _), ax in zip(config, axes):
             plot.plot_percentiles(
+                case=paths.case_num,
+                paths=paths,
                 ref=ref,
                 ID=ID,
                 places_and_methods=places_and_methods,

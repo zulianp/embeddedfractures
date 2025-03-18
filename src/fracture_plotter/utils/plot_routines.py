@@ -5,6 +5,8 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+from scipy import interpolate
+from scipy.integrate import simps
 
 import fracture_plotter.utils.styles as styles
 from fracture_plotter.utils.general import get_paths
@@ -32,6 +34,48 @@ id_p_1_matrix, id_p_1_matrix_legend = 1, 11  # p along (0, 100, 100)-(100, 0, 0)
 id_pot, id_pot_legend = 2, 12
 
 
+class MathTextSciFormatter(mticker.Formatter):
+    def __init__(self, fmt="%1.2f"):
+        self.fmt = fmt
+
+    def __call__(self, x, pos=None):
+        s = self.fmt % x
+        return "${}$".format(s)
+
+
+def decode_float(s):
+    return float(s.decode().replace("D", "e"))
+
+
+def load_data(filename, n_columns, converters=None, skip_header=0):
+    """Load data from a CSV file with optional converters."""
+    if converters is None:
+        converters = {i: decode_float for i in range(n_columns)}
+    return np.genfromtxt(
+        filename, delimiter=",", skip_header=skip_header, converters=converters
+    )
+
+
+def load_mean_and_std_data(filename, n_columns, converters, skip_header=1):
+    """Load mean and standard deviation data from CSV files."""
+    mean_data = load_data(
+        filename=filename,
+        n_columns=n_columns,
+        converters=converters,
+        skip_header=skip_header,
+    )
+    std_data = load_data(
+        filename=filename.replace("mean", "std"),
+        n_columns=n_columns,
+        converters=converters,
+        skip_header=skip_header,
+    )
+    if mean_data.shape != std_data.shape:
+        raise ValueError("Mean and standard deviation data do not have the same shape!")
+
+    return mean_data, std_data
+
+
 def make_load_args(filename, n_columns):
     converters = {i: decode_float for i in range(n_columns)}
     return {"filename": filename, "n_columns": n_columns, "converters": converters}
@@ -39,6 +83,26 @@ def make_load_args(filename, n_columns):
 
 def make_plot_args(label, linestyle="-", color="C0"):
     return {"label": label, "linestyle": linestyle, "color": color}
+
+
+def make_extra_args(kwargs):
+    extra_args = {}
+
+    xlim = kwargs.get("xlim", None)
+    ylim = kwargs.get("ylim", None)
+    xticks = kwargs.get("xticks", None)
+    yticks = kwargs.get("yticks", None)
+
+    if xlim is not None:
+        extra_args["xlim"] = xlim
+    if ylim is not None:
+        extra_args["ylim"] = ylim
+    if xticks is not None:
+        extra_args["xticks"] = xticks
+    if yticks is not None:
+        extra_args["yticks"] = yticks
+
+    return extra_args
 
 
 def format_axis(ax, ref, fontsize, **kwargs):
@@ -76,15 +140,6 @@ def format_axis(ax, ref, fontsize, **kwargs):
         ax.set_yticks(kwargs["yticks"])
 
 
-class MathTextSciFormatter(mticker.Formatter):
-    def __init__(self, fmt="%1.2f"):
-        self.fmt = fmt
-
-    def __call__(self, x, pos=None):
-        s = self.fmt % x
-        return "${}$".format(s)
-
-
 def setup_figure(id_offset, num_axes, xlim=None, ylim=None):
     fig, axes_list = plt.subplots(
         1, num_axes, figsize=(16, 8), sharex=True, sharey=True, num=id_offset + 11
@@ -106,6 +161,68 @@ def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol, fontsize=fontsize)
+
+
+def plot_legend_in_middle(**kwargs):
+    # One axis case
+    ax = kwargs.get("ax", None)
+    fontsize = kwargs.get("fontsize", 30)
+
+    if ax is not None:
+        handles, labels = ax.get_legend_handles_labels()
+
+        if isinstance(ax, (list, np.ndarray)):  # Check if it's an array of subplots
+            mid_ax = ax[len(ax) // 2]  # Select the middle axis for the legend
+            mid_ax.legend(
+                handles,
+                labels,
+                loc="upper center",
+                bbox_to_anchor=(0.5, -0.2),
+                ncol=4,
+                fontsize=fontsize,
+            )
+        else:  # Single plot
+            ax.legend(
+                handles,
+                labels,
+                loc="upper center",
+                bbox_to_anchor=(0.5, -0.3),
+                ncol=2,
+                fontsize=fontsize,
+            )
+
+    if ax is None:
+        fig = kwargs.get("fig", None)
+        ax1 = kwargs.get("ax1", None)
+        ax2 = kwargs.get("ax2", None)
+
+        if fig is None or ax1 is None or ax2 is None:
+            raise ValueError("Either ax or fig and ax1 and ax2 must be provided!")
+        else:
+            # Combine handles and labels from both axes
+            handles1, labels1 = ax1.get_legend_handles_labels()
+            handles2, labels2 = ax2.get_legend_handles_labels()
+
+            # Create a unique set of handles and labels (in case both axes share labels)
+            handles = handles1 + handles2
+            labels = labels1 + labels2
+
+            # Remove duplicates from the legend
+            unique_handles, unique_labels = [], []
+            for handle, label in zip(handles, labels):
+                if label not in unique_labels:
+                    unique_handles.append(handle)
+                    unique_labels.append(label)
+
+            # Plot the combined legend centered below the subplots
+            fig.legend(
+                unique_handles,
+                unique_labels,
+                loc="upper center",
+                bbox_to_anchor=(0.5, -0.1),
+                ncol=4,
+                fontsize=fontsize,
+            )
 
 
 def save(ID, filename, extension=".pdf", plots_dir=None, fontsize=30, **kwargs):
@@ -151,42 +268,6 @@ def crop_pdf(filename, plots_dir):
         os.system("pdfcrop " + filename + " " + filename)
 
 
-################## SUGGESTED COMMON FUNCTIONALITY ##################
-def decode_float(s):
-    return float(s.decode().replace("D", "e"))
-
-
-def load_data(filename, n_columns, converters=None, skip_header=0):
-    """Load data from a CSV file with optional converters."""
-    if converters is None:
-        converters = {
-            i: lambda s: float(s.decode().replace("D", "e")) for i in range(n_columns)
-        }
-    return np.genfromtxt(
-        filename, delimiter=",", skip_header=skip_header, converters=converters
-    )
-
-
-def load_mean_and_std_data(filename, n_columns, converters, skip_header=1):
-    """Load mean and standard deviation data from CSV files."""
-    mean_data = load_data(
-        filename=filename,
-        n_columns=n_columns,
-        converters=converters,
-        skip_header=skip_header,
-    )
-    std_data = load_data(
-        filename=filename.replace("mean", "std"),
-        n_columns=n_columns,
-        converters=converters,
-        skip_header=skip_header,
-    )
-    if mean_data.shape != std_data.shape:
-        raise ValueError("Mean and standard deviation data do not have the same shape!")
-
-    return mean_data, std_data
-
-
 def plot_mean_and_std_data(ax, x, mean_values, std_values, **kwargs):
     color = kwargs.get("color", "C0")
     alpha = kwargs.get("alpha", 0.5)
@@ -204,26 +285,6 @@ def plot_mean_and_std_data(ax, x, mean_values, std_values, **kwargs):
         ax.set_xlim(xlim)
     if ylim is not None:
         ax.set_ylim(ylim)
-
-
-def make_extra_args(kwargs):
-    extra_args = {}
-
-    xlim = kwargs.get("xlim", None)
-    ylim = kwargs.get("ylim", None)
-    xticks = kwargs.get("xticks", None)
-    yticks = kwargs.get("yticks", None)
-
-    if xlim is not None:
-        extra_args["xlim"] = xlim
-    if ylim is not None:
-        extra_args["ylim"] = ylim
-    if xticks is not None:
-        extra_args["xticks"] = xticks
-    if yticks is not None:
-        extra_args["yticks"] = yticks
-
-    return extra_args
 
 
 def plot_helper(
@@ -428,66 +489,102 @@ def plot_over_time(
     plot_helper(**params)
 
 
-def plot_legend_in_middle(**kwargs):
-    # One axis case
-    ax = kwargs.get("ax", None)
-    fontsize = kwargs.get("fontsize", 30)
+def plot_percentiles(
+    case,
+    paths,
+    places_and_methods,
+    ax,
+    ref=None,
+    ID=None,
+    line_id=None,
+    cond=None,
+    fontsize=30,
+    **kwargs,
+):
+    params = dict(
+        ax=ax,
+        fontsize=fontsize,
+        ylim=kwargs.get("ylim"),
+        col_indices=slice(0, 2),
+        num_columns=2,
+        xlabel=styles.getArcLengthLabel(),
+        ylabel=styles.getHeadLabel(3),
+    )
 
-    if ax is not None:
-        handles, labels = ax.get_legend_handles_labels()
+    if case == 1:
+        if ref is None or ID is None:
+            raise ValueError("Case 1 requires both ref and ID.")
+        ylabel = {
+            id_p_matrix: styles.getHeadLabel(3),
+            id_c_matrix: styles.getConcentrationLabel(3),
+            id_c_fracture: styles.getConcentrationLabel(2),
+        }.get(ID)
 
-        if isinstance(ax, (list, np.ndarray)):  # Check if it's an array of subplots
-            mid_ax = ax[len(ax) // 2]  # Select the middle axis for the legend
-            mid_ax.legend(
-                handles,
-                labels,
-                loc="upper center",
-                bbox_to_anchor=(0.5, -0.2),
-                ncol=4,
-                fontsize=fontsize,
-            )
-        else:  # Single plot
-            ax.legend(
-                handles,
-                labels,
-                loc="upper center",
-                bbox_to_anchor=(0.5, -0.3),
-                ncol=2,
-                fontsize=fontsize,
-            )
+        params.update(
+            num_columns=6,
+            ylabel=ylabel,
+            col_indices=slice(2 * ID, 2 * ID + 2),
+            filename=f"dol_refinement_{ref}.csv",
+        )
+    elif case == 2:
+        if cond is None or ref is None:
+            raise ValueError("Case 2 requires cond.")
+        params.update(filename=f"dol_cond_{cond}_refinement_{ref}.csv")
+    elif case == 3:
+        if ref is None or line_id is None:
+            raise ValueError("Case 3 requires both ref and line_id.")
+        params.update(filename=f"dol_line_{line_id}_refinement_{ref}.csv")
+    elif case == 4:
+        if ref is None:
+            raise ValueError("Case 4 requires ref.")
+        y_ticks = None
+        if ref == "0":
+            y_ticks = [0, 100, 200, 300, 400, 500, 600, 700]
+        elif ref == "1":
+            y_ticks = [0, 50, 100, 150, 200, 250]
+        if y_ticks is not None:
+            params.update(yticks=y_ticks)
 
-    if ax is None:
-        fig = kwargs.get("fig", None)
-        ax1 = kwargs.get("ax1", None)
-        ax2 = kwargs.get("ax2", None)
+        params.update(filename=f"dol_line_{ref}.csv", xticks=[0, 500, 1000, 1500])
 
-        if fig is None or ax1 is None or ax2 is None:
-            raise ValueError("Either ax or fig and ax1 and ax2 must be provided!")
-        else:
-            # Combine handles and labels from both axes
-            handles1, labels1 = ax1.get_legend_handles_labels()
-            handles2, labels2 = ax2.get_legend_handles_labels()
+    funcs, minX, maxX = [], -np.inf, np.inf
+    for place, methods in places_and_methods.items():
+        if case == 1 and place == "DTU" and ID != id_p_matrix:
+            continue
+        for method in methods:
+            datafile = os.path.join(
+                paths.results_dir, place, method, params["filename"]
+            ).replace("\_", "_")
+            data = load_data(datafile, params["num_columns"])
+            data = data[:, params["col_indices"]]
+            data = data[~np.isnan(data).any(axis=1)]
 
-            # Create a unique set of handles and labels (in case both axes share labels)
-            handles = handles1 + handles2
-            labels = labels1 + labels2
+            funcs.append(interpolate.interp1d(data[:, 0], data[:, 1]))
+            minX, maxX = max(minX, data[0, 0]), min(maxX, data[-1, 0])
 
-            # Remove duplicates from the legend
-            unique_handles, unique_labels = [], []
-            for handle, label in zip(handles, labels):
-                if label not in unique_labels:
-                    unique_handles.append(handle)
-                    unique_labels.append(label)
+    ls = np.linspace(minX, maxX, num=1000)
+    interpolated = [f(ls) for f in funcs]
+    mean_values = np.mean(interpolated, axis=0)
+    lower, upper = np.percentile(interpolated, [10, 90], axis=0)
 
-            # Plot the combined legend centered below the subplots
-            fig.legend(
-                unique_handles,
-                unique_labels,
-                loc="upper center",
-                bbox_to_anchor=(0.5, -0.1),
-                ncol=4,
-                fontsize=fontsize,
-            )
+    ax.fill_between(ls, lower, upper, color="gray")
+    ax.set_xlabel(params.get("xlabel"), fontsize=fontsize)
+    ax.set_ylabel(params.get("ylabel"), fontsize=fontsize)
+    weighted_area = (simps(upper, ls) - simps(lower, ls)) / simps(mean_values, ls)
+    ax.set_title(f"weighted area {MathTextSciFormatter()(weighted_area)}")
+    ax.grid(True)
+
+    if kwargs.get("xlim", None):
+        ax.set_xlim(kwargs.get("xlim"))
+    if kwargs.get("ylim", None):
+        ax.set_ylim(kwargs.get("ylim"))
+
+    if params.get("xticks", None):
+        ax.set_xticks(params.get("xticks"))
+    if params.get("yticks", None):
+        ax.set_yticks(params.get("yticks"))
+
+    return ls, lower, upper
 
 
 ### Case 3 only ###

@@ -2,7 +2,8 @@ import csv
 import os
 
 import numpy as np
-import plotroutines as plot
+
+import fracture_plotter.utils.plot_routines as plot
 
 
 def run_boundary_data(places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]}):

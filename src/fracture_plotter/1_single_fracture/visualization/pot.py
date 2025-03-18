@@ -1,8 +1,8 @@
 import os
 
 import numpy as np
-import plotroutines as plot
 
+import fracture_plotter.utils.plot_routines as plot
 from fracture_plotter.utils.general import get_paths
 
 

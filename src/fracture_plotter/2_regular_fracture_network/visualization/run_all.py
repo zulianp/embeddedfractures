@@ -1,4 +1,3 @@
-# Source: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d
 import os
 
 from pol import run_pol
