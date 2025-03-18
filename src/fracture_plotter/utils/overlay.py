@@ -2,7 +2,7 @@
 import os
 
 
-def run_overlay(files, paths):
+def run_overlay(paths, files):
     # Change working directory to the one containing this file
     os.chdir(paths.tex_dir)
     for f in files:

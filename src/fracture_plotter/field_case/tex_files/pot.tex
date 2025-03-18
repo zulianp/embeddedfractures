@@ -1,0 +1,14 @@
+\documentclass[12pt]{article}
+
+\usepackage{pdfpages}
+\usepackage{tikz}
+\begin{document}
+
+\pagestyle{empty}
+\includepdf[pages={1}, pagecommand={%
+    \begin{tikzpicture}[remember picture, overlay]
+        \node at (-0.8, -4) {\includegraphics[width=0.25\textwidth]{\figuresPath fracture15}};
+        \node at (5.7, -4) {\includegraphics[width=0.25\textwidth]{\figuresPath fracture45}};
+        \node at (12.2, -4) {\includegraphics[width=0.25\textwidth]{\figuresPath fracture48}};
+    \end{tikzpicture}}]{\plotsPath pot}
+\end{document}
