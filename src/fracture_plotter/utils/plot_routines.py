@@ -19,7 +19,8 @@ linestyle = styles.linestyle
 color = styles.color
 
 fontsize = 20
-subfig_fontsize = 12
+subfig_fontsize = 14
+ncol = 4
 
 # Plot IDs (case 1)
 id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2
@@ -119,7 +120,7 @@ def setup_figure(id_offset, num_axes, xlim=None, ylim=None):
     return fig, axes_list
 
 
-def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
+def plot_legend(legend, ID, linestyle="-", color="C0", ncol=ncol, fontsize=30):
     plt.figure(ID + 11)
     plt.plot(np.zeros(1), label=legend, linestyle=linestyle, color=color)
     plt.legend(bbox_to_anchor=(1, -0.2), ncol=ncol, fontsize=fontsize)
@@ -135,8 +136,8 @@ def plot_legend_in_middle(**kwargs):
                 handles,
                 labels,
                 loc="upper center",
-                bbox_to_anchor=(0.5, -0.2),
-                ncol=4,
+                bbox_to_anchor=(0.5, -0.3),
+                ncol=ncol,
                 fontsize=fontsize,
             )
         else:
@@ -145,7 +146,7 @@ def plot_legend_in_middle(**kwargs):
                 labels,
                 loc="upper center",
                 bbox_to_anchor=(0.5, -0.3),
-                ncol=2,
+                ncol=ncol,
                 fontsize=fontsize,
             )
     else:
@@ -164,7 +165,7 @@ def plot_legend_in_middle(**kwargs):
             unique_labels,
             loc="upper center",
             bbox_to_anchor=(0.5, -0.1),
-            ncol=4,
+            ncol=ncol,
             fontsize=fontsize,
         )
 

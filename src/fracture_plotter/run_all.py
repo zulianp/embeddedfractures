@@ -5,24 +5,20 @@ from pathlib import Path
 
 import fracture_plotter.utils.csv as csv_tools
 from fracture_plotter.utils.compute_mean_and_std_all import compute_mean_and_std
-from fracture_plotter.utils.general import (
-    get_focus_institute_and_method,
-    get_paths,
-    process_args,
-)
+from fracture_plotter.utils.general import get_focus_institute_and_method, get_paths
 from fracture_plotter.utils.overlay import run_overlay
-from fracture_plotter.utils.plot_routines import fontsize, subfig_fontsize
+from fracture_plotter.utils.plot_routines import fontsize, plt, subfig_fontsize
 
 # Settings
-comp_mean_std = True
+comp_mean_std = False
 methods_mean_std = ["UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
 focus_inst, focus_meth = get_focus_institute_and_method(current=True)
 create_pdfs = True
 places_and_methods = {focus_inst: [focus_meth], "mean": ["key"]}
 case_list = ["single_fracture", "regular_fracture", "small_features", "field_case"]
-copy_pdfs_to_overleaf = True
+copy_pdfs_to_overleaf = False
 
-# Configuration for each case: list of functions with their submodules and overlay files.
+# Configuration for each case: list of functions with their submodules and overlay files
 case_config = {
     "single_fracture": {
         "functions": [
@@ -61,19 +57,19 @@ case_config = {
 }
 
 
-def run_all_case(paths, case):
+def run_case(paths, case):
     config = case_config[case]
     funcs = {}
     for entry in config["functions"]:
-        # Dynamically import from the correct submodule.
+        # Dynamically import from the correct submodule
         module = importlib.import_module(
             f"fracture_plotter.{case}.visualization.{entry['module']}"
         )
         funcs[entry["func"]] = getattr(module, entry["func"])
 
-    # Execute functions in order.
     for entry in config["functions"]:
         funcs[entry["func"]](places_and_methods, fontsize, subfig_fontsize)
+        plt.close("all")
 
     files = [os.path.join(paths.tex_dir, name) for name in config["overlay_files"]]
     run_overlay(paths, files)
@@ -84,14 +80,13 @@ def main():
     if comp_mean_std:
         compute_mean_and_std(methods_mean_std)
 
-    if create_pdfs:
-        subdir_list = csv_tools.find_direct_subdirectories(paths.module_dir)
-        for subdir in subdir_list:
-            case = os.path.basename(subdir)
-            if case in case_list and create_pdfs:
-                file_handle = os.path.join(subdir, "visualization", "pol.py")
-                case_paths = get_paths(file_handle)
-                run_all_case(case_paths, case)
+    subdir_list = csv_tools.find_direct_subdirectories(paths.module_dir)
+    for subdir in subdir_list:
+        case = os.path.basename(subdir)
+        if case in case_list and create_pdfs:
+            file_handle = os.path.join(subdir, "visualization", "pol.py")
+            case_paths = get_paths(file_handle)
+            run_case(case_paths, case)
 
     if copy_pdfs_to_overleaf:
         src_dir = Path(paths.module_dir).parent.parent / "plots"
