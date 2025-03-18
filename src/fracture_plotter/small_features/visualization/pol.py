@@ -27,7 +27,7 @@ def plot_data_over_lines(
                     folder, f"dol_line_{line}_refinement_{ref}.csv"
                 ).replace(r"\_", "_")
                 plot.plot_over_line(
-                    case=paths.case_num,
+                    case=paths.case,
                     filename=data,
                     label=label,
                     ref=ref,
@@ -71,7 +71,7 @@ def run_pol(
         ):
             ref_data = os.path.join(ref_folder, f"dol_line_{line}_refinement_5.csv")
             plot.plot_over_line(
-                case=paths.case_num,
+                case=paths.case,
                 filename=ref_data,
                 label="reference",
                 ref=ref,
@@ -90,13 +90,13 @@ def run_pol(
 
     plot.save(
         ID=plot.id_p_0_matrix,
-        filename=f"{paths.case}_pol_p_line_0",
+        filename=f"pol_p_line_0",
         plots_dir=paths.plots_dir,
         fontsize=subfig_fontsize,
     )
     plot.save(
         ID=plot.id_p_1_matrix,
-        filename=f"{paths.case}_pol_p_line_1",
+        filename=f"pol_p_line_1",
         plots_dir=paths.plots_dir,
         fontsize=subfig_fontsize,
     )

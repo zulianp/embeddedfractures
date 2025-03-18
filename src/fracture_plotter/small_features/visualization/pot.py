@@ -12,7 +12,7 @@ def plot_data_over_time(places_and_methods, ref, ax, ID, title, fontsize=30):
             data = os.path.join(folder, f"dot_refinement_{ref}.csv").replace(r"\_", "_")
             label = place if place == "mean" else f"{place}-{method}"
             plot.plot_over_time(
-                case=paths.case_num,
+                case=paths.case,
                 filename=data,
                 label=label,
                 ref=ref,
@@ -49,7 +49,7 @@ def run_pot(
             )
         plot.plot_legend_in_middle(fig=fig, ax1=axes[0], ax2=axes[1], fontsize=fontsize)
     plot.save_over_time(
-        filename=f"{paths.case}_pot",
+        filename=f"pot",
         plots_dir=paths.plots_dir,
         fontsize=subfig_fontsize,
     )
