@@ -279,88 +279,57 @@ def plot_over_line(
     fontsize=30,
     **kwargs,
 ):
+    params = dict(
+        filename=filename,
+        ax=ax,
+        label=label,
+        linestyle=linestyle,
+        color=color,
+        fontsize=fontsize,
+        xlabel=styles.getArcLengthLabel(),
+        title=title,
+        xlim=kwargs.get("xlim"),
+        ylim=kwargs.get("ylim"),
+        num_columns=2,
+        data_idx=0,
+    )
+
     if case == 1:
         if ref is None or ID is None:
             raise ValueError("Case 1 requires both ref and ID.")
-        num_columns, data_idx = 5, 2 * ID
-        ylabel = {
-            id_p_matrix: styles.getHeadLabel(3),
-            id_c_matrix: styles.getConcentrationLabel(3),
-            id_c_fracture: styles.getConcentrationLabel(2),
-        }.get(ID)
-        plot_over_line_helper(
-            filename=filename,
-            ax=ax,
-            data_idx=data_idx,
-            num_columns=num_columns,
-            label=label,
-            linestyle=linestyle,
-            color=color,
+        params.update(
             ref=ref,
-            fontsize=fontsize,
-            xlabel=styles.getArcLengthLabel(),
-            ylabel=ylabel,
-            title=title,
-            xlim=kwargs.get("xlim"),
-            ylim=kwargs.get("ylim"),
-            **kwargs,
+            num_columns=5,
+            data_idx=2 * ID,
+            ylabel={
+                id_p_matrix: styles.getHeadLabel(3),
+                id_c_matrix: styles.getConcentrationLabel(3),
+                id_c_fracture: styles.getConcentrationLabel(2),
+            }.get(ID),
         )
     elif case in (2, 3):
         if ref is None:
             raise ValueError("Case 2 and 3 require ref.")
-        num_columns, data_idx = 2, 0
-        plot_over_line_helper(
-            filename=filename,
-            ax=ax,
-            data_idx=data_idx,
-            num_columns=num_columns,
-            label=label,
-            linestyle=linestyle,
-            color=color,
-            ref=ref,
-            fontsize=fontsize,
-            xlabel=styles.getArcLengthLabel(),
-            ylabel=styles.getHeadLabel(3),
-            title=title,
-            xlim=kwargs.get("xlim"),
-            ylim=kwargs.get("ylim"),
-            **kwargs,
-        )
+        params.update(ref=ref, ylabel=styles.getHeadLabel(3))
     elif case == 4:
         if ID is None:
             raise ValueError("Case 4 requires ID.")
-        num_columns, data_idx = 2, 0
-        extra_params = {}
+        params["ylabel"] = styles.getHeadLabel(3)
         if ID == id_p_0_matrix:
-            extra_params = {
-                "xticks": [0, 500, 1000, 1500],
-                "yticks": [0, 100, 200, 300, 400, 500, 600, 700],
-            }
+            params.update(
+                xticks=[0, 500, 1000, 1500],
+                yticks=[0, 100, 200, 300, 400, 500, 600, 700],
+            )
         elif ID == id_p_1_matrix:
-            extra_params = {
-                "xticks": [0, 500, 1000, 1500],
-                "yticks": [0, 50, 100, 150, 200, 250],
-            }
-        plot_over_line_helper(
-            filename=filename,
-            ax=ax,
-            data_idx=data_idx,
-            num_columns=num_columns,
-            label=label,
-            linestyle=linestyle,
-            color=color,
-            fontsize=fontsize,
-            xlabel=styles.getArcLengthLabel(),
-            ylabel=styles.getHeadLabel(3),
-            title=title,
-            xlim=kwargs.get("xlim"),
-            ylim=kwargs.get("ylim"),
-            **extra_params,
-            **kwargs,
-        )
-
+            params.update(
+                xticks=[0, 500, 1000, 1500],
+                yticks=[0, 50, 100, 150, 200, 250],
+            )
     else:
         raise ValueError(f"Unknown case number: {case}")
+
+    params.update(kwargs)
+    plot_over_line_helper(**params)
 
 
 def plot_legend_in_middle(**kwargs):
