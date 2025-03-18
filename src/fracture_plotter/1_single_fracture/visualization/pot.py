@@ -33,15 +33,21 @@ def plot_data_over_time(
                 "show_legend": show_legend,
             }
             plot.plot_over_time(
-                ID=plot.id_intc_matrix, ax=axes_intc_matrix, ylim=(-10, 185), **common
+                case=paths.case_num,
+                ID=plot.id_intc_matrix,
+                ax=axes_intc_matrix,
+                ylim=(-10, 185),
+                **common,
             )
             plot.plot_over_time(
+                case=paths.case_num,
                 ID=plot.id_intc_fracture,
                 ax=axes_intc_fracture,
                 ylim=(0, 0.45),
                 **common,
             )
             plot.plot_over_time(
+                case=paths.case_num,
                 ID=plot.id_outflux,
                 ax=axes_outflux,
                 ylim=(-0.00000005, 0.00000145),

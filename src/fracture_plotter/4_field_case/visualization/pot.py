@@ -22,6 +22,7 @@ def plot_data_over_time(
             data = os.path.join(folder, "dot.csv").replace("\_", "_")
             label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
             plot.plot_over_time(
+                case=paths.case_num,
                 filename=data,
                 label=label,
                 title=title,

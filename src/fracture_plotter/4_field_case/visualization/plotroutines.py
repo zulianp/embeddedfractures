@@ -8,59 +8,6 @@ from fracture_plotter.utils.general import get_paths
 from fracture_plotter.utils.plot_routines_utils import *
 
 
-def plot_over_time(
-    filename,
-    label,
-    title,
-    region,
-    region_pos,
-    ax,
-    linestyle="-",
-    color="C0",
-    fontsize=30,
-    **kwargs,
-):
-    N = 53
-    load_args = {
-        "filename": filename,
-        "n_columns": N,
-        "converters": {i: decode_float for i in range(N)},
-    }
-    plot_args = {
-        "label": label,
-        "linestyle": linestyle,
-        "color": color,
-    }
-
-    if "mean" in filename:
-        mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
-
-        plot_mean_and_std_data(
-            ax=ax,
-            x=mean_data[:, 0],
-            mean_values=mean_data[:, region + 1],
-            std_values=std_data[:, region + 1],
-            **plot_args,
-        )
-
-    else:
-        data = load_data(**load_args, skip_header=0)
-        ax.plot(data[:, 0], data[:, region + 1], **plot_args)
-
-    format_axis(
-        ax,
-        region_pos,
-        fontsize,
-        xlabel=styles.getTimeLabel("s"),
-        ylabel=styles.getAveragedConcentrationLabel(2),
-        title=title if kwargs.get("show_title", False) else None,
-        show_legend=kwargs.get("show_legend", False),
-        xlim=kwargs.get("xlim", None),
-        ylim=kwargs.get("ylim", None),
-        xticks=[0, 500, 1000, 1500],
-    )
-
-
 def plot_percentiles(ref, places_and_methods, ax, fontsize=30, **kwargs):
     paths = get_paths(__file__)
 

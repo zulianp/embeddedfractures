@@ -8,49 +8,6 @@ from fracture_plotter.utils.general import get_paths
 from fracture_plotter.utils.plot_routines_utils import *
 
 
-def plot_over_time(
-    filename,
-    label,
-    ref,
-    ID,
-    title,
-    ax,
-    linestyle="-",
-    color="C0",
-    fontsize=30,
-    **kwargs,
-):
-    N = 9
-    load_args = make_load_args(filename, N)
-    plot_args = make_plot_args(label, linestyle=linestyle, color=color)
-
-    if "mean" in filename:
-        mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
-
-        plot_mean_and_std_data(
-            ax=ax,
-            x=mean_data[:, 0],
-            mean_values=mean_data[:, ID + 1],
-            std_values=std_data[:, ID + 1],
-            **plot_args,
-        )
-    else:
-        data = load_data(**load_args, skip_header=0)
-        ax.plot(data[:, 0], data[:, ID + 1], **plot_args)
-
-    format_axis(
-        ax,
-        ref,
-        fontsize,
-        xlabel=styles.getTimeLabel("s"),
-        ylabel=r"$\overline{c_2}$",
-        title=title if kwargs.get("show_title", False) else None,
-        show_legend=kwargs.get("show_legend", False),
-        xlim=kwargs.get("xlim", None),
-        ylim=kwargs.get("ylim", None),
-    )
-
-
 def save_over_time(filename, extension=".pdf", plots_dir=None, fontsize=25):
     for ID in np.arange(8):
         save(

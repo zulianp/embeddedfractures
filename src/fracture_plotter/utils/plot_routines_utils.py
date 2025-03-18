@@ -22,11 +22,6 @@ plt.rc("font", size=15)
 linestyle = styles.linestyle
 color = styles.color
 
-# places_and_methods = {
-#     "USI": ["FEM\_LM"],
-#     "mean": ["key"],
-# }
-
 # Plot IDs (case 1)
 id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2
 id_intc_matrix, id_intc_fracture, id_outflux = 0, 1, 2
@@ -233,24 +228,25 @@ def make_extra_args(kwargs):
     return extra_args
 
 
-def plot_over_line_helper(
-    filename, ax, data_idx, num_columns, label, linestyle, color, **kwargs
+def plot_helper(
+    filename, ax, x_idx, y_idx, num_columns, label, linestyle, color, **kwargs
 ):
     load_args = make_load_args(filename, num_columns)
     plot_args = make_plot_args(label, linestyle=linestyle, color=color)
 
+    x_transform = kwargs.get("x_transform", 1.0)
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
         plot_mean_and_std_data(
             ax=ax,
-            x=mean_data[:, data_idx],
-            mean_values=mean_data[:, data_idx + 1],
-            std_values=std_data[:, data_idx + 1],
+            x=mean_data[:, x_idx] * x_transform,
+            mean_values=mean_data[:, y_idx],
+            std_values=std_data[:, y_idx],
             **plot_args,
         )
     else:
         data = load_data(**load_args, skip_header=0)
-        ax.plot(data[:, data_idx], data[:, data_idx + 1], **plot_args)
+        ax.plot(data[:, x_idx] * x_transform, data[:, y_idx], **plot_args)
 
     extra_format_args = make_extra_args(kwargs)
 
@@ -291,7 +287,8 @@ def plot_over_line(
         xlim=kwargs.get("xlim"),
         ylim=kwargs.get("ylim"),
         num_columns=2,
-        data_idx=0,
+        x_idx=0,
+        y_idx=1,
     )
 
     if case == 1:
@@ -300,7 +297,8 @@ def plot_over_line(
         params.update(
             ref=ref,
             num_columns=5,
-            data_idx=2 * ID,
+            x_idx=2 * ID,
+            y_idx=2 * ID + 1,
             ylabel={
                 id_p_matrix: styles.getHeadLabel(3),
                 id_c_matrix: styles.getConcentrationLabel(3),
@@ -329,7 +327,107 @@ def plot_over_line(
         raise ValueError(f"Unknown case number: {case}")
 
     params.update(kwargs)
-    plot_over_line_helper(**params)
+    plot_helper(**params)
+
+
+def plot_over_time(
+    case,
+    filename,
+    label,
+    title,
+    ax,
+    ref=None,
+    ID=None,
+    region=None,
+    region_pos=None,
+    linestyle="-",
+    color="C0",
+    fontsize=30,
+    **kwargs,
+):
+
+    params = dict(
+        filename=filename,
+        ax=ax,
+        label=label,
+        title=title,
+        linestyle=linestyle,
+        color=color,
+        fontsize=fontsize,
+        xlim=kwargs.get("xlim"),
+        ylim=kwargs.get("ylim"),
+        x_idx=0,
+        y_idx=1,
+        xlabel=styles.getTimeLabel("s"),
+    )
+
+    if case == 1:
+        if ref is None or ID is None:
+            raise ValueError("Case 1 requires both ref and ID.")
+        params.update(
+            ref=ref,
+            num_columns=4,
+            x_idx=ID,
+            y_idx=ID + 1,
+            xlabel=styles.getTimeLabel("y"),
+            ylabel={
+                id_intc_matrix: r"$\int_{\Omega_3} \phi_3 \, c_3$",
+                id_intc_fracture: r"$\int_{\Omega_2} \phi_2 \, c_2$",
+                id_outflux: "outflux",
+            }.get(ID),
+            x_transform=1 / (365 * 24 * 3600),
+        )
+    elif case == 2:
+        if region is None or region_pos is None:
+            raise ValueError("Case 2 requires both region and region_pos.")
+        num_cols = min(
+            22, len(np.genfromtxt(filename, delimiter=",", max_rows=1, skip_header=1))
+        )
+
+        y_idx = region + 1
+        if "mean" not in filename and "/USI/" in filename:
+            if region == 1:
+                y_idx = 1
+            elif region == 10:
+                y_idx = 2
+            elif region == 11:
+                y_idx = 3
+
+        params.update(
+            num_columns=num_cols,
+            region=region,
+            region_pos=region_pos,
+            y_idx=y_idx,
+            ylabel=styles.getConcentrationLabel(3),
+        )
+
+    elif case == 3:
+        if ref is None or ID is None:
+            raise ValueError("Case 3 requires both ref and ID.")
+        params.update(
+            ref=ref,
+            num_columns=9,
+            x_idx=0,
+            y_idx=ID + 1,
+            ylabel=r"$\overline{c_2}$",
+        )
+    elif case == 4:
+        if region is None or region_pos is None:
+            raise ValueError("Case 4 requires both region and region_pos.")
+        params.update(
+            num_columns=53,
+            region=region,
+            region_pos=region_pos,
+            y_idx=region + 1,
+            ylabel=styles.getAveragedConcentrationLabel(2),
+            xticks=[0, 500, 1000, 1500],
+        )
+
+    else:
+        raise ValueError(f"Unknown case number: {case}")
+
+    params.update(kwargs)
+    plot_helper(**params)
 
 
 def plot_legend_in_middle(**kwargs):

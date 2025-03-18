@@ -10,57 +10,6 @@ from fracture_plotter.utils.plot_routines_utils import *
 paths = get_paths(__file__)
 
 
-def plot_over_time(
-    filename,
-    label,
-    ref,
-    ID,
-    title,
-    ax,
-    linestyle="-",
-    color="C0",
-    fontsize=30,
-    **kwargs,
-):
-    N = 4
-    load_args = make_load_args(filename, N)
-    plot_args = make_plot_args(label, linestyle, color)
-
-    if "mean" in filename:
-        mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
-        plot_mean_and_std_data(
-            ax=ax,
-            x=mean_data[:, 0] / (365 * 24 * 3600),
-            mean_values=mean_data[:, ID + 1],
-            std_values=std_data[:, ID + 1],
-            **plot_args,
-        )
-    else:
-        data = load_data(**load_args, skip_header=0)
-        ax.plot(data[:, 0] / (365 * 24 * 3600), data[:, ID + 1], **plot_args)
-
-    ylabel = {
-        id_intc_matrix: r"$\int_{\Omega_3} \phi_3 \, c_3$",
-        id_intc_fracture: r"$\int_{\Omega_2} \phi_2 \, c_2$",
-        id_outflux: "outflux",
-    }.get(ID)
-
-    if ylabel is None:
-        sys.exit("Error: Invalid plot id provided.")
-
-    format_axis(
-        ax,
-        ref,
-        fontsize,
-        xlabel=styles.getTimeLabel("y"),
-        ylabel=ylabel,
-        title=title if kwargs.get("show_title", False) else None,
-        show_legend=kwargs.get("show_legend", False),
-        xlim=kwargs.get("xlim", None),
-        ylim=kwargs.get("ylim", None),
-    )
-
-
 def plot_percentiles(ref, ID, places_and_methods, ax, fontsize=30, ylim=None):
     c, N = lambda s: float(s.decode().replace("D", "e")), 6
     format_axis(ax, ref, fontsize)

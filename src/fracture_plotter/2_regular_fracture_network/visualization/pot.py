@@ -25,6 +25,7 @@ def plot_cond_over_time(
             label = place if place == "mean" else f"{place}-{method}"
 
             plot.plot_over_time(
+                case=paths.case_num,
                 filename=data_file,
                 label=label,
                 title=title,
