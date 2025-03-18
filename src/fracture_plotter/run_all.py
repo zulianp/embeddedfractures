@@ -18,6 +18,7 @@ focus_institute, focus_method = focus_dir.split("/")
 focus_method = focus_method.replace("_", "\\_")
 
 places_and_methods = {focus_institute: [focus_method], "mean": ["key"]}
+case_list = ["single_fracture", "regular_fracture", "small_features", "field_case"]
 
 
 def main():
@@ -34,8 +35,8 @@ def main():
         places_and_methods
     )  # Convert the dictionary to a JSON string
     for subdirectory in subdirectories:
-        case = subdirectory.split(os.sep)[-1]  # e.g. 1_single_fracture
-        if case[0] in ["1", "2", "3", "4"]:
+        case = subdirectory.split(os.sep)[-1]  # e.g. single_fracture
+        if case in case_list:
             if create_pdfs:
                 print(
                     f"Changing directory to {subdirectory} and running run_all.py there"
