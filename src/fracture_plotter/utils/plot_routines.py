@@ -15,10 +15,6 @@ os.environ["PATH"] += ":/Library/TeX/texbin"
 plt.rc("text", usetex=True)
 plt.rc("font", family="serif")
 
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif")
-plt.rc("font", size=15)
-
 linestyle = styles.linestyle
 color = styles.color
 
@@ -28,9 +24,7 @@ id_intc_matrix, id_intc_fracture, id_outflux = 0, 1, 2
 
 # Plot IDs (cases 3 & 4)
 id_p_0_matrix, id_p_0_matrix_legend = 0, 10
-id_p_1_matrix, id_p_1_matrix_legend = 1, 11  # p along (0, 100, 100)-(100, 0, 0)
-
-# Plot IDs (cases 3 & 4)
+id_p_1_matrix, id_p_1_matrix_legend = 1, 11
 id_pot, id_pot_legend = 2, 12
 
 
@@ -48,37 +42,28 @@ def decode_float(s):
 
 
 def load_data(filename, n_columns, converters=None, skip_header=0):
-    """Load data from a CSV file with optional converters."""
-    if converters is None:
-        converters = {i: decode_float for i in range(n_columns)}
+    converters = converters or {i: decode_float for i in range(n_columns)}
     return np.genfromtxt(
         filename, delimiter=",", skip_header=skip_header, converters=converters
     )
 
 
 def load_mean_and_std_data(filename, n_columns, converters, skip_header=1):
-    """Load mean and standard deviation data from CSV files."""
-    mean_data = load_data(
-        filename=filename,
-        n_columns=n_columns,
-        converters=converters,
-        skip_header=skip_header,
-    )
+    mean_data = load_data(filename, n_columns, converters, skip_header)
     std_data = load_data(
-        filename=filename.replace("mean", "std"),
-        n_columns=n_columns,
-        converters=converters,
-        skip_header=skip_header,
+        filename.replace("mean", "std"), n_columns, converters, skip_header
     )
     if mean_data.shape != std_data.shape:
         raise ValueError("Mean and standard deviation data do not have the same shape!")
-
     return mean_data, std_data
 
 
 def make_load_args(filename, n_columns):
-    converters = {i: decode_float for i in range(n_columns)}
-    return {"filename": filename, "n_columns": n_columns, "converters": converters}
+    return {
+        "filename": filename,
+        "n_columns": n_columns,
+        "converters": {i: decode_float for i in range(n_columns)},
+    }
 
 
 def make_plot_args(label, linestyle="-", color="C0"):
@@ -86,23 +71,7 @@ def make_plot_args(label, linestyle="-", color="C0"):
 
 
 def make_extra_args(kwargs):
-    extra_args = {}
-
-    xlim = kwargs.get("xlim", None)
-    ylim = kwargs.get("ylim", None)
-    xticks = kwargs.get("xticks", None)
-    yticks = kwargs.get("yticks", None)
-
-    if xlim is not None:
-        extra_args["xlim"] = xlim
-    if ylim is not None:
-        extra_args["ylim"] = ylim
-    if xticks is not None:
-        extra_args["xticks"] = xticks
-    if yticks is not None:
-        extra_args["yticks"] = yticks
-
-    return extra_args
+    return {k: kwargs[k] for k in ("xlim", "ylim", "xticks", "yticks") if k in kwargs}
 
 
 def format_axis(ax, ref, fontsize, **kwargs):
@@ -111,29 +80,23 @@ def format_axis(ax, ref, fontsize, **kwargs):
     if int(ref) > 0:
         ax.yaxis.set_tick_params(length=0)
     else:
-        formatter = mticker.ScalarFormatter(useMathText=True)
-        formatter.set_powerlimits((-2, 2))
-        ax.yaxis.set_major_formatter(formatter)
+        fmt = mticker.ScalarFormatter(useMathText=True)
+        fmt.set_powerlimits((-2, 2))
+        ax.yaxis.set_major_formatter(fmt)
         ax.yaxis.get_offset_text().set_fontsize(fontsize)
         ax.yaxis.get_offset_text().set_visible(True)
         ax.yaxis.set_tick_params(labelsize=fontsize)
 
-    xlabel = kwargs.get("xlabel", None)
-    ylabel = kwargs.get("ylabel", None)
-    title = kwargs.get("title", None)
-    show_legend = kwargs.get("show_legend", False)
+    ax.set_xlabel(kwargs.get("xlabel"), fontsize=fontsize)
+    ax.set_ylabel(kwargs.get("ylabel"), fontsize=fontsize)
+    ax.set_title(kwargs.get("title"), fontsize=fontsize)
 
-    ax.set_xlabel(xlabel, fontsize=fontsize)
-    ax.set_ylabel(ylabel, fontsize=fontsize)
-    ax.set_title(title, fontsize=fontsize)
-    if show_legend:
+    if kwargs.get("show_legend", False):
         ax.legend(bbox_to_anchor=(1.0, 1.0), fontsize=fontsize)
-
     if "xlim" in kwargs:
         ax.set_xlim(kwargs["xlim"])
     if "ylim" in kwargs:
         ax.set_ylim(kwargs["ylim"])
-
     if "xticks" in kwargs:
         ax.set_xticks(kwargs["xticks"])
     if "yticks" in kwargs:
@@ -145,15 +108,11 @@ def setup_figure(id_offset, num_axes, xlim=None, ylim=None):
         1, num_axes, figsize=(16, 8), sharex=True, sharey=True, num=id_offset + 11
     )
     fig.subplots_adjust(hspace=0.4, wspace=0)
-
-    if xlim is not None:
-        for ax in axes_list:
+    for ax in axes_list:
+        if xlim is not None:
             ax.set_xlim(xlim)
-
-    if ylim is not None:
-        for ax in axes_list:
+        if ylim is not None:
             ax.set_ylim(ylim)
-
     return fig, axes_list
 
 
@@ -164,16 +123,12 @@ def plot_legend(legend, ID, linestyle="-", color="C0", ncol=1, fontsize=30):
 
 
 def plot_legend_in_middle(**kwargs):
-    # One axis case
-    ax = kwargs.get("ax", None)
+    ax = kwargs.get("ax")
     fontsize = kwargs.get("fontsize", 30)
-
     if ax is not None:
         handles, labels = ax.get_legend_handles_labels()
-
-        if isinstance(ax, (list, np.ndarray)):  # Check if it's an array of subplots
-            mid_ax = ax[len(ax) // 2]  # Select the middle axis for the legend
-            mid_ax.legend(
+        if isinstance(ax, (list, np.ndarray)):
+            ax[len(ax) // 2].legend(
                 handles,
                 labels,
                 loc="upper center",
@@ -181,7 +136,7 @@ def plot_legend_in_middle(**kwargs):
                 ncol=4,
                 fontsize=fontsize,
             )
-        else:  # Single plot
+        else:
             ax.legend(
                 handles,
                 labels,
@@ -190,64 +145,46 @@ def plot_legend_in_middle(**kwargs):
                 ncol=2,
                 fontsize=fontsize,
             )
-
-    if ax is None:
-        fig = kwargs.get("fig", None)
-        ax1 = kwargs.get("ax1", None)
-        ax2 = kwargs.get("ax2", None)
-
-        if fig is None or ax1 is None or ax2 is None:
+    else:
+        fig, ax1, ax2 = kwargs.get("fig"), kwargs.get("ax1"), kwargs.get("ax2")
+        if not all([fig, ax1, ax2]):
             raise ValueError("Either ax or fig and ax1 and ax2 must be provided!")
-        else:
-            # Combine handles and labels from both axes
-            handles1, labels1 = ax1.get_legend_handles_labels()
-            handles2, labels2 = ax2.get_legend_handles_labels()
-
-            # Create a unique set of handles and labels (in case both axes share labels)
-            handles = handles1 + handles2
-            labels = labels1 + labels2
-
-            # Remove duplicates from the legend
-            unique_handles, unique_labels = [], []
-            for handle, label in zip(handles, labels):
-                if label not in unique_labels:
-                    unique_handles.append(handle)
-                    unique_labels.append(label)
-
-            # Plot the combined legend centered below the subplots
-            fig.legend(
-                unique_handles,
-                unique_labels,
-                loc="upper center",
-                bbox_to_anchor=(0.5, -0.1),
-                ncol=4,
-                fontsize=fontsize,
-            )
+        handles1, labels1 = ax1.get_legend_handles_labels()
+        handles2, labels2 = ax2.get_legend_handles_labels()
+        unique_handles, unique_labels = [], []
+        for h, l in zip(handles1 + handles2, labels1 + labels2):
+            if l not in unique_labels:
+                unique_handles.append(h)
+                unique_labels.append(l)
+        fig.legend(
+            unique_handles,
+            unique_labels,
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.1),
+            ncol=4,
+            fontsize=fontsize,
+        )
 
 
 def save(ID, filename, extension=".pdf", plots_dir=None, fontsize=30, **kwargs):
     if not os.path.exists(plots_dir):
         os.makedirs(plots_dir)
-
     fig = plt.figure(ID + 11)
-    ax_title = kwargs.get("ax_title", None)
-
+    ax_title = kwargs.get("ax_title")
     for idx, ax in enumerate(fig.get_axes()):
         ax.label_outer()
         if len(fig.get_axes()) > 1:
             index = 97 + idx + kwargs.get("starting_from", 0)
-            text = "\\textbf{subfig. " + chr(index) + "}"
             ax.text(
                 0.5,
                 -0.2,
-                text,
+                f"\\textbf{{subfig. {chr(index)}}}",
                 horizontalalignment="center",
                 verticalalignment="bottom",
                 transform=ax.transAxes,
                 fontsize=fontsize,
             )
         elif ax_title is not None:
-            print("asd")
             ax.text(
                 0.5,
                 -0.25,
@@ -256,35 +193,37 @@ def save(ID, filename, extension=".pdf", plots_dir=None, fontsize=30, **kwargs):
                 verticalalignment="bottom",
                 transform=ax.transAxes,
             )
-
     plt.savefig(os.path.join(plots_dir, filename + extension), bbox_inches="tight")
     plt.gcf().clear()
 
 
 def crop_pdf(filename, plots_dir):
-    filename = os.path.join(plots_dir, f"{filename}.pdf")
-    if os.path.isfile(filename):
-        os.system("pdfcrop --margins '0 -300 0 0' " + filename + " " + filename)
-        os.system("pdfcrop " + filename + " " + filename)
+    filepath = os.path.join(plots_dir, f"{filename}.pdf")
+    if os.path.isfile(filepath):
+        os.system(f"pdfcrop --margins '0 -300 0 0' {filepath} {filepath}")
+        os.system(f"pdfcrop {filepath} {filepath}")
 
 
 def plot_mean_and_std_data(ax, x, mean_values, std_values, **kwargs):
     color = kwargs.get("color", "C0")
-    alpha = kwargs.get("alpha", 0.5)
-    label = kwargs.get("label", None)
-    linestyle = kwargs.get("linestyle", "-")
-
     ax.fill_between(
-        x, mean_values - std_values, mean_values + std_values, color=color, alpha=alpha
+        x,
+        mean_values - std_values,
+        mean_values + std_values,
+        color=color,
+        alpha=kwargs.get("alpha", 0.5),
     )
-    ax.plot(x, mean_values, label=label, linestyle=linestyle, color=color)
-
-    xlim = kwargs.get("xlim", None)
-    ylim = kwargs.get("ylim", None)
-    if xlim is not None:
-        ax.set_xlim(xlim)
-    if ylim is not None:
-        ax.set_ylim(ylim)
+    ax.plot(
+        x,
+        mean_values,
+        label=kwargs.get("label"),
+        linestyle=kwargs.get("linestyle", "-"),
+        color=color,
+    )
+    if kwargs.get("xlim") is not None:
+        ax.set_xlim(kwargs["xlim"])
+    if kwargs.get("ylim") is not None:
+        ax.set_ylim(kwargs["ylim"])
 
 
 def plot_helper(
@@ -292,7 +231,6 @@ def plot_helper(
 ):
     load_args = make_load_args(filename, num_columns)
     plot_args = make_plot_args(label, linestyle=linestyle, color=color)
-
     x_transform = kwargs.get("x_transform", 1.0)
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
@@ -308,7 +246,6 @@ def plot_helper(
         ax.plot(data[:, x_idx] * x_transform, data[:, y_idx], **plot_args)
 
     extra_format_args = make_extra_args(kwargs)
-
     format_axis(
         ax=ax,
         ref=kwargs.get("ref", 0),
@@ -404,7 +341,6 @@ def plot_over_time(
     fontsize=30,
     **kwargs,
 ):
-
     params = dict(
         filename=filename,
         ax=ax,
@@ -459,7 +395,6 @@ def plot_over_time(
             y_idx=y_idx,
             ylabel=styles.getConcentrationLabel(3),
         )
-
     elif case == 3:
         if ref is None or ID is None:
             raise ValueError("Case 3 requires both ref and ID.")
@@ -481,7 +416,6 @@ def plot_over_time(
             ylabel=styles.getAveragedConcentrationLabel(2),
             xticks=[0, 500, 1000, 1500],
         )
-
     else:
         raise ValueError(f"Unknown case number: {case}")
 
@@ -537,15 +471,14 @@ def plot_percentiles(
     elif case == 4:
         if ref is None:
             raise ValueError("Case 4 requires ref.")
-        y_ticks = None
-        if ref == "0":
-            y_ticks = [0, 100, 200, 300, 400, 500, 600, 700]
-        elif ref == "1":
-            y_ticks = [0, 50, 100, 150, 200, 250]
-        if y_ticks is not None:
-            params.update(yticks=y_ticks)
-
-        params.update(filename=f"dol_line_{ref}.csv", xticks=[0, 500, 1000, 1500])
+        y_ticks = (
+            [0, 100, 200, 300, 400, 500, 600, 700]
+            if ref == "0"
+            else [0, 50, 100, 150, 200, 250]
+        )
+        params.update(
+            filename=f"dol_line_{ref}.csv", xticks=[0, 500, 1000, 1500], yticks=y_ticks
+        )
 
     funcs, minX, maxX = [], -np.inf, np.inf
     for place, methods in places_and_methods.items():
@@ -578,7 +511,6 @@ def plot_percentiles(
         ax.set_xlim(kwargs.get("xlim"))
     if kwargs.get("ylim", None):
         ax.set_ylim(kwargs.get("ylim"))
-
     if params.get("xticks", None):
         ax.set_xticks(params.get("xticks"))
     if params.get("yticks", None):
@@ -592,7 +524,7 @@ def save_over_time(filename, extension=".pdf", plots_dir=None, fontsize=25):
     for ID in np.arange(8):
         save(
             ID=ID,
-            filename=filename + "_fracture_" + str(ID),
+            filename=f"{filename}_fracture_{ID}",
             extension=extension,
             plots_dir=plots_dir,
             fontsize=fontsize,
