@@ -25,7 +25,7 @@ def plot_cond_over_time(
             label = place if place == "mean" else f"{place}-{method}"
 
             plot.plot_over_time(
-                case=paths.case_num,
+                case=paths.case,
                 filename=data_file,
                 label=label,
                 title=title,
@@ -82,7 +82,7 @@ def run_pot(
         # Save figure without creating a separate legend file
         plot.save(
             ID=cond,
-            filename=f"{paths.case}_pot_cond_{cond}",
+            filename=f"pot_cond_{cond}",
             plots_dir=paths.plots_dir,
             fontsize=subfig_fontsize,
             starting_from=3 * cond,

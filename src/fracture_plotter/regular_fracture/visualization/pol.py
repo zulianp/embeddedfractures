@@ -16,7 +16,7 @@ def plot_data_over_lines(
             ).replace("\_", "_")
             label = place if place == "mean" else f"{place}-{method}"
             plot.plot_over_line(
-                case=paths.case_num,
+                case=paths.case,
                 filename=data,
                 label=label,
                 ref=ref,
@@ -32,7 +32,7 @@ def plot_data_over_lines(
         f"USTUTT/MPFA/dol_cond_{cond}_refinement_4.csv".replace("\_", "_"),
     )
     plot.plot_over_line(
-        case=paths.case_num,
+        case=paths.case,
         filename=ref_data,
         label="reference",
         ref=ref,
@@ -75,12 +75,12 @@ def run_pol(
 
     plot.save(
         ID=cond,
-        filename=f"{paths.case}_pol_cond_{cond}",
+        filename=f"pol_cond_{cond}",
         plots_dir=paths.plots_dir,
         fontsize=subfig_fontsize,
     )
     plot.crop_pdf(
-        f"{paths.case}_pol_cond_{cond}_legend",
+        filename=f"pol_cond_{cond}_legend",
         plots_dir=paths.plots_dir,
     )
 
