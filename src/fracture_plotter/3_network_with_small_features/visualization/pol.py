@@ -28,6 +28,7 @@ def plot_data_over_lines(
                     folder, f"dol_line_{line}_refinement_{ref}.csv"
                 ).replace(r"\_", "_")
                 plot.plot_over_line(
+                    case=paths.case_num,
                     filename=data,
                     label=label,
                     ref=ref,
@@ -71,6 +72,7 @@ def run_pol(
         ):
             ref_data = os.path.join(ref_folder, f"dol_line_{line}_refinement_5.csv")
             plot.plot_over_line(
+                case=paths.case_num,
                 filename=ref_data,
                 label="reference",
                 ref=ref,

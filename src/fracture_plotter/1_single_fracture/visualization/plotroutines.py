@@ -9,48 +9,6 @@ from fracture_plotter.utils.plot_routines_utils import *
 
 paths = get_paths(__file__)
 
-# Plot IDs
-id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2
-id_intc_matrix, id_intc_fracture, id_outflux = 0, 1, 2
-
-
-def plot_over_line(
-    filename,
-    label,
-    ref,
-    ID,
-    title,
-    ax,
-    linestyle="-",
-    color="C0",
-    fontsize=30,
-    **kwargs,
-):
-    num_columns, data_idx = 5, 2 * ID
-    ylabel = {
-        id_p_matrix: styles.getHeadLabel(3),
-        id_c_matrix: styles.getConcentrationLabel(3),
-        id_c_fracture: styles.getConcentrationLabel(2),
-    }.get(ID)
-
-    plot_over_line_helper(
-        filename=filename,
-        ax=ax,
-        data_idx=data_idx,
-        num_columns=num_columns,
-        label=label,
-        linestyle=linestyle,
-        color=color,
-        ref=ref,
-        fontsize=fontsize,
-        xlabel=styles.getArcLengthLabel(),
-        ylabel=ylabel,
-        title=title,
-        xlim=kwargs.get("xlim", None),
-        ylim=kwargs.get("ylim", None),
-        **kwargs,
-    )
-
 
 def plot_over_time(
     filename,

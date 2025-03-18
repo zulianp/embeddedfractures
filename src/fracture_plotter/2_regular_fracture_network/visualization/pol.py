@@ -17,6 +17,7 @@ def plot_data_over_lines(
             ).replace("\_", "_")
             label = place if place == "mean" else f"{place}-{method}"
             plot.plot_over_line(
+                case=paths.case_num,
                 filename=data,
                 label=label,
                 ref=ref,
@@ -32,6 +33,7 @@ def plot_data_over_lines(
         f"USTUTT/MPFA/dol_cond_{cond}_refinement_4.csv".replace("\_", "_"),
     )
     plot.plot_over_line(
+        case=paths.case_num,
         filename=ref_data,
         label="reference",
         ref=ref,

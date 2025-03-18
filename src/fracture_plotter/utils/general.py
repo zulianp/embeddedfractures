@@ -23,6 +23,7 @@ def get_paths(file_handle, package_dir="src/fracture_plotter"):
     tex_dir = os.path.join(os.path.dirname(curr_dir), "tex_files")
     tex_figs_dir = os.path.join(os.path.dirname(curr_dir), "figures")
     case = curr_dir.split(os.sep)[-2]
+    case_num = int(case.split("_")[0])
     plots_dir = os.path.dirname(curr_dir).replace(package_dir, "plots")
     results_dir = os.path.dirname(curr_dir).replace(package_dir, "results")
     module_dir = curr_dir.split(package_dir)[0] + package_dir
@@ -33,6 +34,7 @@ def get_paths(file_handle, package_dir="src/fracture_plotter"):
     return SimpleNamespace(
         curr_dir=curr_dir,
         case=case,
+        case_num=case_num,
         plots_dir=plots_dir,
         results_dir=results_dir,
         tex_dir=tex_dir,

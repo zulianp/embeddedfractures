@@ -7,41 +7,6 @@ from scipy.integrate import simps
 from fracture_plotter.utils.general import get_paths
 from fracture_plotter.utils.plot_routines_utils import *
 
-# Plot IDs
-id_p_0_matrix, id_p_0_matrix_legend, id_p_1_matrix = 0, 10, 1
-id_p_1_matrix_legend, id_pot, id_pot_legend = 11, 2, 12
-
-
-def plot_over_line(
-    filename, label, ID, title, ax, linestyle="-", color="C0", fontsize=30, **kwargs
-):
-    num_columns, data_idx = 2, 0
-    if ID == id_p_0_matrix:
-        xticks = [0, 500, 1000, 1500]
-        yticks = [0, 100, 200, 300, 400, 500, 600, 700]
-    elif ID == id_p_1_matrix:
-        xticks = [0, 500, 1000, 1500]
-        yticks = [0, 50, 100, 150, 200, 250]
-
-    plot_over_line_helper(
-        filename=filename,
-        ax=ax,
-        data_idx=data_idx,
-        num_columns=num_columns,
-        label=label,
-        linestyle=linestyle,
-        color=color,
-        fontsize=fontsize,
-        xlabel=styles.getArcLengthLabel(),
-        ylabel=styles.getHeadLabel(3),
-        title=title,
-        xlim=kwargs.get("xlim", None),
-        ylim=kwargs.get("ylim", None),
-        xticks=xticks,
-        yticks=yticks,
-        **kwargs,
-    )
-
 
 def plot_over_time(
     filename,

@@ -22,10 +22,21 @@ plt.rc("font", size=15)
 linestyle = styles.linestyle
 color = styles.color
 
-places_and_methods = {
-    "USI": ["FEM\_LM"],
-    "mean": ["key"],
-}
+# places_and_methods = {
+#     "USI": ["FEM\_LM"],
+#     "mean": ["key"],
+# }
+
+# Plot IDs (case 1)
+id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2
+id_intc_matrix, id_intc_fracture, id_outflux = 0, 1, 2
+
+# Plot IDs (case 3 + 4)
+id_p_0_matrix, id_p_0_matrix_legend = 0, 10
+id_p_1_matrix, id_p_1_matrix_legend = 1, 11  # p along (0, 100, 100)-(100, 0, 0)
+
+# Plot IDs (case 3 + 4)
+id_pot, id_pot_legend = 2, 12
 
 
 def make_load_args(filename, n_columns):
@@ -253,6 +264,103 @@ def plot_over_line_helper(
         show_legend=kwargs.get("show_legend", False),
         **extra_format_args,
     )
+
+
+def plot_over_line(
+    case,
+    filename,
+    label,
+    title,
+    ax,
+    ref=None,
+    ID=None,
+    linestyle="-",
+    color="C0",
+    fontsize=30,
+    **kwargs,
+):
+    if case == 1:
+        if ref is None or ID is None:
+            raise ValueError("Case 1 requires both ref and ID.")
+        num_columns, data_idx = 5, 2 * ID
+        ylabel = {
+            id_p_matrix: styles.getHeadLabel(3),
+            id_c_matrix: styles.getConcentrationLabel(3),
+            id_c_fracture: styles.getConcentrationLabel(2),
+        }.get(ID)
+        plot_over_line_helper(
+            filename=filename,
+            ax=ax,
+            data_idx=data_idx,
+            num_columns=num_columns,
+            label=label,
+            linestyle=linestyle,
+            color=color,
+            ref=ref,
+            fontsize=fontsize,
+            xlabel=styles.getArcLengthLabel(),
+            ylabel=ylabel,
+            title=title,
+            xlim=kwargs.get("xlim"),
+            ylim=kwargs.get("ylim"),
+            **kwargs,
+        )
+    elif case in (2, 3):
+        if ref is None:
+            raise ValueError("Case 2 and 3 require ref.")
+        num_columns, data_idx = 2, 0
+        plot_over_line_helper(
+            filename=filename,
+            ax=ax,
+            data_idx=data_idx,
+            num_columns=num_columns,
+            label=label,
+            linestyle=linestyle,
+            color=color,
+            ref=ref,
+            fontsize=fontsize,
+            xlabel=styles.getArcLengthLabel(),
+            ylabel=styles.getHeadLabel(3),
+            title=title,
+            xlim=kwargs.get("xlim"),
+            ylim=kwargs.get("ylim"),
+            **kwargs,
+        )
+    elif case == 4:
+        if ID is None:
+            raise ValueError("Case 4 requires ID.")
+        num_columns, data_idx = 2, 0
+        extra_params = {}
+        if ID == id_p_0_matrix:
+            extra_params = {
+                "xticks": [0, 500, 1000, 1500],
+                "yticks": [0, 100, 200, 300, 400, 500, 600, 700],
+            }
+        elif ID == id_p_1_matrix:
+            extra_params = {
+                "xticks": [0, 500, 1000, 1500],
+                "yticks": [0, 50, 100, 150, 200, 250],
+            }
+        plot_over_line_helper(
+            filename=filename,
+            ax=ax,
+            data_idx=data_idx,
+            num_columns=num_columns,
+            label=label,
+            linestyle=linestyle,
+            color=color,
+            fontsize=fontsize,
+            xlabel=styles.getArcLengthLabel(),
+            ylabel=styles.getHeadLabel(3),
+            title=title,
+            xlim=kwargs.get("xlim"),
+            ylim=kwargs.get("ylim"),
+            **extra_params,
+            **kwargs,
+        )
+
+    else:
+        raise ValueError(f"Unknown case number: {case}")
 
 
 def plot_legend_in_middle(**kwargs):

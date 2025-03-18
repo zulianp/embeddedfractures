@@ -4,30 +4,6 @@
 from fracture_plotter.utils.plot_routines_utils import *
 
 
-def plot_over_line(
-    filename, label, ref, title, ax, linestyle="-", color="C0", fontsize=30, **kwargs
-):
-    num_columns, data_idx = 2, 0
-
-    plot_over_line_helper(
-        filename=filename,
-        ax=ax,
-        data_idx=data_idx,
-        num_columns=num_columns,
-        label=label,
-        linestyle=linestyle,
-        color=color,
-        ref=ref,
-        fontsize=fontsize,
-        xlabel=styles.getArcLengthLabel(),
-        ylabel=styles.getHeadLabel(3),
-        title=title,
-        xlim=kwargs.get("xlim", None),
-        ylim=kwargs.get("ylim", None),
-        **kwargs,
-    )
-
-
 def plot_over_time(
     filename,
     label,

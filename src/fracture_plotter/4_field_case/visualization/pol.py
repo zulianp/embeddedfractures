@@ -16,6 +16,7 @@ def plot_data_over_lines(
             data = os.path.join(folder, f"dol_line_{line_idx}.csv").replace("\_", "_")
             label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
             plot.plot_over_line(
+                case=paths.case_num,
                 filename=data,
                 label=label,
                 ID=plot.id_p_0_matrix + line_idx,

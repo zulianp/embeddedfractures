@@ -31,13 +31,15 @@ def plot_data_over_lines(
                 "show_legend": show_legend,
                 "fontsize": fontsize,
             }
-            plot.plot_over_line(ID=plot.id_p_matrix, ax=axes_p_matrix, **common)
+            plot.plot_over_line(
+                case=paths.case_num, ID=plot.id_p_matrix, ax=axes_p_matrix, **common
+            )
             if place != "DTU":
                 for ID, ax in (
                     (plot.id_c_matrix, axes_c_matrix),
                     (plot.id_c_fracture, axes_c_fracture),
                 ):
-                    plot.plot_over_line(ID=ID, ax=ax, **common)
+                    plot.plot_over_line(case=paths.case_num, ID=ID, ax=ax, **common)
 
 
 def run_pol(
@@ -97,7 +99,9 @@ def run_pol(
             "fontsize": fontsize,
             "show_legend": show_legend,
         }
-        plot.plot_over_line(ID=plot.id_p_matrix, ax=ax_p, **ref_common)
+        plot.plot_over_line(
+            case=paths.case_num, ID=plot.id_p_matrix, ax=ax_p, **ref_common
+        )
         if show_legend:
             for ax in (ax_p, ax_c, ax_cf):
                 plot.plot_legend_in_middle(ax=ax, fontsize=fontsize)
