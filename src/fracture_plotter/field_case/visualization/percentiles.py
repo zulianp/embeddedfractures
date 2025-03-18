@@ -29,7 +29,7 @@ def run_percentiles(
 
         plot.save(
             ID=int(ref),
-            filename=f"{paths.case}_pol_p_line_" + ref + "_matrix_percentile_90_10",
+            filename=f"pol_p_line_" + ref + "_matrix_percentile_90_10",
             fontsize=subfig_fontsize,
             ax_title=ax_title,
         )

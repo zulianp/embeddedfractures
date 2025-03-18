@@ -21,7 +21,7 @@ def plot_data_over_time(
             data = os.path.join(folder, "dot.csv").replace("\_", "_")
             label = place + ("-" + method if place.replace("\_", "_") != "mean" else "")
             plot.plot_over_time(
-                case=paths.case_num,
+                case=paths.case,
                 filename=data,
                 label=label,
                 title=title,
@@ -75,7 +75,7 @@ def run_pot(
     # Save the figure with the integrated legend
     plot.save(
         ID=plot.id_pot,
-        filename=f"{paths.case}_pot",
+        filename=f"pot",
         plots_dir=paths.plots_dir,
         fontsize=subfig_fontsize,
     )

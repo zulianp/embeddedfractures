@@ -27,9 +27,9 @@ def run_all():
     print("Finished running pot")
 
     files = [
-        os.path.join(paths.tex_dir, f"{paths.case}_pol_line_0"),
-        os.path.join(paths.tex_dir, f"{paths.case}_pol_line_1"),
-        os.path.join(paths.tex_dir, f"{paths.case}_pot"),
+        os.path.join(paths.tex_dir, "pol_line_0"),
+        os.path.join(paths.tex_dir, "pol_line_1"),
+        os.path.join(paths.tex_dir, "pot"),
     ]
 
     run_overlay(files, paths)
