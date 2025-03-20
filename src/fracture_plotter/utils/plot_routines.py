@@ -18,9 +18,9 @@ plt.rc("font", family="serif")
 linestyle = styles.linestyle
 color = styles.color
 
-fontsize = 20
-subfig_fontsize = 14
-ncol = 4
+fontsize = 30
+subfig_fontsize = 25
+ncol = 4  # for the legend in plots
 
 # Plot IDs (case 1)
 id_p_matrix, id_c_matrix, id_c_fracture = 0, 1, 2
