@@ -88,8 +88,45 @@ spreadSheetView1 = CreateView('SpreadSheetView')
 spreadSheetView1.ColumnToSort = ''
 spreadSheetView1.BlockSize = 1024
 
+# # show data in view
+# integrateVariables1Display = Show(integrateVariables1, spreadSheetView1, 'SpreadSheetRepresentation')
+
+# create a new 'Cell Data to Point Data'
+cellDatatoPointData1 = CellDatatoPointData(registrationName='CellDatatoPointData1', Input=integrateVariables1)
+cellDatatoPointData1.CellDataArraytoprocess = ['Area', 'object_id']
+
 # show data in view
-integrateVariables1Display = Show(integrateVariables1, spreadSheetView1, 'SpreadSheetRepresentation')
+cellDatatoPointData1Display = Show(cellDatatoPointData1, spreadSheetView1, 'SpreadSheetRepresentation')
+
+# hide data in view
+Hide(integrateVariables1, spreadSheetView1)
+
+# update the view to ensure updated data information
+spreadSheetView1.Update()
+
+# Properties modified on cellDatatoPointData1Display
+cellDatatoPointData1Display.Assembly = ''
+
+# create a new 'Calculator'
+calculator1 = Calculator(registrationName='Calculator1', Input=cellDatatoPointData1)
+calculator1.Function = ''
+
+# Properties modified on calculator1
+calculator1.ResultArrayName = 'C_normalized'
+calculator1.Function = 'concentration/Area'
+
+# show data in view
+calculator1Display = Show(calculator1, spreadSheetView1, 'SpreadSheetRepresentation')
+
+# hide data in view
+Hide(cellDatatoPointData1, spreadSheetView1)
+
+# update the view to ensure updated data information
+spreadSheetView1.Update()
+
+# Properties modified on calculator1Display
+calculator1Display.Assembly = ''
+
 
 # get layout
 layout1 = GetLayoutByName("Layout #1")
@@ -101,7 +138,7 @@ AssignViewToLayout(view=spreadSheetView1, layout=layout1, hint=0)
 spreadSheetView1.Update()
 
 # create a new 'Plot Data Over Time'
-plotDataOverTime1 = PlotDataOverTime(registrationName='PlotDataOverTime1', Input=integrateVariables1)
+plotDataOverTime1 = PlotDataOverTime(registrationName='PlotDataOverTime1', Input=calculator1)
 
 # Create a new 'Quartile Chart View'
 quartileChartView1 = CreateView('QuartileChartView')
@@ -111,6 +148,12 @@ plotDataOverTime1Display = Show(plotDataOverTime1, quartileChartView1, 'Quartile
 
 # add view to a layout so it's visible in UI
 AssignViewToLayout(view=quartileChartView1, layout=layout1, hint=2)
+
+# Properties modified on plotDataOverTime1Display
+plotDataOverTime1Display.SeriesVisibility = []
+
+# Properties modified on plotDataOverTime1Display
+plotDataOverTime1Display.SeriesVisibility = ['C_normalized (stats)']
 
 # Properties modified on plotDataOverTime1Display
 plotDataOverTime1Display.SeriesOpacity = ['concentration (stats)', '1', 'X (stats)', '1', 'Y (stats)', '1', 'Z (stats)', '1', 'N (stats)', '1', 'Time (stats)', '1', 'vtkValidPointMask (stats)', '1']
@@ -128,7 +171,7 @@ plotSelectionOverTime1 = GetActiveSource()
 
 # save data
 SaveData(path_csv, proxy=plotDataOverTime1, ChooseArraysToWrite=1,
-    RowDataArrays=['Time', 'avg(concentration)'],
+    RowDataArrays=['Time', 'avg(C_normalized)'],
     FieldAssociation='Row Data',
     AddMetaData=0)
 
