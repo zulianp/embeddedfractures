@@ -1,3 +1,5 @@
+# run_all.py
+
 import importlib
 import os
 import shutil
@@ -9,14 +11,10 @@ from fracture_plotter.utils.general import get_focus_institute_and_method, get_p
 from fracture_plotter.utils.overlay import run_overlay
 from fracture_plotter.utils.plot_routines import fontsize, plt, subfig_fontsize
 
-# Settings
-comp_mean_std = False
-methods_mean_std = ["UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
-focus_inst, focus_meth = get_focus_institute_and_method(current=True)
-create_pdfs = True
-places_and_methods = {focus_inst: [focus_meth], "mean": ["key"]}
-case_list = ["single_fracture", "regular_fracture", "small_features", "field_case"]
-copy_pdfs_to_overleaf = False
+# Fixed settings
+COMP_MEAN_STD = True
+CREATE_PDFS = True
+COPY_PDFS_TO_OVERLEAF = False
 
 # Configuration for each case: list of functions with their submodules and overlay files
 case_config = {
@@ -57,38 +55,47 @@ case_config = {
 }
 
 
-def run_case(paths, case):
+def run_case(paths, case, places_and_methods):
     config = case_config[case]
     funcs = {}
     for entry in config["functions"]:
-        # Dynamically import from the correct submodule
         module = importlib.import_module(
             f"fracture_plotter.{case}.visualization.{entry['module']}"
         )
         funcs[entry["func"]] = getattr(module, entry["func"])
-
     for entry in config["functions"]:
         funcs[entry["func"]](places_and_methods, fontsize, subfig_fontsize)
         plt.close("all")
-
     files = [os.path.join(paths.tex_dir, name) for name in config["overlay_files"]]
     run_overlay(paths, files)
 
 
-def main():
+def run_all(
+    current=True,
+    methods_mean_std=None,
+    case_list=["single_fracture", "regular_fracture", "small_features", "field_case"],
+):
+    if methods_mean_std is None:
+        methods_mean_std = ["UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
+
     paths = get_paths(__file__)
-    if comp_mean_std:
+
+    # Fixed settings applied here:
+    if COMP_MEAN_STD:
         compute_mean_and_std(methods_mean_std)
+
+    focus_inst, focus_meth = get_focus_institute_and_method(current=current)
+    places_and_methods = {focus_inst: [focus_meth], "mean": ["key"]}
 
     subdir_list = csv_tools.find_direct_subdirectories(paths.module_dir)
     for subdir in subdir_list:
         case = os.path.basename(subdir)
-        if case in case_list and create_pdfs:
+        if case in case_list and CREATE_PDFS:
             file_handle = os.path.join(subdir, "visualization", "pol.py")
             case_paths = get_paths(file_handle)
-            run_case(case_paths, case)
+            run_case(case_paths, case, places_and_methods)
 
-    if copy_pdfs_to_overleaf:
+    if COPY_PDFS_TO_OVERLEAF:
         src_dir = Path(paths.module_dir).parent.parent / "plots"
         github_dir = Path(paths.module_dir).parent.parent.parent
         dst_dir = os.path.join(Path(github_dir), "overleaf_embedded_fractures/plots")
@@ -100,4 +107,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run_all()
