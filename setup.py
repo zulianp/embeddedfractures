@@ -14,7 +14,6 @@ setup(
     package_dir={"": "src"},
     install_requires=[
         "bottleneck==1.3.7",
-        "contourpy==1.2.0",
         "cryptography==43.0.0",
         "cycler==0.11.0",
         "cffi==1.17.1",

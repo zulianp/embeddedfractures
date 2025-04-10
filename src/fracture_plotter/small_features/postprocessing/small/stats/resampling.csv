@@ -1,0 +1,8 @@
+Class;MPI rank;Total time spent (s);Count;Allocations;Mean time (s)
+ConvertTensor::apply | allocate crs;0;0.000713792;3;0;0.000237931
+ConvertTensor::apply | fill crs;0;0.00274262;3;0;0.000914208
+DofMap::init_aura;0;0.00984458;2;0;0.00492229
+FETransfer::init;0;0.0346565;1;0;0.0346565
+FETransferPrepareData::apply;0;0.00545179;1;0;0.00545179
+PetscMatrix::write_unlock(...);0;0.00228946;3;0;0.000763153
+main;0;0.203488;1;0;0.203488
