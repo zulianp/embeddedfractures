@@ -44,14 +44,14 @@ def run_pot(
     places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
     fontsize=30,
     subfig_fontsize=25,
-    refinement_index=None,
+    refinement_indices=None,
     titles=None,
 ):
     paths = get_paths(__file__)
-    if refinement_index is None:
-        refinement_index = [0, 1, 2]
+    if refinement_indices is None:
+        refinement_indices = [0, 1, 2]
     if titles is None:
-        titles = [f"Refinement {ref}" for ref in refinement_index]
+        titles = [f"Refinement {ref}" for ref in refinement_indices]
     conds = [0]  # List of conditions
     regions = [1, 10, 11]  # Single region for this case # regions: 1, 10, 11
 

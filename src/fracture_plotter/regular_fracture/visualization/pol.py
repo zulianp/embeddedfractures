@@ -49,22 +49,22 @@ def run_pol(
     places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
     fontsize=30,
     subfig_fontsize=24,
-    refinement_index=None,
+    refinement_indices=None,
     titles=None,
 ):
     paths = get_paths(__file__)
-    if refinement_index is None:
-        refinement_index = [0, 1, 2]
+    if refinement_indices is None:
+        refinement_indices = [0, 1, 2]
     if titles is None:
-        titles = [f"Refinement {ref}" for ref in refinement_index]
+        titles = [f"Refinement {ref}" for ref in refinement_indices]
 
     cond, fmt = 0, {0: "%1.2f", 1: "%1.2e"}.get(0)
     ylim = {0: (0.5, 2.75), 1: (0.4, 5.75)}.get(cond)
     fig, axes_list = plot.setup_figure(
-        id_offset=cond, num_axes=len(refinement_index), ylim=ylim
+        id_offset=cond, num_axes=len(refinement_indices), ylim=ylim
     )
 
-    for idx, (title, ref, ax) in enumerate(zip(titles, refinement_index, axes_list)):
+    for idx, (title, ref, ax) in enumerate(zip(titles, refinement_indices, axes_list)):
         show_legend = idx == 1
         plot_data_over_lines(
             places_and_methods=places_and_methods,

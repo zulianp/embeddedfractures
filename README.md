@@ -28,3 +28,6 @@ Each of the main folders (`plots`, `results`, and `fracture_plotter`) contains t
 - `regular_fracture`
 - `small_features`
 - `field_case`
+
+## Some Comments
+In the visualization code, "pol" stands for "plot over line" and "pot" stands for "plot over time", following the same naming scheme from the original paper: https://git.iws.uni-stuttgart.de/benchmarks/fracture-flow-3d

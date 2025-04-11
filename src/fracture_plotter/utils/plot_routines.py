@@ -41,6 +41,14 @@ class MathTextSciFormatter(mticker.Formatter):
         return "${}$".format(s)
 
 
+def get_places_and_methods_arg(places_and_methods, ref):
+    return (
+        places_and_methods[ref]
+        if isinstance(places_and_methods, dict)
+        else places_and_methods
+    )
+
+
 def decode_float(s):
     return float(s.replace("D", "e"))
 

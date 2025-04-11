@@ -59,31 +59,33 @@ def run_pot(
     places_and_methods={"mean": ["key"]},
     fontsize=30,
     subfig_fontsize=12,
-    refinement_index=None,
+    refinement_indices=None,
     titles=None,
 ):
     paths = get_paths(__file__)
-    if refinement_index is None:
-        refinement_index = [0, 1, 2]
+    if refinement_indices is None:
+        refinement_indices = [0, 1, 2]
     if titles is None:
-        titles = [f"Refinement {ref}" for ref in refinement_index]
+        titles = [f"Refinement {ref}" for ref in refinement_indices]
 
     fig_intc_matrix, axes_intc_matrix_list = plot.setup_figure(
-        id_offset=plot.id_intc_matrix, num_axes=len(refinement_index), ylim=(-10, 185)
+        id_offset=plot.id_intc_matrix, num_axes=len(refinement_indices), ylim=(-10, 185)
     )
     fig_intc_fracture, axes_intc_fracture_list = plot.setup_figure(
-        id_offset=plot.id_intc_fracture, num_axes=len(refinement_index), ylim=(0, 0.45)
+        id_offset=plot.id_intc_fracture,
+        num_axes=len(refinement_indices),
+        ylim=(0, 0.45),
     )
     fig_outflux, axes_outflux_list = plot.setup_figure(
         id_offset=plot.id_outflux,
-        num_axes=len(refinement_index),
+        num_axes=len(refinement_indices),
         ylim=(-0.00000005, 0.00000145),
     )
 
     for idx, (title, ref, ax_matrix, ax_fracture, ax_outflux) in enumerate(
         zip(
             titles,
-            refinement_index,
+            refinement_indices,
             axes_intc_matrix_list,
             axes_intc_fracture_list,
             axes_outflux_list,
