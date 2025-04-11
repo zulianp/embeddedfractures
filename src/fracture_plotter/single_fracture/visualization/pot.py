@@ -55,10 +55,18 @@ def plot_data_over_time(
             )
 
 
-def run_pot(places_and_methods={"mean": ["key"]}, fontsize=30, subfig_fontsize=12):
+def run_pot(
+    places_and_methods={"mean": ["key"]},
+    fontsize=30,
+    subfig_fontsize=12,
+    refinement_index=None,
+    titles=None,
+):
     paths = get_paths(__file__)
-    titles = np.array(["$\\sim 1k$ cells", "$\\sim 10k$ cells", "$\\sim 100k$ cells"])
-    refinement_index = [0, 1, 2]
+    if refinement_index is None:
+        refinement_index = [0, 1, 2]
+    if titles is None:
+        titles = [f"Refinement {ref}" for ref in refinement_index]
 
     fig_intc_matrix, axes_intc_matrix_list = plot.setup_figure(
         id_offset=plot.id_intc_matrix, num_axes=len(refinement_index), ylim=(-10, 185)

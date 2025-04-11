@@ -236,6 +236,7 @@ def plot_helper(
     load_args = make_load_args(filename, num_columns)
     plot_args = make_plot_args(label, linestyle=linestyle, color=color)
     x_transform = kwargs.get("x_transform", 1.0)
+
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
         plot_mean_and_std_data(

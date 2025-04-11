@@ -1,5 +1,3 @@
-# run_all.py
-
 import importlib
 import os
 import shutil
@@ -54,8 +52,16 @@ case_config = {
     },
 }
 
+# Use None for cases where no refinement_index should be passed
+refinement_index_by_case = {
+    "single_fracture": [0, 1, 2],
+    "regular_fracture": [0, 1, 2],
+    "small_features": [0, 1],
+    "field_case": None,
+}
 
-def run_case(paths, case, places_and_methods):
+
+def run_case(paths, case, places_and_methods, refinement_index=None):
     config = case_config[case]
     funcs = {}
     for entry in config["functions"]:
@@ -64,7 +70,18 @@ def run_case(paths, case, places_and_methods):
         )
         funcs[entry["func"]] = getattr(module, entry["func"])
     for entry in config["functions"]:
-        funcs[entry["func"]](places_and_methods, fontsize, subfig_fontsize)
+        if entry["func"] == "run_pol":
+            if refinement_index is not None:
+                funcs[entry["func"]](
+                    places_and_methods,
+                    fontsize,
+                    subfig_fontsize,
+                    refinement_index=refinement_index,
+                )
+            else:
+                funcs[entry["func"]](places_and_methods, fontsize, subfig_fontsize)
+        else:
+            funcs[entry["func"]](places_and_methods, fontsize, subfig_fontsize)
         plt.close("all")
     files = [os.path.join(paths.tex_dir, name) for name in config["overlay_files"]]
     run_overlay(paths, files)
@@ -80,7 +97,6 @@ def run_all(
 
     paths = get_paths(__file__)
 
-    # Fixed settings applied here:
     if COMP_MEAN_STD:
         compute_mean_and_std(methods_mean_std)
 
@@ -93,7 +109,9 @@ def run_all(
         if case in case_list and CREATE_PDFS:
             file_handle = os.path.join(subdir, "visualization", "pol.py")
             case_paths = get_paths(file_handle)
-            run_case(case_paths, case, places_and_methods)
+            # Retrieve the refinement index for the case; may be None.
+            ref_index = refinement_index_by_case.get(case)
+            run_case(case_paths, case, places_and_methods, refinement_index=ref_index)
 
     if COPY_PDFS_TO_OVERLEAF:
         src_dir = Path(paths.module_dir).parent.parent / "plots"

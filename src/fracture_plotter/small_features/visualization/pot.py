@@ -30,10 +30,15 @@ def run_pot(
     places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
     fontsize=30,
     subfig_fontsize=25,
+    refinement_index=None,
+    titles=None,
 ):
     paths = get_paths(__file__)
-    titles = ["$\\sim 30k$ cells", "$\\sim 150k$ cells"]
-    refinement_index = [0, 1]
+    if refinement_index is None:
+        refinement_index = [0, 1, 2]
+    if titles is None:
+        titles = [f"Refinement {ref}" for ref in refinement_index]
+
     for ID in range(8):
         fig, axes = plot.setup_figure(
             id_offset=ID, num_axes=len(refinement_index), ylim=(-0.01, 1.01)

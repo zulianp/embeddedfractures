@@ -26,6 +26,7 @@ def plot_data_over_lines(
                 data = os.path.join(
                     folder, f"dol_line_{line}_refinement_{ref}.csv"
                 ).replace(r"\_", "_")
+                
                 plot.plot_over_line(
                     case=paths.case,
                     filename=data,
@@ -45,10 +46,15 @@ def run_pol(
     places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
     fontsize=30,
     subfig_fontsize=25,
+    refinement_index=None,
+    titles=None,
 ):
     paths = get_paths(__file__)
-    titles = ["$\\sim 30k$ cells", "$\\sim 150k$ cells"]
-    refinement_index = [0, 1]
+    if refinement_index is None:
+        refinement_index = [0, 1, 2]
+    if titles is None:
+        titles = [f"Refinement {ref}" for ref in refinement_index]
+
     fig0, axes0 = plot.setup_figure(
         id_offset=plot.id_p_0_matrix, num_axes=len(refinement_index), ylim=(0.025, 0.08)
     )
@@ -56,18 +62,19 @@ def run_pol(
         id_offset=plot.id_p_1_matrix, num_axes=len(refinement_index), ylim=(0.02, 0.075)
     )
 
+    mid_index = len(refinement_index) // 2
     for idx, (title, ref) in enumerate(zip(titles, refinement_index)):
-        show_legend = idx == 0
-        ax0, ax1 = axes0[idx], axes1[idx]
+        show_legend = idx == mid_index
+        ax0_current, ax1_current = axes0[idx], axes1[idx]
         plot_data_over_lines(
-            places_and_methods, ref, ax0, ax1, title, show_legend, True
+            places_and_methods, ref, ax0_current, ax1_current, title, show_legend, True
         )
 
         # Plot reference data for USTUTT-MPFA
         ref_folder = os.path.join(paths.results_dir, "USTUTT", "MPFA")
         for line, cond, ax in (
-            (0, plot.id_p_0_matrix, ax0),
-            (1, plot.id_p_1_matrix, ax1),
+            (0, plot.id_p_0_matrix, ax0_current),
+            (1, plot.id_p_1_matrix, ax1_current),
         ):
             ref_data = os.path.join(ref_folder, f"dol_line_{line}_refinement_5.csv")
             plot.plot_over_line(
@@ -84,9 +91,9 @@ def run_pol(
                 show_title=True,
             )
 
-        if idx == 1:
-            plot.plot_legend_in_middle(fig=fig0, ax1=ax0, ax2=ax1)
-            plot.plot_legend_in_middle(fig=fig1, ax1=ax0, ax2=ax1)
+        if idx == mid_index:
+            plot.plot_legend_in_middle(fig=fig0, ax1=ax0_current, ax2=ax1_current)
+            plot.plot_legend_in_middle(fig=fig1, ax1=ax0_current, ax2=ax1_current)
 
     plot.save(
         ID=plot.id_p_0_matrix,
