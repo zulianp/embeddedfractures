@@ -1,0 +1,22 @@
+Class;MPI rank;Total time spent (s);Count;Allocations;Mean time (s)
+Assemble<LaplaceOperator>::apply;0;0.0344061;2;0;0.017203
+Assemble<LaplaceOperator>::assemble;0;0.0409912;2;0;0.0204956
+ConvertTensor::apply | allocate crs;0;0.00154729;3;0;0.000515764
+ConvertTensor::apply | fill crs;0;0.002474;3;0;0.000824666
+DofMap::init_aura;0;0.00783187;2;0;0.00391594
+FETransfer::init;0;0.0426763;1;0;0.0426763
+FETransferPrepareData::apply;0;0.00641917;1;0;0.00641917
+ForcingFunction::assemble;0;6e-06;1;0;6e-06
+GlobalToLocal(Stk,Intrepid2);0;0.000926499;2;0;0.00046325
+KSPSolver::Impl::smooth(mat);0;3.833e-06;1;0;3.833e-06
+KSPSolver::apply;0;6.07908;1;0;6.07908
+KSPSolver::update;0;0.000139;1;0;0.000139
+Linear solve;0;6.07922;1;0;6.07922
+LocalToGlobal(Stk,Intrepid2);0;0.019253;2;0;0.00962648
+LocalToGlobal(Stk,Intrepid2,Matrix assembly);0;0.0192391;2;0;0.00961956
+LocalToGlobal(Stk,Intrepid2,Matrix handling);0;4.75e-06;2;0;2.375e-06
+LocalToGlobalFromBuckets(Stk,Intrepid2);0;0.000553209;3;0;0.000184403
+PetscEvalTripleMatrixProduct::ptap;0;0.0613028;1;0;0.0613028
+PetscMatrix::axpy;0;0.0117514;1;0;0.0117514
+PetscMatrix::write_unlock(...);0;0.0182191;5;0;0.00364382
+main;0;6.4659;1;0;6.4659

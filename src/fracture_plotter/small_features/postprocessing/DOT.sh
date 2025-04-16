@@ -8,7 +8,7 @@ mkdir -p temp
 
 cd ..
 
-dirs=(small medium ) 
+dirs=(small medium large) 
 r=0
 
 
