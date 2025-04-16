@@ -13,20 +13,28 @@ class Case(Enum):
 def main():
     # Use the enum values to build the case_list
     case_list = [case.value for case in Case]
+    # case_list = Case.REGULAR_FRACTURE.value
 
     refinement_indices_by_case = {
         Case.SINGLE_FRACTURE.value: [0, 1, 2],
         Case.REGULAR_FRACTURE.value: [0, 1, 2],
-        Case.SMALL_FEATURES.value: [0, 1],
+        Case.SMALL_FEATURES.value: [0, 1, 2],
         Case.FIELD_CASE.value: None,
     }
 
     titles_by_case = {
-        Case.SINGLE_FRACTURE.value: ["Ref. 0", "Ref. 1", "Ref. 2"],
-        Case.REGULAR_FRACTURE.value: ["Ref. 0", "Ref. 1", "Ref. 2"],
-        Case.SMALL_FEATURES.value: ["Ref. 0", "Ref. 1"],
+        Case.SINGLE_FRACTURE.value: ["Title 0", "Title 1", "Title 2"],
+        Case.REGULAR_FRACTURE.value: ["Title 0", "Title 1", "Title 2"],
+        Case.SMALL_FEATURES.value: ["Title 0", "Title 1", "Title 2"],
         Case.FIELD_CASE.value: None,
     }
+
+    # Check that the length of each title by case is the same length as the refinment indices by case
+    for case in Case:
+        if titles_by_case[case.value] is not None:
+            assert len(titles_by_case[case.value]) == len(
+                refinement_indices_by_case[case.value]
+            ), f"Title list length does not match refinement indices length for {case.value}"
 
     # Methods to consider for the mean and standard deviation computation
     methods_mean_std = ["UiB/TPFA", "UiB/MPFA", "UiB/MVEM", "UiB/RT0"]
