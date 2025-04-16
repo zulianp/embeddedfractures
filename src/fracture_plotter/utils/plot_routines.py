@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
 from scipy import interpolate
-from scipy.integrate import simps
+from scipy.integrate import simpson as simps
 
 import fracture_plotter.utils.styles as styles
 from fracture_plotter.utils.general import get_paths
@@ -41,8 +41,16 @@ class MathTextSciFormatter(mticker.Formatter):
         return "${}$".format(s)
 
 
+def get_places_and_methods_arg(places_and_methods, ref):
+    return (
+        places_and_methods[ref]
+        if isinstance(places_and_methods, dict)
+        else places_and_methods
+    )
+
+
 def decode_float(s):
-    return float(s.decode().replace("D", "e"))
+    return float(s.replace("D", "e"))
 
 
 def load_data(filename, n_columns, converters=None, skip_header=0):
@@ -236,6 +244,7 @@ def plot_helper(
     load_args = make_load_args(filename, num_columns)
     plot_args = make_plot_args(label, linestyle=linestyle, color=color)
     x_transform = kwargs.get("x_transform", 1.0)
+
     if "mean" in filename:
         mean_data, std_data = load_mean_and_std_data(**load_args, skip_header=1)
         plot_mean_and_std_data(

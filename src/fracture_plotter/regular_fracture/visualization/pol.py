@@ -49,10 +49,15 @@ def run_pol(
     places_and_methods={"USI": ["FEM\_LM"], "mean": ["key"]},
     fontsize=30,
     subfig_fontsize=24,
+    refinement_indices=None,
+    titles=None,
 ):
     paths = get_paths(__file__)
-    titles = ["$\\sim 500$ cells", "$\\sim 4k$ cells", "$\\sim 32k$ cells"]
-    refinement_indices = [0, 1, 2]
+    if refinement_indices is None:
+        refinement_indices = [0, 1, 2]
+    if titles is None:
+        titles = [f"Refinement {ref}" for ref in refinement_indices]
+
     cond, fmt = 0, {0: "%1.2f", 1: "%1.2e"}.get(0)
     ylim = {0: (0.5, 2.75), 1: (0.4, 5.75)}.get(cond)
     fig, axes_list = plot.setup_figure(
