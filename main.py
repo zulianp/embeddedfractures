@@ -12,8 +12,8 @@ class Case(Enum):
 
 def main():
     # Use the enum values to build the case_list
-    case_list = [case.value for case in Case]
-    # case_list = Case.REGULAR_FRACTURE.value
+    # case_list = [case.value for case in Case]
+    case_list = Case.REGULAR_FRACTURE.value
 
     refinement_indices_by_case = {
         Case.SINGLE_FRACTURE.value: [0, 1, 2],

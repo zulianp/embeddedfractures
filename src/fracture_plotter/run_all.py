@@ -32,7 +32,11 @@ case_config = {
     "regular_fracture": {
         "functions": [
             {"func": "run_pol", "module": "pol"},
-            {"func": "run_pot", "module": "pot"},
+            {
+                "func": "run_pot",
+                "module": "pot",
+                "filter": "create_places_and_methods_dict",
+            },
         ],
         "overlay_files": ["pot_cond_0"],
     },
