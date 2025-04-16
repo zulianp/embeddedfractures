@@ -5,6 +5,26 @@ from fracture_plotter.utils.general import get_paths
 from fracture_plotter.utils.plot_routines import *
 
 
+def create_places_and_methods_dict(
+    refinement_indices=None, places_and_methods=None, paths=None
+):  # refinement indices included just to match function signature in toher files
+    places_and_methods_dict = {k: places_and_methods.copy() for k in refinement_indices}
+
+    for cond in [0, 1, 2]:
+        for place, methods in places_and_methods.items():
+            for method in methods:
+                folder = os.path.join(paths.results_dir, place, method).replace(
+                    r"\_", "_"
+                )
+                file_path = os.path.join(folder, f"dot_cond_{cond}.csv").replace(
+                    r"\_", "_"
+                )
+                if not os.path.exists(file_path):
+                    del places_and_methods_dict[cond][place]
+                    break
+    return places_and_methods_dict
+
+
 def plot_cond_over_time(
     places_and_methods,
     cond,
@@ -52,7 +72,7 @@ def run_pot(
         refinement_indices = [0, 1, 2]
     if titles is None:
         titles = [f"Refinement {ref}" for ref in refinement_indices]
-    conds = [0]  # List of conditions
+    conds = [0, 1, 2]  # List of conditions
     regions = [1, 10, 11]  # Single region for this case # regions: 1, 10, 11
 
     # Setup figures and axes for each condition and region
@@ -64,8 +84,13 @@ def run_pot(
         for region_pos, region in enumerate(regions):
             ax = axes_list[region_pos]
             show_legend = region_pos == 1  # Ensure the legend is shown in this case
+
+            places_and_methods_arg = plot.get_places_and_methods_arg(
+                places_and_methods=places_and_methods, ref=cond
+            )
+
             plot_cond_over_time(
-                places_and_methods=places_and_methods,
+                places_and_methods=places_and_methods_arg,
                 cond=cond,
                 ax=ax,
                 title=title,
