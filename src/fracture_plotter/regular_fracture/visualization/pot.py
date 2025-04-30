@@ -42,6 +42,11 @@ def plot_cond_over_time(
         for method in places_and_methods[place]:
             folder = os.path.join(paths.results_dir, place, method)
             data_file = os.path.join(folder, f"dot_cond_{cond}.csv").replace("\\_", "_")
+
+            # TODO: Remove this, this is just here for testing purposes
+            if cond == 2 and place == "mean":
+                data_file = os.path.join(folder, f"dot_cond_1.csv").replace("\\_", "_")
+
             label = place if place == "mean" else f"{place}-{method}"
 
             plot.plot_over_time(
@@ -85,8 +90,13 @@ def run_pot(
             ax = axes_list[region_pos]
             show_legend = region_pos == 1  # Ensure the legend is shown in this case
 
+            # TODO: this is the original which should be brought back
+            # places_and_methods_arg = plot.get_places_and_methods_arg(
+            #     places_and_methods=places_and_methods, ref=cond
+            # )
+            # For TESTING purposes, as requested, we use the same places_and_methods for all refinements
             places_and_methods_arg = plot.get_places_and_methods_arg(
-                places_and_methods=places_and_methods, ref=cond
+                places_and_methods=places_and_methods, ref=0
             )
 
             plot_cond_over_time(
