@@ -38,7 +38,7 @@ case_config = {
                 "filter": "create_places_and_methods_dict",
             },
         ],
-        "overlay_files": ["pot_cond_0"],
+        "overlay_files": ["pot_cond_0", "pot_cond_1", "pot_cond_2"],
     },
     "small_features": {
         "functions": [
