@@ -44,8 +44,8 @@ def plot_cond_over_time(
             data_file = os.path.join(folder, f"dot_cond_{cond}.csv").replace("\\_", "_")
 
             # TODO: Remove this, this is just here for testing purposes
-            if cond == 2 and place == "mean":
-                data_file = os.path.join(folder, f"dot_cond_1.csv").replace("\\_", "_")
+            if cond > 0 and place == "mean":
+                data_file = os.path.join(folder, f"dot_cond_0.csv").replace("\\_", "_")
 
             label = place if place == "mean" else f"{place}-{method}"
 
