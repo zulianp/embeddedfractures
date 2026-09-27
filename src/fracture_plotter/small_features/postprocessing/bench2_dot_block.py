@@ -1,221 +1,112 @@
-# trace generated using paraview version 5.12.1
-#import paraview
-#paraview.compatibility.major = 5
-#paraview.compatibility.minor = 12
-import sys
-#### import the simple module from the paraview
+#!/usr/bin/env pvpython
+import csv, os, sys
 from paraview.simple import *
-#### disable automatic camera reset on 'Show'
-paraview.simple._DisableFirstRenderCameraReset()
+from paraview import servermanager
 
-argv=sys.argv
+if len(sys.argv) != 4:
+    print("usage: {} <input_mesh> <output_csv> <block_name>".format(sys.argv[0]))
+    sys.exit(1)
 
-if len(argv) < 4:
-	print(f'usage: {argv[0]}  <input_mesh> <output_csv> <block_number>')
-	exit()
+path_matrix, path_csv, block_input = sys.argv[1:4]
+block_selector = block_input if block_input.startswith("/IOSS/") else "/IOSS/element_blocks/{}".format(block_input)
+print("Fracture selector:", block_selector)
 
-path_matrix=argv[1]
-path_csv=argv[2]
-block_input=argv[3] #/IOSS/element_blocks/block_1
-block_number = ('/IOSS/element_blocks/%s' %(block_input))
-print(block_number)
-matrix_transporte = IOSSReader(registrationName='matrix_transport.e', FileName=[path_matrix])
+parent=os.path.dirname(os.path.abspath(path_csv))
+if parent:
+    os.makedirs(parent, exist_ok=True)
 
-# get animation scene
-animationScene1 = GetAnimationScene()
+reader=IOSSReader(registrationName="matrix_transport.e", FileName=[path_matrix])
+reader.UpdatePipeline()
 
-# update animation scene based on data timesteps
-animationScene1.UpdateAnimationUsingDataTimeSteps()
+try:
+    times=list(reader.TimestepValues)
+except Exception:
+    times=[]
+if not times:
+    scene=GetAnimationScene()
+    scene.UpdateAnimationUsingDataTimeSteps()
+    times=list(reader.TimestepValues)
+if not times:
+    raise RuntimeError("No time steps found in {}".format(path_matrix))
 
-# get active view
-renderView1 = GetActiveViewOrCreate('RenderView')
+fracture=ExtractBlock(registrationName="Extract_fracture", Input=reader)
+fracture.Selectors=[block_selector]
+fracture.UpdatePipeline(time=times[0])
+if fracture.GetDataInformation().GetNumberOfCells() == 0:
+    raise RuntimeError("Empty fracture selection: {}".format(block_selector))
 
-# show data in view
-matrix_transporteDisplay = Show(matrix_transporte, renderView1, 'UnstructuredGridRepresentation')
+integrated=IntegrateVariables(registrationName="Integrate_fracture", Input=fracture)
 
-# trace defaults for the display properties.
-matrix_transporteDisplay.Representation = 'Surface'
+def leaves(obj):
+    if obj.IsA("vtkCompositeDataSet"):
+        it=obj.NewIterator()
+        it.UnRegister(None)
+        it.InitTraversal()
+        while not it.IsDoneWithTraversal():
+            child=it.GetCurrentDataObject()
+            if child is not None:
+                if child.IsA("vtkCompositeDataSet"):
+                    for x in leaves(child):
+                        yield x
+                else:
+                    yield child
+            it.GoToNextItem()
+    else:
+        yield obj
 
-# reset view to fit data
-renderView1.ResetCamera(False, 0.9)
+def first(arr):
+    if arr is None or arr.GetNumberOfTuples() == 0:
+        return None
+    return float(arr.GetComponent(0,0))
 
-# get the material library
-materialLibrary1 = GetMaterialLibrary()
+def integral_and_area(t):
+    integrated.UpdatePipeline(time=t)
+    obj=servermanager.Fetch(integrated)
+    cint=0.0
+    area=0.0
+    have_c=False
+    have_a=False
+    for ds in leaves(obj):
+        for attrs in (ds.GetPointData(), ds.GetCellData(), ds.GetFieldData()):
+            if attrs is None:
+                continue
+            a=attrs.GetArray("concentration")
+            if a is not None:
+                v=first(a)
+                if v is not None:
+                    cint += v
+                    have_c=True
+            a=attrs.GetArray("Area")
+            if a is not None:
+                v=first(a)
+                if v is not None:
+                    area += v
+                    have_a=True
+    if not have_c:
+        raise RuntimeError("Integrated 'concentration' array not found.")
+    if not have_a or area <= 0:
+        raise RuntimeError("Valid integrated 'Area' not found; verify that the selected block is a 2-D fracture.")
+    return cint, area
 
-# update the view to ensure updated data information
-renderView1.Update()
+reference_area=None
+with open(path_csv, "w", newline="") as f:
+    w=csv.writer(f)
+    w.writerow(["Time", "mean(concentration)"])
+    for k,t in enumerate(times):
+        cint,area=integral_and_area(t)
+        if reference_area is None:
+            reference_area=area
+        else:
+            tol=max(1e-12,1e-9*abs(reference_area))
+            if abs(area-reference_area)>tol:
+                raise RuntimeError("Fracture area changed: {} -> {} at t={}".format(reference_area,area,t))
+        mean_c=cint/area
+        w.writerow(["{:.17g}".format(float(t)), "{:.17g}".format(float(mean_c))])
+        if k == 0 or k == len(times)-1:
+            print("t={:.17g} integral={:.17g} Area={:.17g} mean={:.17g}".format(float(t),cint,area,mean_c))
+        if k == 0 or (k+1)%10 == 0 or k == len(times)-1:
+            print("Processed {}/{} time steps".format(k+1,len(times)))
 
-# set scalar coloring
-ColorBy(matrix_transporteDisplay, ('FIELD', 'vtkBlockColors'))
-
-# show color bar/color legend
-matrix_transporteDisplay.SetScalarBarVisibility(renderView1, True)
-
-# get color transfer function/color map for 'vtkBlockColors'
-vtkBlockColorsLUT = GetColorTransferFunction('vtkBlockColors')
-
-# get opacity transfer function/opacity map for 'vtkBlockColors'
-vtkBlockColorsPWF = GetOpacityTransferFunction('vtkBlockColors')
-
-# get 2D transfer function for 'vtkBlockColors'
-vtkBlockColorsTF2D = GetTransferFunction2D('vtkBlockColors')
-
-# create a new 'Extract Block'
-extractBlock1 = ExtractBlock(registrationName='ExtractBlock1', Input=matrix_transporte)
-
-# Properties modified on extractBlock1
-extractBlock1.Selectors = [block_number]
-
-# show data in view
-extractBlock1Display = Show(extractBlock1, renderView1, 'UnstructuredGridRepresentation')
-
-# trace defaults for the display properties.
-extractBlock1Display.Representation = 'Surface'
-
-# hide data in view
-Hide(matrix_transporte, renderView1)
-
-# update the view to ensure updated data information
-renderView1.Update()
-
-# create a new 'Integrate Variables'
-integrateVariables1 = IntegrateVariables(registrationName='IntegrateVariables1', Input=extractBlock1)
-
-animationScene1.Play()
-
-# Create a new 'SpreadSheet View'
-spreadSheetView1 = CreateView('SpreadSheetView')
-spreadSheetView1.ColumnToSort = ''
-spreadSheetView1.BlockSize = 1024
-
-# # show data in view
-# integrateVariables1Display = Show(integrateVariables1, spreadSheetView1, 'SpreadSheetRepresentation')
-
-# create a new 'Cell Data to Point Data'
-cellDatatoPointData1 = CellDatatoPointData(registrationName='CellDatatoPointData1', Input=integrateVariables1)
-cellDatatoPointData1.CellDataArraytoprocess = ['Area', 'object_id']
-
-# show data in view
-cellDatatoPointData1Display = Show(cellDatatoPointData1, spreadSheetView1, 'SpreadSheetRepresentation')
-
-# hide data in view
-Hide(integrateVariables1, spreadSheetView1)
-
-# update the view to ensure updated data information
-spreadSheetView1.Update()
-
-# Properties modified on cellDatatoPointData1Display
-cellDatatoPointData1Display.Assembly = ''
-
-# create a new 'Calculator'
-calculator1 = Calculator(registrationName='Calculator1', Input=cellDatatoPointData1)
-calculator1.Function = ''
-
-# Properties modified on calculator1
-calculator1.ResultArrayName = 'C_normalized'
-calculator1.Function = 'concentration/Area'
-
-# show data in view
-calculator1Display = Show(calculator1, spreadSheetView1, 'SpreadSheetRepresentation')
-
-# hide data in view
-Hide(cellDatatoPointData1, spreadSheetView1)
-
-# update the view to ensure updated data information
-spreadSheetView1.Update()
-
-# Properties modified on calculator1Display
-calculator1Display.Assembly = ''
-
-
-# get layout
-layout1 = GetLayoutByName("Layout #1")
-
-# add view to a layout so it's visible in UI
-AssignViewToLayout(view=spreadSheetView1, layout=layout1, hint=0)
-
-# update the view to ensure updated data information
-spreadSheetView1.Update()
-
-# create a new 'Plot Data Over Time'
-plotDataOverTime1 = PlotDataOverTime(registrationName='PlotDataOverTime1', Input=calculator1)
-
-# Create a new 'Quartile Chart View'
-quartileChartView1 = CreateView('QuartileChartView')
-
-# show data in view
-plotDataOverTime1Display = Show(plotDataOverTime1, quartileChartView1, 'QuartileChartRepresentation')
-
-# add view to a layout so it's visible in UI
-AssignViewToLayout(view=quartileChartView1, layout=layout1, hint=2)
-
-# Properties modified on plotDataOverTime1Display
-plotDataOverTime1Display.SeriesVisibility = []
-
-# Properties modified on plotDataOverTime1Display
-plotDataOverTime1Display.SeriesVisibility = ['C_normalized (stats)']
-
-# Properties modified on plotDataOverTime1Display
-plotDataOverTime1Display.SeriesOpacity = ['concentration (stats)', '1', 'X (stats)', '1', 'Y (stats)', '1', 'Z (stats)', '1', 'N (stats)', '1', 'Time (stats)', '1', 'vtkValidPointMask (stats)', '1']
-plotDataOverTime1Display.SeriesPlotCorner = ['N (stats)', '0', 'Time (stats)', '0', 'X (stats)', '0', 'Y (stats)', '0', 'Z (stats)', '0', 'concentration (stats)', '0', 'vtkValidPointMask (stats)', '0']
-plotDataOverTime1Display.SeriesLineStyle = ['N (stats)', '1', 'Time (stats)', '1', 'X (stats)', '1', 'Y (stats)', '1', 'Z (stats)', '1', 'concentration (stats)', '1', 'vtkValidPointMask (stats)', '1']
-plotDataOverTime1Display.SeriesLineThickness = ['N (stats)', '2', 'Time (stats)', '2', 'X (stats)', '2', 'Y (stats)', '2', 'Z (stats)', '2', 'concentration (stats)', '2', 'vtkValidPointMask (stats)', '2']
-plotDataOverTime1Display.SeriesMarkerStyle = ['N (stats)', '0', 'Time (stats)', '0', 'X (stats)', '0', 'Y (stats)', '0', 'Z (stats)', '0', 'concentration (stats)', '0', 'vtkValidPointMask (stats)', '0']
-plotDataOverTime1Display.SeriesMarkerSize = ['N (stats)', '4', 'Time (stats)', '4', 'X (stats)', '4', 'Y (stats)', '4', 'Z (stats)', '4', 'concentration (stats)', '4', 'vtkValidPointMask (stats)', '4']
-
-# update the view to ensure updated data information
-quartileChartView1.Update()
-
-# get active source.
-plotSelectionOverTime1 = GetActiveSource()
-
-# save data
-SaveData(path_csv, proxy=plotDataOverTime1, ChooseArraysToWrite=1,
-    RowDataArrays=['Time', 'avg(C_normalized)'],
-    FieldAssociation='Row Data',
-    AddMetaData=0)
-
-#================================================================
-# addendum: following script captures some of the application
-# state to faithfully reproduce the visualization during playback
-#================================================================
-
-#--------------------------------
-# saving layout sizes for layouts
-
-# layout/tab size in pixels
-layout1.SetSize(1701, 1244)
-
-#-----------------------------------
-# saving camera placements for views
-
-# current camera placement for renderView1
-renderView1.CameraPosition = [0.5, 0.5, 3.9879387989061272]
-renderView1.CameraFocalPoint = [0.5, 0.5, 0.5]
-renderView1.CameraParallelScale = 0.905324035552808
-
-
-##--------------------------------------------
-## You may need to add some code at the end of this python script depending on your usage, eg:
-#
-## Render all views to see them appears
-# RenderAllViews()
-#
-## Interact with the view, usefull when running from pvpython
-# Interact()
-#
-## Save a screenshot of the active view
-# SaveScreenshot("path/to/screenshot.png")
-#
-## Save a screenshot of a layout (multiple splitted view)
-# SaveScreenshot("path/to/screenshot.png", GetLayout())
-#
-## Save all "Extractors" from the pipeline browser
-# SaveExtracts()
-#
-## Save a animation of the current active view
-# SaveAnimation()
-#
-## Please refer to the documentation of paraview.simple
-## https://kitware.github.io/paraview-docs/latest/python/paraview.simple.html
-##--------------------------------------------
+print("Area:", reference_area)
+print("Output:", path_csv)
+print("mean(concentration) = integral(concentration dA) / Area")

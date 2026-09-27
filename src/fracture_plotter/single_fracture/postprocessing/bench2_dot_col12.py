@@ -292,7 +292,11 @@ SetActiveSource(slice1)
 ShowInteractiveWidgets(proxy=slice1.SliceType)
 
 # Properties modified on slice1.SliceType
-slice1.SliceType.Normal = [60.0, 0.0, 100.0]
+# Benchmark 1 single-fracture plane:
+# z = 80 - 0.6*x  ->  0.6*x + z - 80 = 0
+# A point on the plane is (50, 50, 50).
+slice1.SliceType.Origin = [50.0, 50.0, 50.0]
+slice1.SliceType.Normal = [0.6, 0.0, 1.0]
 
 # show data in view
 slice1Display = Show(slice1, renderView2, 'GeometryRepresentation')
@@ -308,7 +312,7 @@ calculator3 = Calculator(registrationName='Calculator3', Input=slice1)
 
 # Properties modified on calculator3
 calculator3.ResultArrayName = 'frac_thikness'
-calculator3.Function = '1e-2'
+calculator3.Function = '4e-3'
 
 # show data in view
 calculator3Display = Show(calculator3, renderView2, 'GeometryRepresentation')
@@ -471,7 +475,7 @@ quartileChartView2.Update()
 SetActiveSource(plotDataOverTime2)
 
 # save data
-SaveData(path_csv1, proxy=plotDataOverTime2, WriteTimeSteps=1,
+SaveData(path_csv2, proxy=plotDataOverTime2, WriteTimeSteps=1,
     ChooseArraysToWrite=1,
     RowDataArrays=['Time','avg(col3)'],
     FieldAssociation='Row Data',
@@ -480,8 +484,51 @@ SaveData(path_csv1, proxy=plotDataOverTime2, WriteTimeSteps=1,
 # set active source
 SetActiveSource(plotDataOverTime1)
 
+# ---------------------------------------------------------------
+# Diagnostic for the matrix-transport branch (block_3)
+# ---------------------------------------------------------------
+matrix_transporte.UpdatePipeline()
+calculator2.UpdatePipeline()
+integrateVariables1.UpdatePipeline()
+plotDataOverTime1.UpdatePipeline()
+
+print("\n===== MATRIX TRANSPORT DIAGNOSTIC: block_2 =====")
+print("Selected ElementBlocks:", matrix_transporte.ElementBlocks)
+
+for name, proxy in [
+    ("matrix_transporte", matrix_transporte),
+    ("calculator2", calculator2),
+    ("integrateVariables1", integrateVariables1),
+    ("plotDataOverTime1", plotDataOverTime1),
+]:
+    try:
+        info = proxy.GetDataInformation()
+        print(
+            name,
+            "points =", info.GetNumberOfPoints(),
+            "cells =", info.GetNumberOfCells()
+        )
+    except Exception as exc:
+        print(name, "data information unavailable:", exc)
+
+try:
+    pinfo = calculator2.GetPointDataInformation()
+    print("calculator2 Point Data arrays:",
+          [pinfo.GetArray(i).GetName() for i in range(pinfo.GetNumberOfArrays())])
+except Exception as exc:
+    print("Could not inspect Point Data:", exc)
+
+try:
+    cinfo = calculator2.GetCellDataInformation()
+    print("calculator2 Cell Data arrays:",
+          [cinfo.GetArray(i).GetName() for i in range(cinfo.GetNumberOfArrays())])
+except Exception as exc:
+    print("Could not inspect Cell Data:", exc)
+
+print("=================================================\n")
+
 # save data
-SaveData(path_csv2, proxy=plotDataOverTime1, WriteTimeSteps=1,
+SaveData(path_csv1, proxy=plotDataOverTime1, WriteTimeSteps=1,
     ChooseArraysToWrite=1,
     RowDataArrays=['Time','avg(col2)'],
     FieldAssociation='Row Data')

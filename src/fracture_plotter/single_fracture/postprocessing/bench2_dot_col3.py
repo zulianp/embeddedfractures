@@ -1,231 +1,411 @@
-# trace generated using paraview version 5.12.1
-#import paraview
-#paraview.compatibility.major = 5
-#paraview.compatibility.minor = 12
+#!/usr/bin/env pvpython
+# ParaView 5.12.x
+#
+# Usage:
+#   pvpython bench2_dot_blockid1_10_11.py \
+#       <matrix_transport.e> \
+#       <csv_Omega31> <csv_Omega32> <csv_Omega33>
+#
+# Computes, for each matrix region Omega_3,i and every transport time:
+#
+#        avg(c)_i = integral_{Omega_3,i} c dV / |Omega_3,i|
+#
+# The geometric regions reproduce the Clip sequence recorded in the
+# original ParaView trace. Origins that were NOT explicitly modified in
+# that trace are intentionally left at ParaView's automatically initialized
+# value.
+
 import sys
-#### import the simple module from the paraview
-from paraview.simple import *
-#### disable automatic camera reset on 'Show'
-paraview.simple._DisableFirstRenderCameraReset()
+import os
+import csv
+import math
 
-argv=sys.argv
-
-if len(argv) < 3:
-	print(f'usage: {argv[0]}  <input_mesh> <output_csv1>')
-	exit()
-
-path_matrix=argv[1]
-path_csv1=argv[2]
-
-# create a new 'IOSS Reader'
-matrix_transporte = IOSSReader(registrationName='matrix_transport.e', FileName=[path_matrix])
-
-# get active view
-renderView2 = GetActiveViewOrCreate('RenderView')
-
-# get display properties
-matrix_transporteDisplay = GetDisplayProperties(matrix_transporte, view=renderView2)
-
-# get the material library
-materialLibrary1 = GetMaterialLibrary()
-
-# get color transfer function/color map for 'vtkBlockColors'
-vtkBlockColorsLUT = GetColorTransferFunction('vtkBlockColors')
-
-# get opacity transfer function/opacity map for 'vtkBlockColors'
-vtkBlockColorsPWF = GetOpacityTransferFunction('vtkBlockColors')
-
-# get 2D transfer function for 'vtkBlockColors'
-vtkBlockColorsTF2D = GetTransferFunction2D('vtkBlockColors')
-
-# get animation scene
-animationScene1 = GetAnimationScene()
-
-# update animation scene based on data timesteps
-animationScene1.UpdateAnimationUsingDataTimeSteps()
-
-# Properties modified on matrix_transporte
-matrix_transporte.ElementBlocks = ['block_2']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.ElementBlocks = ['block_1', 'block_2']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.SideSets = ['surface_1']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.SideSets = ['surface_1', 'surface_2']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.ElementBlocks = ['block_2']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.ElementBlocks = ['block_1', 'block_2']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.ElementBlocks = ['block_2']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.SideSets = ['surface_2']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.SideSets = ['surface_1', 'surface_2']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.SideSets = ['surface_1']
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# Properties modified on matrix_transporte
-matrix_transporte.ElementBlocks = []
-
-# update the view to ensure updated data information
-renderView2.Update()
-
-# create a new 'Integrate Variables'
-integrateVariables1 = IntegrateVariables(registrationName='IntegrateVariables1', Input=matrix_transporte)
-
-# Create a new 'SpreadSheet View'
-spreadSheetView1 = CreateView('SpreadSheetView')
-spreadSheetView1.ColumnToSort = ''
-spreadSheetView1.BlockSize = 1024
-
-# show data in view
-integrateVariables1Display = Show(integrateVariables1, spreadSheetView1, 'SpreadSheetRepresentation')
-
-# add view to a layout so it's visible in UI
-
-# find view
-spreadSheetView2 = FindViewOrCreate('SpreadSheetView2', viewtype='SpreadSheetView')
-
-# update the view to ensure updated data information
-spreadSheetView2.Update()
-
-# update the view to ensure updated data information
-spreadSheetView1.Update()
-
-# create a new 'Plot Data Over Time'
-plotDataOverTime1 = PlotDataOverTime(registrationName='PlotDataOverTime1', Input=integrateVariables1)
-
-# Create a new 'Quartile Chart View'
-quartileChartView1 = CreateView('QuartileChartView')
-
-# show data in view
-plotDataOverTime1Display = Show(plotDataOverTime1, quartileChartView1, 'QuartileChartRepresentation')
-
-# add view to a layout so it's visible in UI
-
-# Properties modified on plotDataOverTime1Display
-plotDataOverTime1Display.SeriesOpacity = ['concentration (stats)', '1', 'X (stats)', '1', 'Y (stats)', '1', 'Z (stats)', '1', 'N (stats)', '1', 'Time (stats)', '1', 'vtkValidPointMask (stats)', '1']
-plotDataOverTime1Display.SeriesPlotCorner = ['N (stats)', '0', 'Time (stats)', '0', 'X (stats)', '0', 'Y (stats)', '0', 'Z (stats)', '0', 'concentration (stats)', '0', 'vtkValidPointMask (stats)', '0']
-plotDataOverTime1Display.SeriesLineStyle = ['N (stats)', '1', 'Time (stats)', '1', 'X (stats)', '1', 'Y (stats)', '1', 'Z (stats)', '1', 'concentration (stats)', '1', 'vtkValidPointMask (stats)', '1']
-plotDataOverTime1Display.SeriesLineThickness = ['N (stats)', '2', 'Time (stats)', '2', 'X (stats)', '2', 'Y (stats)', '2', 'Z (stats)', '2', 'concentration (stats)', '2', 'vtkValidPointMask (stats)', '2']
-plotDataOverTime1Display.SeriesMarkerStyle = ['N (stats)', '0', 'Time (stats)', '0', 'X (stats)', '0', 'Y (stats)', '0', 'Z (stats)', '0', 'concentration (stats)', '0', 'vtkValidPointMask (stats)', '0']
-plotDataOverTime1Display.SeriesMarkerSize = ['N (stats)', '4', 'Time (stats)', '4', 'X (stats)', '4', 'Y (stats)', '4', 'Z (stats)', '4', 'concentration (stats)', '4', 'vtkValidPointMask (stats)', '4']
-
-# update the view to ensure updated data information
-spreadSheetView2.Update()
-
-# set active view
-SetActiveView(spreadSheetView2)
-
-# destroy spreadSheetView2
-Delete(spreadSheetView2)
-del spreadSheetView2
-
-# close an empty frame
-
-# find view
-renderView1 = FindViewOrCreate('RenderView1', viewtype='RenderView')
-
-# set active view
-SetActiveView(renderView1)
-
-# destroy renderView1
-Delete(renderView1)
-del renderView1
-
-# close an empty frame
-
-# save data
-SaveData(path_csv1, proxy=plotDataOverTime1, WriteTimeSteps=1,
-    ChooseArraysToWrite=1,
-    RowDataArrays=['Time', 'avg(concentration)'],
-    FieldAssociation='Row Data',
-    AddMetaData=0)
-
-# set active view
-SetActiveView(renderView2)
-
-#================================================================
-# addendum: following script captures some of the application
-# state to faithfully reproduce the visualization during playback
-#================================================================
-
-#--------------------------------
-# saving layout sizes for layouts
-
-# layout/tab size in pixels
-
-#-----------------------------------
-# saving camera placements for views
-
-# current camera placement for renderView2
-renderView2.CameraPosition = [321.34265927538445, 193.1296082906069, 183.59865536376844]
-renderView2.CameraFocalPoint = [50.0, 50.0, 50.0]
-renderView2.CameraViewUp = [-0.32550076596440325, 0.8967971070373966, -0.29967348926113485]
-renderView2.CameraParallelScale = 86.60254037844386
+from paraview.simple import IOSSReader, Clip, IntegrateVariables
+from paraview.simple import UpdatePipeline
+from paraview import servermanager
 
 
-##--------------------------------------------
-## You may need to add some code at the end of this python script depending on your usage, eg:
+# ----------------------------------------------------------------------
+# Arguments
+# ----------------------------------------------------------------------
+argv = sys.argv
+
+if len(argv) != 5:
+    print(
+        "usage: {} <input_mesh> <output_csv1> <output_csv2> <output_csv3>"
+        .format(argv[0])
+    )
+    sys.exit(1)
+
+path_matrix = argv[1]
+path_csv1 = argv[2]
+path_csv2 = argv[3]
+path_csv3 = argv[4]
+
+output_paths = [path_csv1, path_csv2, path_csv3]
+
+print("Transport:", path_matrix)
+print("Outputs:")
+for p in output_paths:
+    print("  ", p)
+
+for p in output_paths:
+    parent = os.path.dirname(os.path.abspath(p))
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+
+
+# ----------------------------------------------------------------------
+# Reader
+# ----------------------------------------------------------------------
+reader = IOSSReader(
+    registrationName="matrix_transport.e",
+    FileName=[path_matrix],
+)
+
+# Request only the quantity needed when the properties are available.
+try:
+    reader.PointArrays = ["concentration"]
+except Exception:
+    pass
+
+# Side sets are not part of the matrix-volume average.
+try:
+    reader.SideSets = []
+except Exception:
+    pass
+
+reader.UpdatePipelineInformation()
+
+times = []
+
+try:
+    times = list(reader.TimestepValues)
+except Exception:
+    pass
+
+if not times:
+    try:
+        scene_times = reader.GetProperty("TimestepValues")
+        if scene_times is not None:
+            times = list(scene_times)
+    except Exception:
+        pass
+
+if not times:
+    raise RuntimeError("No transport time steps found in matrix_transport.e")
+
+print("Transport time steps:", len(times))
+print("First time:", times[0])
+print("Last time :", times[-1])
+
+# Initialize the data pipeline at the first actual transport time.
+UpdatePipeline(time=times[0], proxy=reader)
+
+
+# ----------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------
+def make_clip(name, input_proxy, normal, origin=None):
+    """
+    Create a Plane Clip.
+
+    If origin is None, DO NOT assign ClipType.Origin. This is deliberate:
+    the original GUI trace did not modify that origin, so ParaView must
+    initialize it from the current input bounds.
+    """
+    c = Clip(registrationName=name, Input=input_proxy)
+
+    # Plane is the default Clip type in the recorded ParaView trace.
+    if origin is not None:
+        c.ClipType.Origin = list(origin)
+
+    c.ClipType.Normal = list(normal)
+
+    # Do not set Invert / InsideOut. The original trace did not change it.
+    UpdatePipeline(time=times[0], proxy=c)
+    return c
+
+
+def data_arrays(proxy, t):
+    UpdatePipeline(time=t, proxy=proxy)
+    info = proxy.GetDataInformation()
+
+    point_names = []
+    cell_names = []
+
+    pdi = info.GetPointDataInformation()
+    cdi = info.GetCellDataInformation()
+
+    for i in range(pdi.GetNumberOfArrays()):
+        ai = pdi.GetArrayInformation(i)
+        if ai is not None:
+            point_names.append(ai.GetName())
+
+    for i in range(cdi.GetNumberOfArrays()):
+        ai = cdi.GetArrayInformation(i)
+        if ai is not None:
+            cell_names.append(ai.GetName())
+
+    return point_names, cell_names
+
+
+def fetch_integral(integrator, t):
+    """
+    Return (integral_concentration, volume).
+
+    IntegrateVariables produces a one-point output. For volumetric input,
+    Volume is normally stored in CellData while integrated point fields
+    such as concentration are normally in PointData.
+    """
+    UpdatePipeline(time=t, proxy=integrator)
+    obj = servermanager.Fetch(integrator)
+
+    if obj is None:
+        raise RuntimeError("servermanager.Fetch returned no data")
+
+    # Composite output is possible with IOSS pipelines. IntegrateVariables
+    # normally reduces it, but handle both simple and composite datasets.
+    datasets = []
+
+    if hasattr(obj, "NewIterator"):
+        it = obj.NewIterator()
+        it.UnRegister(None)
+        it.InitTraversal()
+        while not it.IsDoneWithTraversal():
+            block = it.GetCurrentDataObject()
+            if block is not None:
+                datasets.append(block)
+            it.GoToNextItem()
+    else:
+        datasets = [obj]
+
+    cint = 0.0
+    volume = 0.0
+    found_c = False
+    found_v = False
+
+    for ds in datasets:
+        pd = ds.GetPointData() if hasattr(ds, "GetPointData") else None
+        cd = ds.GetCellData() if hasattr(ds, "GetCellData") else None
+        fd = ds.GetFieldData() if hasattr(ds, "GetFieldData") else None
+
+        # Integrated concentration can appear in PointData, CellData,
+        # or FieldData depending on the input association/version.
+        carr = None
+        for attrs in (pd, cd, fd):
+            if attrs is not None:
+                a = attrs.GetArray("concentration")
+                if a is not None and a.GetNumberOfTuples() > 0:
+                    carr = a
+                    break
+
+        if carr is not None:
+            cint += float(carr.GetTuple1(0))
+            found_c = True
+
+        # IntegrateVariables normally stores Volume in CellData.
+        varr = None
+        for attrs in (cd, pd, fd):
+            if attrs is not None:
+                a = attrs.GetArray("Volume")
+                if a is not None and a.GetNumberOfTuples() > 0:
+                    varr = a
+                    break
+
+        if varr is not None:
+            volume += float(varr.GetTuple1(0))
+            found_v = True
+
+    if not found_c:
+        raise RuntimeError(
+            "Integrated array 'concentration' is missing at time {}".format(t)
+        )
+
+    if not found_v:
+        raise RuntimeError(
+            "Integrated array 'Volume' is missing at time {}".format(t)
+        )
+
+    if not math.isfinite(volume) or volume <= 0.0:
+        raise RuntimeError(
+            "Invalid/zero matrix-region volume {} at time {}".format(volume, t)
+        )
+
+    return cint, volume
+
+
+# ----------------------------------------------------------------------
+# Omega_3,1
 #
-## Render all views to see them appears
-# RenderAllViews()
+# Trace:
+#   clip1 Normal = [-1, 0, 0]
+#   clip2 Normal = [ 0, 1, 0]
+#   clip3 Normal = [ 0, 0, 1]
 #
-## Interact with the view, usefull when running from pvpython
-# Interact()
+# No explicit Origin was recorded for these clips.
+# ----------------------------------------------------------------------
+c1 = make_clip("Omega31_Clip1", reader, [-1.0, 0.0, 0.0])
+c2 = make_clip("Omega31_Clip2", c1,     [ 0.0, 1.0, 0.0])
+omega31 = make_clip("Omega31_Clip3", c2, [0.0, 0.0, 1.0])
+
+
+# ----------------------------------------------------------------------
+# Omega_3,2
 #
-## Save a screenshot of the active view
-# SaveScreenshot("path/to/screenshot.png")
+# Final effective values in the trace:
+#   clip4: Normal = [-1,0,0], Origin untouched
+#   clip5: Normal = [ 1,0,0], Origin untouched
+#   clip6: Origin = [0.5,0.5,0.5],   Normal = [0,-1,0]
+#   clip7: Origin = [0.5,0.75,0.5],  Normal = [0, 1,0]
+#   clip8: Origin = [0.625,0.625,0.75], Normal = [0,0,-1]
+# ----------------------------------------------------------------------
+c4 = make_clip("Omega32_Clip4", reader, [-1.0, 0.0, 0.0])
+c5 = make_clip("Omega32_Clip5", c4,     [ 1.0, 0.0, 0.0])
+c6 = make_clip(
+    "Omega32_Clip6", c5,
+    [0.0, -1.0, 0.0],
+    origin=[0.5, 0.5, 0.5],
+)
+c7 = make_clip(
+    "Omega32_Clip7", c6,
+    [0.0, 1.0, 0.0],
+    origin=[0.5, 0.75, 0.5],
+)
+omega32 = make_clip(
+    "Omega32_Clip8", c7,
+    [0.0, 0.0, -1.0],
+    origin=[0.625, 0.625, 0.75],
+)
+
+
+# ----------------------------------------------------------------------
+# Omega_3,3
 #
-## Save a screenshot of a layout (multiple splitted view)
-# SaveScreenshot("path/to/screenshot.png", GetLayout())
+# Trace:
+#   clip9 : Origin = [0.75,0.5,0.5],   Normal = [-1,0,0]
+#   clip10: Origin = [0.875,0.75,0.5], Normal = [0,-1,0]
+#   clip11: Origin untouched, Normal = [0,0,-1]
+#   clip12: Origin untouched, Normal = [0,0, 1]
+# ----------------------------------------------------------------------
+c9 = make_clip(
+    "Omega33_Clip9", reader,
+    [-1.0, 0.0, 0.0],
+    origin=[0.75, 0.5, 0.5],
+)
+c10 = make_clip(
+    "Omega33_Clip10", c9,
+    [0.0, -1.0, 0.0],
+    origin=[0.875, 0.75, 0.5],
+)
+c11 = make_clip("Omega33_Clip11", c10, [0.0, 0.0, -1.0])
+omega33 = make_clip("Omega33_Clip12", c11, [0.0, 0.0, 1.0])
+
+
+regions = [omega31, omega32, omega33]
+
+# ----------------------------------------------------------------------
+# Validate region outputs before processing all times.
+# ----------------------------------------------------------------------
+for i, region in enumerate(regions, start=1):
+    pnames, cnames = data_arrays(region, times[0])
+
+    print("Omega_3,{}:".format(i))
+    print("  Point Data:", pnames)
+    print("  Cell Data :", cnames)
+
+    if "concentration" not in pnames and "concentration" not in cnames:
+        raise RuntimeError(
+            "concentration missing from Omega_3,{}; "
+            "the geometric region is empty or the Clip sequence is incorrect"
+            .format(i)
+        )
+
+
+# ----------------------------------------------------------------------
+# Integrate each region.
+# ----------------------------------------------------------------------
+integrators = [
+    IntegrateVariables(registrationName="Integrate_Omega31", Input=omega31),
+    IntegrateVariables(registrationName="Integrate_Omega32", Input=omega32),
+    IntegrateVariables(registrationName="Integrate_Omega33", Input=omega33),
+]
+
+for integ in integrators:
+    UpdatePipeline(time=times[0], proxy=integ)
+
+
+# ----------------------------------------------------------------------
+# Open all output CSVs immediately.
 #
-## Save all "Extractors" from the pipeline browser
-# SaveExtracts()
-#
-## Save a animation of the current active view
-# SaveAnimation()
-#
-## Please refer to the documentation of paraview.simple
-## https://kitware.github.io/paraview-docs/latest/python/paraview.simple.html
-##--------------------------------------------
+# This deliberately avoids PlotDataOverTime. We explicitly visit every
+# transport timestep and compute the volume-normalized integral.
+# ----------------------------------------------------------------------
+files = []
+writers = []
+
+try:
+    for path in output_paths:
+        f = open(path, "w", newline="")
+        files.append(f)
+
+        w = csv.writer(f)
+        w.writerow(["Time", "avg(concentration)"])
+        writers.append(w)
+
+    reference_volumes = [None, None, None]
+
+    for k, t in enumerate(times):
+        # Update source first, then each integration pipeline.
+        UpdatePipeline(time=t, proxy=reader)
+
+        for i, integ in enumerate(integrators):
+            cint, volume = fetch_integral(integ, t)
+            avg = cint / volume
+
+            if not math.isfinite(avg):
+                raise RuntimeError(
+                    "Non-finite average concentration in Omega_3,{} at time {}"
+                    .format(i + 1, t)
+                )
+
+            if reference_volumes[i] is None:
+                reference_volumes[i] = volume
+
+            writers[i].writerow([
+                "{:.17g}".format(float(t)),
+                "{:.17g}".format(float(avg)),
+            ])
+
+        # Flush periodically so a partial CSV remains available if a later
+        # timestep fails.
+        if k == 0 or (k + 1) % 10 == 0 or k == len(times) - 1:
+            for f in files:
+                f.flush()
+            print("Processed time step {}/{}: {}".format(k + 1, len(times), t))
+
+finally:
+    for f in files:
+        try:
+            f.close()
+        except Exception:
+            pass
+
+
+# ----------------------------------------------------------------------
+# Final validation
+# ----------------------------------------------------------------------
+print("")
+for i, (path, volume) in enumerate(zip(output_paths, reference_volumes), start=1):
+    print("Omega_3,{} validation".format(i))
+    print("  volume:", volume)
+    print("  csv   :", path)
+
+    if not os.path.isfile(path):
+        raise RuntimeError("Output CSV was not created: {}".format(path))
+
+    if os.path.getsize(path) == 0:
+        raise RuntimeError("Output CSV is empty: {}".format(path))
+
+print("")
+print("Done. All three CSV files were written successfully.")
